@@ -1766,6 +1766,7 @@ function AppearancePane ({ config, onSettings }) {
     isCustom ? (s.customHue ?? 258) : THEMES.find(t => t.id === s.themeId).hue,
     isCustom ? (s.customChroma ?? 0.11) : THEMES.find(t => t.id === s.themeId).chroma
   )
+  const selectedFont = FONTS.some(f => f.id === s.fontFamily) ? s.fontFamily : FONTS[0].id
 
   return (
     <div className='set-section'>
@@ -1924,7 +1925,7 @@ function AppearancePane ({ config, onSettings }) {
         {FONTS.map(f => (
           <button
             key={f.id}
-            className={'theme-swatch' + ((s.fontFamily || 'inter') === f.id ? ' selected' : '')}
+            className={'theme-swatch' + (selectedFont === f.id ? ' selected' : '')}
             style={{ fontFamily: f.stack }}
             onClick={() => preview({ fontFamily: f.id })}
           >
