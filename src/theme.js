@@ -267,59 +267,39 @@ export function resolvePreset (themeId) {
   return THEMES.find(t => t.id === themeId) || THEMES[0]
 }
 
+function nativeBackgroundHex ({ authored, mode, hue, tint }) {
+  if (/^#[0-9a-f]{6}$/i.test(authored)) return authored
+  const ramps = {
+    dark: [0.19, 0.006],
+    medium: [0.30, 0.008],
+    light: [0.99, 0.0018]
+  }
+  const [L, C] = ramps[mode] || ramps.dark
+  return oklchToHex(L, C * tint, hue || 258)
+}
+
 export function applyTheme (settings) {
   const root = document.documentElement
-  // An unrecognized themeId (renamed, removed, or a bad default) used to fall
-  // through to customHue, which turned the app a color nobody chose. Fall back
-  // to the first theme — the brand one — so the app is always on a real palette.
-  // ⚠️ 'custom' IS A SENTINEL, NOT AN UNKNOWN THEME. The colour picker sets
-  // themeId:'custom' and puts the chosen hue in customHue. The guard below exists
-  // for a genuinely unrecognised id — renamed, removed, a bad default — which used
-  // to fall through to customHue and turn the app a colour nobody chose. But
-  // 'custom' matches no theme and IS truthy, so it hit that fallback and every
-  // custom accent was silently replaced by THEMES[0], Radiant's blue. Tony: "i
-  // changed the accent color but some of the elements remained blue." They all
-  // did; the picker had never worked since the guard landed.
+  // An unrecognized themeId (renamed, removed, or a bad default) falls back to
+  // the brand preset. The custom sentinel remains a real user choice.
   const preset = resolvePreset(settings.themeId)
   const hue = preset ? preset.hue : (settings.customHue ?? 258)
   const chroma = preset ? preset.chroma : (settings.customChroma ?? 0.11)
-  // background tint: an explicit user override wins, else the theme's default
   const tint = settings.bgTint != null ? settings.bgTint : (preset ? preset.tint : 1)
   const mode = ['light', 'medium', 'dark'].includes(settings.mode) ? settings.mode : 'dark'
+  root.dataset.theme = preset?.id || (settings.themeId === 'custom' ? 'custom' : 'derived')
   root.dataset.mode = mode
-  // Remember it for the next cold start: every color lives under
-  // :root[data-mode=…], and the mode only arrives with the config. A phone that
-  // hasn't signed in yet never gets a config, so without this the connect
-  // screen renders with no palette at all — black on white.
+  // Remember it for the next cold start: the mode only arrives with config.
   try { localStorage.setItem('radiant.mode', mode) } catch {}
-  // window chrome (Electron) only knows light/dark — medium reads as dark
-  // ⚠️ THE NATIVE WINDOW COLOUR WAS HARDCODED. Electron paints backgroundColor
-  // before the page renders and whenever the window is resized, and it was fixed
-  // at #141517 / #f5f5f6 regardless of theme — so on a pinned palette like Nous
-  // Classic the frame flashed dark grey around a deep blue app. Send the theme's
-  // actual --bg so the native frame matches what the page is about to draw.
+
   root.style.setProperty('--accent-h', String(hue))
   root.style.setProperty('--accent-c', String(chroma))
   root.style.setProperty('--bg-tint', String(tint))
-  // Clear first, always: a theme that pins tokens must not leave them behind
-  // for the next one, and a custom accent must be able to take over cleanly.
+  // Clear first so pinned tokens never leak into the next theme.
   for (const v of PINNABLE) root.style.removeProperty(v)
-  // Guarded on the preset alone: a custom accent means no preset matched, so
-  // there is nothing to pin anyway. Testing customHue as well would have
-  // switched the palette off for anyone who had ever touched the colour picker.
   const pinned = preset?.vars?.[mode]
   if (pinned) for (const [k, v] of Object.entries(pinned)) root.style.setProperty(k, v)
 
-  // ⚠️ A CUSTOM BACKGROUND WINS OVER EVERYTHING ABOVE, INCLUDING A PINNED THEME.
-  // It is the most specific thing the user can say about colour — they typed the
-  // hex — so a preset's own palette must not paint over it. The accent is left
-  // alone on purpose: background, foreground and accent are three independent
-  // choices, which is the whole point of the feature.
-  // ⚠️ THE PICKED LIGHTNESS COUNTS. The accent was drawn at a fixed lightness per
-  // mode from hue and chroma alone, so white came back as a mid-tone tan — two
-  // thirds of the choice discarded in silence. Pinned here for the same reason the
-  // background is: each mode block bakes one accent lightness into the CSS, and
-  // this is the choice that has to override it.
   if (settings.themeId === 'custom' && settings.customAccentHex) {
     const a = deriveAccent({ hex: settings.customAccentHex, mode })
     for (const [k, v] of Object.entries(a.vars)) root.style.setProperty(k, v)
@@ -337,13 +317,15 @@ export function applyTheme (settings) {
   const font = FONTS.find(f => f.id === settings.fontFamily) || FONTS[0]
   root.style.setProperty('--font-body', font.stack)
   root.style.setProperty('--ui-scale', String(settings.uiScale || 1))
+
   // Electron only knows light/dark for the frame. Set the background after all
-  // preset and custom tokens are applied so the native frame matches the page,
-  // rather than the previous theme's computed value.
+  // preset and custom tokens are applied. Derived OKLCH tokens are converted
+  // through the same palette math because BrowserWindow accepts hex only.
   if (window.radiantNative) {
     window.radiantNative.setMode(mode === 'light' ? 'light' : 'dark')
     try {
-      const bg = getComputedStyle(root).getPropertyValue('--bg').trim()
+      const authored = getComputedStyle(root).getPropertyValue('--bg').trim()
+      const bg = nativeBackgroundHex({ authored, mode, hue, tint })
       if (bg && window.radiantNative.setBackground) window.radiantNative.setBackground(bg)
     } catch {}
   }

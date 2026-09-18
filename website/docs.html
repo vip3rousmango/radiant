@@ -111,7 +111,7 @@
               <p class="eyebrow">Tools and approvals</p>
               <h2>Let the plan show its work.</h2>
               <p>Tools are named actions with inputs and outcomes. Workflows show their steps and dependencies before they run, giving you a chance to spot an incorrect assumption while the change is still reversible.</p>
-              <div class="docs-callout"><strong>Permission modes matter</strong><p><strong>Ask</strong> pauses for approvals. <strong>Auto</strong> runs lower-risk commands and asks before riskier ones; MCP tools and computer-control actions still ask in Auto. <strong>Allow all</strong> removes shell and MCP prompts. Computer control has its own Settings → Automation choice: Ask me first or Full automation, which can run computer actions without pausing. Check both settings before a run.</p></div>
+              <div class="docs-callout"><strong>Permission modes matter</strong><p><strong>Ask</strong> pauses for approvals. <strong>Auto</strong> runs lower-risk commands and asks before riskier ones; MCP tools and computer-control actions still ask in Auto unless Full automation is enabled. <strong>Allow all</strong> removes shell, MCP, and computer-control prompts, even when Full automation is off. Check both the composer permission pill and Settings → Automation before a run.</p></div>
               <div class="docs-table" role="list" aria-label="Action guidance">
                 <div role="listitem"><strong>Read</strong><span>Inspect information needed for the next step.</span><b class="docs-safe">Usually safe</b></div>
                 <div role="listitem"><strong>Prepare</strong><span>Draft a file, message, or change without sending it.</span><b class="docs-review">Review first</b></div>
@@ -131,9 +131,9 @@
               <h2>When the path feels unclear.</h2>
               <div class="docs-troubleshooting">
                 <div><strong>The model picker is empty</strong><span>Open Settings → Providers &amp; keys and confirm the provider is connected or has a usable API key. For local models, make sure the model has finished downloading and is available on this Mac.</span></div>
-                <div><strong>A tool keeps asking</strong><span>Check the composer permissions pill. Auto approve still asks for riskier commands, MCP tools, and computer control. Check Settings → Automation for the separate computer-control mode.</span></div>
+                <div><strong>A tool keeps asking</strong><span>Auto approve still asks for riskier commands, MCP tools, and computer control. Allow all bypasses those approval prompts; Settings → Automation controls computer actions only when the composer is not set to Allow all.</span></div>
                 <div><strong>The browser page is not available</strong><span>Open Settings → Chrome and connect the browser bridge to the browser profile you intend to share. The bridge cannot see a page until that connection is active.</span></div>
-                <div><strong>The work is in the wrong folder</strong><span>Click the folder chip at the top of the chat and choose the workspace folder again. New sessions in that chat will use the selected folder.</span></div>
+                <div><strong>The work is in the wrong folder</strong><span>Click the folder chip at the top of the chat and choose the workspace folder again. That chat will use the selected folder; projects can also set the default for new chats.</span></div>
                 <div><strong>A run is taking too long</strong><span>Read the current tool status before interrupting. Stop the run when the plan is wrong, then revise the request or lower the scope instead of repeating the same path.</span></div>
               </div>
             </section>

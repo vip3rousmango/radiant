@@ -29,4 +29,5 @@ _None yet._
 - **Plan:** Refresh the catalogue against what MLX can actually run today, then take Mac parity in order: usage meters, subscription sign-in (paste + device-code flows that work on iOS), agents.
 
 ### 2026-09-18 — Allegretto landing, docs, app theme, and Netlify deployment — ★★★★ (round 1)
+- **Feedback:** The user rated the delivered landing page, docs, and app theme exceptional.
 - **Plan:** Ask for any specific minor tweaks; no automatic rework until identified.

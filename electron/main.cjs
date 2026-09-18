@@ -6,6 +6,28 @@ const { pathToFileURL } = require('url')
 const { installUpdater } = require('./updater.cjs')
 const windowState = require('./window-state.cjs')
 
+// The renderer reports the resolved page background after it applies a theme.
+// Keep the last validated value separately from config/window geometry so a
+// cold BrowserWindow can start on the same surface before the renderer paints.
+const themeFramePath = path.join(os.homedir(), '.allegretto', 'theme-frame.json')
+const isHexColor = value => typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value.trim())
+function savedBackground () {
+  try {
+    const value = JSON.parse(fs.readFileSync(themeFramePath, 'utf8')).background
+    return isHexColor(value) ? value.trim() : null
+  } catch { return null }
+}
+function persistBackground (value) {
+  try {
+    fs.mkdirSync(path.dirname(themeFramePath), { recursive: true })
+    const tmp = `${themeFramePath}.tmp`
+    fs.writeFileSync(tmp, JSON.stringify({ background: value }), 'utf8')
+    fs.renameSync(tmp, themeFramePath)
+  } catch (e) {
+    console.warn('[radiant] could not persist theme frame:', e.message)
+  }
+}
+
 // window chrome follows the app's own light/dark setting, not the OS
 function savedMode () {
   try {
@@ -24,10 +46,11 @@ ipcMain.on('radiant:set-mode', (e, mode) => {
 // near-neutral so nobody noticed; a pinned palette is not, so Nous Classic
 // showed a dark grey frame flashing around a deep blue app. The renderer sends
 // its real --bg whenever the theme changes.
-let lastBg = null
+let lastBg = savedBackground()
 ipcMain.on('radiant:set-bg', (e, color) => {
-  if (typeof color !== 'string' || !/^#[0-9a-f]{6}$/i.test(color.trim())) return
+  if (!isHexColor(color)) return
   lastBg = color.trim()
+  persistBackground(lastBg)
   for (const w of [win, settingsWin]) {
     if (w && !w.isDestroyed()) { try { w.setBackgroundColor(lastBg) } catch {} }
   }
@@ -118,7 +141,7 @@ ipcMain.on('rad:open-settings', async (e, tab) => {
     minWidth: 720,
     minHeight: 520,
     title: 'Allegretto Settings',
-    backgroundColor: lastBg || (nativeTheme.themeSource === 'light' ? '#f5f5f6' : '#141517'),
+    backgroundColor: lastBg || (nativeTheme.themeSource === 'light' ? '#f5f2ea' : '#252b2f'),
     // ⚠️ NO `parent`. On macOS a child window is ATTACHED to its parent: it floats
     // above it always, and it MOVES WITH IT — drag the main window and Settings
     // comes along, which is not what any Mac settings window does. Tony: "when the
@@ -198,7 +221,7 @@ async function createWindow () {
     // region is a hit-testing rectangle that swallows clicks. styles.css turns
     // both off; see data-window-chrome in main.jsx.
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
-    backgroundColor: lastBg || (nativeTheme.themeSource === 'light' ? '#f5f5f6' : '#141517'),
+    backgroundColor: lastBg || (nativeTheme.themeSource === 'light' ? '#f5f2ea' : '#252b2f'),
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -264,7 +287,7 @@ async function toggleHud () {
     // opposite of its job. It shows itself without taking the keyboard.
     focusable: true,
     show: false,
-    backgroundColor: lastBg || (nativeTheme.themeSource === 'light' ? '#f5f5f6' : '#141517'),
+    backgroundColor: lastBg || (nativeTheme.themeSource === 'light' ? '#f5f2ea' : '#252b2f'),
     webPreferences: { contextIsolation: true, nodeIntegration: false, preload: path.join(__dirname, 'preload.cjs') }
   })
   // Above full-screen apps too, or it is invisible exactly when you are heads-down.

@@ -2110,7 +2110,7 @@ function AgentPane ({ config, onSettings }) {
           <input type='radio' name='automation' checked={!s.fullAutomation} onChange={() => onSettings({ fullAutomation: false })} />
           <span>
             <strong>Ask me first</strong> <span className='desc'>— recommended</span>
-            <span className='auto-choice-sub'>Every computer action pauses and waits for you before it runs.</span>
+            <span className='auto-choice-sub'>Computer actions pause here unless the chat permissions pill is set to Allow all.</span>
           </span>
         </label>
         <label className={'auto-choice' + (s.fullAutomation ? ' is-on is-warn' : '')}>
@@ -2118,8 +2118,7 @@ function AgentPane ({ config, onSettings }) {
           <span>
             <strong>Full automation</strong>
             <span className='auto-choice-sub'>
-              Clicks, types and opens apps without asking — on {config?.serverHost || 'this Mac'}, the machine running {BRAND.productName}, which may not be the one you are looking at. The agent can do anything there that you
-              could, including things that cannot be undone. Use it only with models and tasks you trust.
+              Clicks, types and opens apps without asking when Full automation is enabled — and Allow all in the chat permissions pill can bypass approval prompts even when this is off. On {config?.serverHost || 'this Mac'}, the machine running {BRAND.productName}, the agent can do anything there that you could, including things that cannot be undone. Use it only with models and tasks you trust.
             </span>
           </span>
         </label>
@@ -3392,7 +3391,7 @@ const GUIDE = [
     items: [
       ['Files & commands', 'Read, write, and edit files and run shell commands in the workspace folder. Toggle with the “tools” pill; command runs ask for approval.'],
       ['Set the workspace folder', 'Click the folder chip at the top of a chat to choose which folder the agent works in — it opens a native folder picker.'],
-      ['Permissions', 'The composer’s permissions pill sets how much the agent can do without asking — Ask each (confirm every command), Auto approve (low-risk runs silently, risky ones still ask), or Allow all (never ask). MCP tools and computer control always ask under Auto approve, even when they are harmless — only Allow all skips those prompts too. Flip it to Allow all for an unattended long build.'],
+      ['Permissions', 'The composer’s permissions pill sets how much the agent can do without asking — Ask each (confirm every command), Auto approve (low-risk runs silently, risky ones still ask), or Allow all (never ask). In Auto approve, MCP tools and computer control still ask unless Full automation is enabled; Allow all bypasses those prompts even when Full automation is off. Flip it to Allow all for an unattended long build.'],
       ['Background jobs', 'Long builds, test watchers, and dev servers run in the background so the agent keeps working and checks on them.'],
       ['Terminal', 'A real terminal in the activity panel (top-right icon).'],
       ['Computer control (🖥)', 'Let a vision model drive the browser and desktop. Basic automation is on by default; full automation is an opt-in checkbox in Settings → Automation.'],
