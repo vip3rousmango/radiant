@@ -4,9 +4,9 @@
  * choice. See consent.js for why it exists.
  */
 import React, { useEffect, useState } from 'react'
+import { BRAND } from '../../server/brand.js'
 import { usePress } from './usePress.js'
 import { providerHost } from './consent.js'
-
 const PRIVACY_URL = 'https://www.templetongroup.dev/showcase/radiant/privacy.html'
 
 function openPrivacy () {
@@ -39,7 +39,7 @@ export default function ConsentSheet ({ provider, onAllow, onDecline }) {
           <div className="rx-title-2 rx-l1">Send your messages to {provider.name}?</div>
           <p className="rx-body rx-l2">
             You chose a model that runs on {provider.name}&rsquo;s servers, not on this device. To answer,
-            Radiant has to send the conversation there.
+            {BRAND.productName} has to send the conversation there.
           </p>
           <div className="rx-consent-list">
             <div className="rx-consent-row">
@@ -48,7 +48,7 @@ export default function ConsentSheet ({ provider, onAllow, onDecline }) {
             </div>
             <div className="rx-consent-row">
               <div className="rx-subhead rx-l1">Where it goes</div>
-              <div className="rx-footnote rx-l2">Directly to {provider.name} at <span className="rx-mono">{host}</span>, using your own API key, under {provider.name}&rsquo;s privacy policy. Not to Templeton Technologies &mdash; we run no server and never see it.</div>
+              <div className="rx-footnote rx-l2">Directly to {provider.name} at <span className="rx-mono">{host}</span>, using your own API key, under {provider.name}&rsquo;s privacy policy. Not to {BRAND.publisherName} &mdash; we run no server and never see it.</div>
             </div>
             <div className="rx-consent-row">
               <div className="rx-subhead rx-l1">What is not sent</div>

@@ -60,6 +60,7 @@
  *    the free space instead.
  */
 import React, { useState } from 'react'
+import { BRAND } from '../../server/brand.js'
 import { deviceWord, deviceText } from './device.js'
 import Gauge from './Gauge.jsx'
 import BrandSpinner, { BrandMark } from './BrandSpinner.jsx'
@@ -471,7 +472,7 @@ export default function ModelsScreen ({
           <div className="rx-section-footer">
             {apple.available
               ? `Apple’s own model, already on this ${deviceWord()}. Free, works offline, and nothing is downloaded. The models below are yours to keep and are usually better at longer work.`
-              : `Radiant can use Apple’s built-in model when it is available. The models below run on this ${deviceWord()} regardless.`}
+              : `${BRAND.productName} can use Apple’s built-in model when it is available. The models below run on this ${deviceWord()} regardless.`}
           </div>
         </div>
       )}

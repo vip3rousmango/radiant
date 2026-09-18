@@ -13,6 +13,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react'
 import usePress from './usePress.js'
+import { BRAND } from '../../server/brand.js'
 import { deviceWord } from './device.js'
 import { searchModels, inspectRepo, qualify, customRow } from './hf.js'
 import BrandSpinner from './BrandSpinner.jsx'
@@ -84,8 +85,8 @@ export default function HuggingFaceSearch ({ local = {}, models = [], ramAvailab
           </button>
         </div>
         <div className="rx-row-blurb rx-hf-note">
-          Anything in MLX format that Radiant can load. Each result is checked before you download it: whether the engine
-          has a loader for it, whether its weights are what its config says, and whether it fits this {deviceWord()}.
+          {`Anything in MLX format that ${BRAND.productName} can load. Each result is checked before you download it: whether the engine
+          has a loader for it, whether its weights are what its config says, and whether it fits this ${deviceWord()}.`}
         </div>
         {error && <div className="rx-row-blurb rx-destructive rx-hf-note">{error}</div>}
         {results.map(r => {

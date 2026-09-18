@@ -13,6 +13,7 @@
  * here in the same change.
  */
 import React, { useEffect, useState } from 'react'
+import { BRAND } from '../../server/brand.js'
 import { deviceWord, onDeviceResolved } from './device.js'
 import CompanyLine from './CompanyLine.jsx'
 
@@ -26,7 +27,7 @@ const sections = () => [
   {
     title: `A model on your ${deviceWord()}`,
     body: [
-      'Radiant downloads an open AI model onto this phone and runs it here. There is no account, and once a model has finished downloading it works with no signal at all — on a plane, underground, anywhere.',
+      `${BRAND.productName} downloads an open AI model onto this phone and runs it here. There is no account, and once a model has finished downloading it works with no signal at all — on a plane, underground, anywhere.`,
       'A model running on the phone answers without a network, and nothing you send it leaves the device. If you add a cloud provider in Settings, chats you send to THAT model go to that company — the name under every chat title tells you which of the two is answering.'
     ]
   },
@@ -50,14 +51,14 @@ const sections = () => [
       'There are fifty-three to choose from, grouped by who made them — Google, Meta, Mistral, Microsoft, IBM, Alibaba, Apple, NVIDIA and more. Tap a name to open that shelf; tap it again to close it. Seven of them can look at pictures, and one of those can watch a short clip.',
       `Every model is labeled for THIS ${deviceWord()}. Green runs well. Amber runs, but close to the limit — expect it to be slow, and to reload when you switch apps. Red is not expected to load at all. The label is guidance, not a lock: you can still download a red model and try it.`,
       `That label is about memory, not storage, and they are different questions: a phone can easily have room for a file it cannot then run. Bigger models answer better and use more battery. Qwen 3 1.7B is a good place to start on any recent ${deviceWord()}.`,
-      `The panel above the list shows what this ${deviceWord()} gives Radiant to work with. It is less than the phone's total memory, because iOS limits how much any single app may use.`
+      `The panel above the list shows what this ${deviceWord()} gives ${BRAND.productName} to work with. It is less than the phone's total memory, because iOS limits how much any single app may use.`
     ]
   },
   {
     title: 'Finding more on Hugging Face',
     body: [
-      `The Models page ends with a search box. Type a name — “llama 3.2”, “qwen 4bit”, “gemma” — and Radiant searches Hugging Face for models in the format it runs. Each result is checked before you download it: whether the engine can load that kind of model, whether its weights are what its description says, and whether it fits the memory of this ${deviceWord()}. Then it gets the same green, amber or red label as the built-in list, or a plain reason it cannot run. The keyboard scrolls the search box up clear of itself, so you can see what you are typing and the Search button.`,
-      'Download puts it beside the built-in models with the same turning swirl, byte count, stop, chat and remove. The search is not filtered: anything published in a format Radiant can run will show up, including uncensored and abliterated builds. These are models other people have made, and a model with its safety training removed will say anything — read its page on Hugging Face if you want to know what it is.'
+      `The Models page ends with a search box. Type a name — “llama 3.2”, “qwen 4bit”, “gemma” — and ${BRAND.productName} searches Hugging Face for models in the format it runs. Each result is checked before you download it: whether the engine can load that kind of model, whether its weights are what its description says, and whether it fits the memory of this ${deviceWord()}. Then it gets the same green, amber or red label as the built-in list, or a plain reason it cannot run. The keyboard scrolls the search box up clear of itself, so you can see what you are typing and the Search button.`,
+      `Download puts it beside the built-in models with the same turning swirl, byte count, stop, chat and remove. The search is not filtered: anything published in a format ${BRAND.productName} can run will show up, including uncensored and abliterated builds. These are models other people have made, and a model with its safety training removed will say anything — read its page on Hugging Face if you want to know what it is.`
     ]
   },
   {
@@ -78,7 +79,7 @@ const sections = () => [
     title: 'Stopping a download',
     body: [
       'Tap the turning logo to stop. Whatever has already downloaded stays on the phone, so starting again picks up from there rather than beginning again.',
-      'Downloads do not yet continue while the app is in the background — leave Radiant open until one finishes.'
+      `Downloads do not yet continue while the app is in the background — leave ${BRAND.productName} open until one finishes.`
     ]
   },
   {
@@ -90,7 +91,7 @@ const sections = () => [
   {
     title: 'Models in the cloud',
     body: [
-      'Settings → Providers connects Radiant to Anthropic, OpenAI, OpenRouter, xAI, Nous, DeepSeek, Kimi, GLM, MiniMax, Groq or Mistral with your own API key. That is how to reach the models too large to run on a phone.',
+      `Settings → Providers connects ${BRAND.productName} to Anthropic, OpenAI, OpenRouter, xAI, Nous, DeepSeek, Kimi, GLM, MiniMax, Groq or Mistral with your own API key. That is how to reach the models too large to run on a phone.`,
       'Add a key, search that provider\'s models, and tap one. It becomes the model answering your chats — the name at the top of every chat tells you which model is replying, and tapping that name switches between it and the models on your phone.',
       `Your key is held in the ${deviceWord()} Keychain and used by the app itself — it is never stored in the web layer, and never shown again after you enter it. These requests do go over the network, unlike a model running on the phone.`
     ]
@@ -98,21 +99,21 @@ const sections = () => [
   {
     title: 'On an iPad',
     body: [
-      'Radiant is one app for both. On an iPad it says iPad, sizes itself for the bigger screen instead of stretching the phone layout across it, and everything else — your models, your conversations, your colors — works exactly the same way.'
+      `${BRAND.productName} is one app for both. On an iPad it says iPad, sizes itself for the bigger screen instead of stretching the phone layout across it, and everything else — your models, your conversations, your colors — works exactly the same way.`
     ]
   },
   {
     title: 'Who makes this',
     body: [
-      'Radiant is a Templeton Technologies product. That line sits at the foot of the welcome screen, of Home, of this guide and of About — tap it anywhere it appears and it opens templetontech.com in Safari, so you can see whose app this is.'
+      `${BRAND.productName} is a ${BRAND.publisherName} product. That line sits at the foot of the welcome screen, of Home, of this guide and of About — tap it anywhere it appears and it opens ${new URL(BRAND.publisherUrl).host} in Safari, so you can see whose app this is.`
     ]
   },
   {
     title: 'How it looks',
     body: [
-      'Settings → Appearance chooses Dark, Medium, Light, or System — Medium is dark without the true black, and System follows your phone. Radiant opens dark unless you change it.',
+      `Settings → Appearance chooses Dark, Medium, Light, or System — Medium is dark without the true black, and System follows your phone. ${BRAND.productName} opens dark unless you change it.`,
       'Settings → Color carries the same themes as the Mac app, including Templeton — the sage green and warm tan one. The color runs through everything: buttons, the glow behind the logo, and the ring while a model downloads. The welcome screen stays dark whichever you pick, because it is built against black, but its glow now follows the theme: pick a quiet color like Templeton or Graphite and the welcome screen is quiet too, instead of arriving fully saturated.',
-      'Settings → Text size sets the size of everything on top of whatever you have chosen in iOS Settings, so you can make Radiant larger without changing every other app.'
+      `Settings → Text size sets the size of everything on top of whatever you have chosen in iOS Settings, so you can make ${BRAND.productName} larger without changing every other app.`
     ]
   }
 ]

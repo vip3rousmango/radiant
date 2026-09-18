@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { BRAND } from '../../server/brand.js'
 
 /**
  * Choose a folder (or a file), without typing a path.
@@ -78,7 +79,7 @@ export default function PathPicker ({
         )}
         {!native && (
           <div className='pp-chosen'>
-            <span className='pp-chosen-none'>A full path on the Mac running Radiant — not on this device.</span>
+            <span className='pp-chosen-none'>A full path on the Mac running {BRAND.productName} — not on this device.</span>
           </div>
         )}
       </div>

@@ -9,8 +9,9 @@ import { MOTIONS } from './MotionBackground.jsx'
 import { Icon } from './Icons.jsx'
 import { AGENT_ICONS, AGENT_ICON_IDS, AgentGlyph } from './AgentIcons.jsx'
 import { AGENT_TEMPLATES, AGENT_TEMPLATE_CATS } from '../agentTemplates.js'
-import { ModelPicker } from './Chat.jsx'
 import ConfirmButton from './ConfirmButton.jsx'
+import { ModelPicker } from './Chat.jsx'
+import { BRAND } from '../../server/brand.js'
 
 // ⚠️ A BUILT-IN'S PERSONA IS ITS INSTRUCTIONS, NOT A SUMMARY — several sentences
 // of "You are a…". Its opening sentence is the description a person recognises
@@ -282,7 +283,7 @@ function VoicePane ({ config, onSettings, onConfigChange }) {
     <div className='set-section'>
       <h3>Voice</h3>
       <p className='hint' style={{ marginTop: 2 }}>
-        Talk to Radiant. Press <b>Talk</b> in the composer and you are in a live, two-way conversation over that
+        Talk to {BRAND.productName}. Press <b>Talk</b> in the composer and you are in a live, two-way conversation over that
         chat — speak naturally, interrupt, ask how it is going, change your mind. OpenAI's GPT-Live listens and
         speaks; anything real is handed to the agent in the chat, on whatever model the chat uses, with the same
         tools and approvals as typing. The reply is read back in a few plain sentences; code and detail stay in the chat.
@@ -307,8 +308,7 @@ function VoicePane ({ config, onSettings, onConfigChange }) {
       <div className='set-block'>
         <div className='set-block-title'>Which voice</div>
         <p className='hint' style={{ marginTop: 2 }}>
-          Both do the same job: they listen and speak, and hand every real request back to Radiant so your own
-          model, tools and approvals do the work. They bill by the minute and need different keys.
+          Both do the same job: they listen and speak, and hand every real request back to {BRAND.productName} so your own
         </p>
         <div className='row' style={{ marginTop: 6, alignItems: 'center', gap: 8 }}>
           <select className='text-input' style={{ width: 'auto' }} value={which} onChange={e => onSettings({ voice: { ...v, provider: e.target.value } })}>
@@ -685,7 +685,7 @@ function UtilityModelBlock ({ config, onSettings }) {
       <div className='set-block-title'>Background work</div>
       <p className='hint' style={{ marginTop: 2 }}>
         Naming a chat, remembering a fact, suggesting a skill and summarizing a long conversation are
-        small jobs Radiant does for itself, a few times per turn. They run on a cheap model from the
+        small jobs {BRAND.productName} does for itself, a few times per turn. They run on a cheap model from the
         same provider your chat uses, and what they spend is shown in the token counter beside the
         composer. Pick one here to override that choice.
       </p>
@@ -712,7 +712,7 @@ function LocalContextBlock ({ config, onSettings }) {
     <div className='set-block' style={{ marginBottom: 16 }}>
       <div className='set-block-title'>Local model context</div>
       <p className='hint' style={{ marginTop: 2 }}>
-        How much of a local model&rsquo;s context a chat may fill before Radiant starts trimming older
+        How much of a local model&rsquo;s context a chat may fill before {BRAND.productName} starts trimming older
         tool results. Raising this lets local chats stay longer before they are trimmed; it does not
         change how much memory the model reserves.
       </p>
@@ -741,14 +741,14 @@ function LocalContextBlock ({ config, onSettings }) {
         </div>
       )}
       <p className='hint' style={{ marginTop: 10 }}>
-        <strong>To change the memory a model reserves, use Ollama, not Radiant.</strong> Ollama picks a
+        <strong>To change the memory a model reserves, use Ollama, not {BRAND.productName}.</strong> Ollama picks a
         model&rsquo;s context from the memory it finds &mdash; under 24&nbsp;GB it loads 4K, 24&ndash;48&nbsp;GB 32K,
         and 48&nbsp;GB or more 256K &mdash; and reserves it all when the model loads, which is how a
         single model can take tens of gigabytes. Change it in <strong>Ollama&rsquo;s own Settings &rarr; Context
         length</strong>, or start the server with <code>OLLAMA_CONTEXT_LENGTH=32768 ollama serve</code>.
         {big.length > 0 && (
           <> Right now {big.map(m => m.name).join(', ')} {big.length === 1 ? 'is' : 'are'} loaded with more
-          context than Radiant will use, so the extra is reserved memory you are not getting the benefit of.</>
+          context than {BRAND.productName} will use, so the extra is reserved memory you are not getting the benefit of.</>
         )}
       </p>
     </div>
@@ -850,7 +850,7 @@ function ModelsPane ({ onModelsChanged, config, onSettings }) {
       <h3>Local models</h3>
       {onAnotherMac && (
         <div className='set-hint' style={{ marginBottom: 10 }}>
-          You are using the Radiant on <strong>{serverMac}</strong>. Models download to that {noun}
+          You are using the {BRAND.productName} on <strong>{serverMac}</strong>. Models download to that {noun}
           and run there — not on this one — and the memory and free space below are its own.
           A download keeps going there even if you close this window.
         </div>
@@ -1331,7 +1331,7 @@ function AgentsPane ({ config, onConfigChange, initialView }) {
       {external.length > 0 && (
         <div className='ext-agents'>
           <div className='ext-agents-title'>Connected agents on this {deviceNoun(config?.platform)}</div>
-          <p className='ext-agents-sub'>Radiant found other agent apps you have installed. Connect a Hermes agent to chat with the real one — its own model, skills, and memory — right inside Radiant.</p>
+          <p className='ext-agents-sub'>{BRAND.productName} found other agent apps you have installed. Connect a Hermes agent to chat with the real one — its own model, skills, and memory — right inside {BRAND.productName}.</p>
           {external.map(ext => {
             const already = agents.some(a => (a.name || '').trim().toLowerCase() === (ext.name || '').trim().toLowerCase())
             return (
@@ -1475,7 +1475,7 @@ function SkillLibrary ({ onConfigChange }) {
       <button className='skill-lib-head' onClick={() => setOpen(o => !o)}>
         <Icon.file size={14} />
         <span className='skill-lib-title'>Skill library</span>
-        <span className='skill-lib-sub'>Ready-made skills that ship with Radiant — read one before you add it</span>
+        <span className='skill-lib-sub'>Ready-made skills that ship with {BRAND.productName} — read one before you add it</span>
         <span className='skill-lib-chev'>{open ? '▾' : '▸'}</span>
       </button>
 
@@ -1589,7 +1589,7 @@ function SkillsPane ({ config, onConfigChange }) {
   const uploadFolder = async () => {
     setUpload(null)
     if (!window.radiantNative?.pickFolder) {
-      setUpload({ kind: 'err', text: 'Uploading a folder needs the Radiant app — the browser cannot see a folder path.' })
+      setUpload({ kind: 'err', text: `Uploading a folder needs the ${BRAND.productName} app — the browser cannot see a folder path.` })
       return
     }
     const picked = await window.radiantNative.pickFolder(null, 'Choose a skill folder')
@@ -1608,7 +1608,7 @@ function SkillsPane ({ config, onConfigChange }) {
       } else if (/no_skill_md/.test(raw)) {
         text = 'Not added: that folder has no SKILL.md. Pick the folder that contains it, not the one above it.'
       } else if (/not_a_folder|not_found/.test(raw)) {
-        text = 'Not added: that is not a folder Radiant can read.'
+        text = `Not added: that is not a folder ${BRAND.productName} can read.`
       }
       setUpload({ kind: 'err', text })
     }
@@ -2091,11 +2091,11 @@ function AgentPane ({ config, onSettings }) {
           </div>
           {comp && (!comp.screenRecording || !comp.accessibility) && (
             <div className='spec-note'>
-              Add <strong>Radiant</strong> under System Settings → Privacy &amp; Security →{' '}
+              Add <strong>{BRAND.productName}</strong> under System Settings → Privacy &amp; Security →{' '}
               {!comp.screenRecording && <strong>Screen Recording</strong>}
               {!comp.screenRecording && !comp.accessibility && ' and '}
               {!comp.accessibility && <strong>Accessibility</strong>}
-              , then quit and reopen Radiant — macOS only re-reads these at launch.
+              , then quit and reopen {BRAND.productName} — macOS only re-reads these at launch.
               Browser control needs neither.
             </div>
           )}
@@ -2116,7 +2116,7 @@ function AgentPane ({ config, onSettings }) {
           <span>
             <strong>Full automation</strong>
             <span className='auto-choice-sub'>
-              Clicks, types and opens apps without asking — on {config?.serverHost || 'this Mac'}, the machine running Radiant, which may not be the one you are looking at. The agent can do anything there that you
+              Clicks, types and opens apps without asking — on {config?.serverHost || 'this Mac'}, the machine running {BRAND.productName}, which may not be the one you are looking at. The agent can do anything there that you
               could, including things that cannot be undone. Use it only with models and tasks you trust.
             </span>
           </span>
@@ -2235,11 +2235,11 @@ function AboutPane ({ config, onSettings }) {
 
   return (
     <div className='set-section'>
-      <h3>About Radiant</h3>
+      <h3>About {BRAND.productName}</h3>
       <div className='about-row'>
         <div className='logo-mark' style={{ width: 40, height: 40 }} aria-hidden />
         <div>
-          <div className='wordmark' style={{ fontSize: 18 }}>Radiant</div>
+          <div className='wordmark' style={{ fontSize: 18 }}>{BRAND.productName}</div>
           <div className='about-ver'>Version {version || '…'}</div>
         </div>
       </div>
@@ -2248,7 +2248,7 @@ function AboutPane ({ config, onSettings }) {
           above is this app; everything else in the window is that Mac. */}
       {remote.base && (
         <div className='update-avail' style={{ marginTop: 12 }}>
-          This window is showing Radiant on <strong>{remoteLabel}</strong>, so the chats,
+          This window is showing {BRAND.productName} on <strong>{remoteLabel}</strong>, so the chats,
           projects and models you see are that Mac's, not this one's. The version above is
           this app. To use this Mac instead, go to <strong>Devices</strong> and press
           “Use this Mac's own server”.
@@ -2266,12 +2266,12 @@ function AboutPane ({ config, onSettings }) {
       {status && !status.error && !status.blocked && (
         status.hasUpdate
           ? <div className='update-avail'>
-              <div><strong>Radiant {status.latest}</strong> is available (you have {status.current}).</div>
+              <div><strong>{BRAND.productName} {status.latest}</strong> is available (you have {status.current}).</div>
               {native
                 ? (phase === 'ready'
                     ? <div className='row' style={{ marginTop: 8, alignItems: 'center', gap: 10 }}>
                         <button className='small-btn primary' onClick={restart}>Restart &amp; install</button>
-                        <span className='oauth-note'>Downloaded — Radiant will relaunch on the new version.</span>
+                        <span className='oauth-note'>Downloaded — {BRAND.productName} will relaunch on the new version.</span>
                       </div>
                     : phase === 'downloading'
                       ? <div style={{ marginTop: 10 }}>
@@ -2309,24 +2309,24 @@ function AboutPane ({ config, onSettings }) {
         <span>Automatically check for updates on launch</span>
       </label>
       <div className='oauth-note'>
-        The desktop app also has <span className='mono'>Radiant → Check for Updates…</span> in the menu bar.
+        The desktop app also has <span className='mono'>{BRAND.productName} → Check for Updates…</span> in the menu bar.
         Updates download in the background and install when you restart.
       </div>
 
       <div className='about-footer' style={{ marginTop: 22 }}>
-        <div className='about-footer-text'>A Templeton Technologies Product</div>
+        <div className='about-footer-text'>{BRAND.welcomeTagline}</div>
         {/* Electron denies in-window navigation, so a plain href does nothing —
             window.open goes through setWindowOpenHandler and out to the browser. */}
         <a
           className='about-footer-link'
-          href='https://templetontech.com'
-          title='templetontech.com'
-          onClick={e => { e.preventDefault(); window.open('https://templetontech.com', '_blank', 'noopener,noreferrer') }}
+          href={BRAND.publisherUrl}
+          title={new URL(BRAND.publisherUrl).host}
+          onClick={e => { e.preventDefault(); window.open(BRAND.publisherUrl, '_blank', 'noopener,noreferrer') }}
         >
           <img
             className='about-footer-logo'
             src='/templeton-tech.png'
-            alt='Templeton Technologies'
+            alt={BRAND.publisherName}
             onError={e => { e.currentTarget.style.display = 'none' }}
           />
         </a>
@@ -2395,7 +2395,7 @@ function DataFolderBlock () {
   const enable = async () => {
     if (!choice) {
       if (!window.radiantNative?.pickFolder) {
-        setMsg({ kind: 'err', text: 'Choosing a folder needs the Radiant app — this is the browser view.' })
+        setMsg({ kind: 'err', text: `Choosing a folder needs the ${BRAND.productName} app — this is the browser view.` })
         return
       }
       // Never return in silence — a checkbox that springs back with no message
@@ -2406,19 +2406,19 @@ function DataFolderBlock () {
         return
       }
       return send({ path: picked }, r => r.adopted
-        ? 'That folder already had a Radiant setup and it was adopted as-is. Quit and reopen Radiant.'
-        : 'Copied your setup across. Your originals were left where they were. Quit and reopen Radiant.')
+        ? `That folder already had a ${BRAND.productName} setup and it was adopted as-is. Quit and reopen ${BRAND.productName}.`
+        : `Copied your setup across. Your originals were left where they were. Quit and reopen ${BRAND.productName}.`)
     }
     send({ path: choice }, r => r.adopted
-      ? 'That folder already had a Radiant setup and it was adopted as-is. Quit and reopen Radiant.'
-      : 'Copied your setup across. Your originals were left where they were. Quit and reopen Radiant.')
+      ? `That folder already had a ${BRAND.productName} setup and it was adopted as-is. Quit and reopen ${BRAND.productName}.`
+      : `Copied your setup across. Your originals were left where they were. Quit and reopen ${BRAND.productName}.`)
   }
   // ⚠️ TURNING SYNC OFF MUST BRING THE WORK HOME. The local folder has been
   // sitting untouched since sync was turned on — pointing back at it would
   // silently roll the user back to whatever they had that day. mode:'replace'
   // copies the live data down and moves the stale copy aside instead.
   const disable = () => send({ path: 'reset', reset: true, mode: 'replace' },
-    r => `Your setup was copied back to this Mac${r.backedUp ? ' and the old local copy was kept alongside it' : ''}. Quit and reopen Radiant.`)
+    r => `Your setup was copied back to this Mac${r.backedUp ? ' and the old local copy was kept alongside it' : ''}. Quit and reopen ${BRAND.productName}.`)
 
   if (!info) return null
   // What the user CHOSE, not what is loaded — the pointer changes now, the
@@ -2461,14 +2461,14 @@ function DataFolderBlock () {
       {conflict && (
         <div className='sync-conflict'>
           <p>
-            That folder already has a Radiant setup{conflict.destModified ? `, last changed ${new Date(conflict.destModified).toLocaleString()}` : ''}.
+            That folder already has a {BRAND.productName} setup{conflict.destModified ? `, last changed ${new Date(conflict.destModified).toLocaleString()}` : ''}.
             One of the two has to win, and nothing has been changed yet.
           </p>
           <div className='data-folder-row'>
-            <button className='btn-secondary' disabled={busy} onClick={() => send({ path: conflict.dest, mode: 'adopt' }, () => 'Using the setup that was already in that folder. Quit and reopen Radiant.')}>
+            <button className='btn-secondary' disabled={busy} onClick={() => send({ path: conflict.dest, mode: 'adopt' }, () => `Using the setup that was already in that folder. Quit and reopen ${BRAND.productName}.`)}>
               Use what is in the folder
             </button>
-            <button className='btn-secondary' disabled={busy} onClick={() => send({ path: conflict.dest, mode: 'replace' }, r => `Replaced it with this Mac's setup${r.backedUp ? '; the previous one was kept alongside it' : ''}. Quit and reopen Radiant.`)}>
+            <button className='btn-secondary' disabled={busy} onClick={() => send({ path: conflict.dest, mode: 'replace' }, r => `Replaced it with this Mac's setup${r.backedUp ? '; the previous one was kept alongside it' : ''}. Quit and reopen ${BRAND.productName}.`)}>
               Use this Mac&rsquo;s setup
             </button>
             <button className='btn-secondary' disabled={busy} onClick={() => setConflict(null)}>Cancel</button>
@@ -2481,13 +2481,13 @@ function DataFolderBlock () {
         <div className='data-folder-row'>
           <code className='mono data-folder-path' title={info.active}>{info.active.replace(/^\/Users\/[^/]+/, '~')}</code>
           <button className='btn-secondary' disabled={busy} onClick={async () => {
-            if (!window.radiantNative?.pickFolder) { setMsg({ kind: 'err', text: 'Choosing a folder needs the Radiant app.' }); return }
+            if (!window.radiantNative?.pickFolder) { setMsg({ kind: 'err', text: `Choosing a folder needs the ${BRAND.productName} app.` }); return }
             const next = await window.radiantNative.pickFolder(info.active)
-            if (next) send({ path: next }, r => r.adopted ? 'Adopted the setup already in that folder. Quit and reopen Radiant.' : 'Copied your setup across. Quit and reopen Radiant.')
+            if (next) send({ path: next }, r => r.adopted ? `Adopted the setup already in that folder. Quit and reopen ${BRAND.productName}.` : `Copied your setup across. Quit and reopen ${BRAND.productName}.`)
           }}>Choose another folder…</button>
         </div>
         <p className='set-hint'>
-          One Mac at a time. Two copies of Radiant writing to the same folder at
+          One Mac at a time. Two copies of {BRAND.productName} writing to the same folder at
           once will overwrite each other — to work from two Macs together, share
           this one below instead.
         </p>
@@ -2495,7 +2495,7 @@ function DataFolderBlock () {
 
       {info.unreachable && (
         <p className='set-hint is-warn'>
-          The shared folder could not be reached, so Radiant is running from this
+          The shared folder could not be reached, so {BRAND.productName} is running from this
           Mac and your work is intact. Reconnect it, or turn sync off.
         </p>
       )}
@@ -2515,13 +2515,13 @@ function DataFolderBlock () {
           Macs worked, that one stayed empty through reboots and reinstalls. */}
       {info.cloud && info.cloud.exists && !info.cloud.ubiquitous && (
         <div className='sync-broken'>
-          <strong>Nothing here is syncing.</strong> Radiant is writing to this folder, but macOS
+          <strong>Nothing here is syncing.</strong> {BRAND.productName} is writing to this folder, but macOS
           does not treat it as an iCloud item, so nothing reaches your other Macs and nothing
           from them arrives.
           {info.cloud.icloud === true && (
             <> <br /><br /><strong>iCloud itself is working on this Mac</strong>, so this is the
               folder rather than your settings — most likely it was created at that path before
-              iCloud Drive finished setting up, and iCloud never adopted it. Radiant can fix
+              iCloud Drive finished setting up, and iCloud never adopted it. {BRAND.productName} can fix
               that here: it stands up a fresh folder in the same place, copies your setup into
               it, and keeps the old one alongside.
               {/* ⚠️ A BUTTON, NOT AN INSTRUCTION. This used to say to press “Choose another
@@ -2535,7 +2535,7 @@ function DataFolderBlock () {
                   try {
                     const r = await api.repairCloudFolder()
                     setInfo(r)
-                    setMsg({ kind: 'ok', text: `${r.message} Quit and reopen Radiant.` })
+                    setMsg({ kind: 'ok', text: `${r.message} Quit and reopen ${BRAND.productName}.` })
                   } catch (e) {
                     let text = 'The repair did not run, and nothing was changed.'
                     try { text = JSON.parse(String(e.message).replace(/^[^{]*/, '')).message || text } catch {}
@@ -2546,9 +2546,9 @@ function DataFolderBlock () {
               </div></>
           )}
           {info.cloud.icloud === false && (
-            <> <br /><br /><strong>iCloud is not available to Radiant on this Mac.</strong> Check
+            <> <br /><br /><strong>iCloud is not available to {BRAND.productName} on this Mac.</strong> Check
               that you are signed in and that iCloud Drive is on in System Settings → your name
-              → iCloud, then quit and reopen Radiant.</>
+              → iCloud, then quit and reopen {BRAND.productName}.</>
           )}
         </div>
       )}
@@ -2561,9 +2561,9 @@ function DataFolderBlock () {
       )}
       {info.pendingRestart && (
         <div className='sync-pending'>
-          <strong>Not in effect yet on this Mac.</strong> Radiant is still using its own
+          <strong>Not in effect yet on this Mac.</strong> {BRAND.productName} is still using its own
           folder (<code className='mono'>{info.active.replace(/^\/Users\/[^/]+/, '~')}</code>).
-          Quit Radiant completely and reopen it — closing the window is not enough.
+          Quit {BRAND.productName} completely and reopen it — closing the window is not enough.
         </div>
       )}
       {msg && <p className={'set-hint ' + (msg.kind === 'err' ? 'is-warn' : 'is-restart')}>{msg.text}</p>}
@@ -2611,7 +2611,7 @@ function ChatTransfer () {
         kind: r.added ? 'ok' : 'warn',
         text: r.added
           ? `Added ${r.added} chat${r.added === 1 ? '' : 's'}${r.skipped ? `, skipped ${r.skipped} that did not look like chats` : ''}. Find them in the sidebar under “${r.project}”, keeping their original dates.`
-          : 'Nothing in that file looked like a Radiant chat.'
+          : `Nothing in that file looked like a ${BRAND.productName} chat.`
       })
     } catch (e) { setMsg({ kind: 'warn', text: e.message }) }
     setBusy(false)
@@ -2792,21 +2792,21 @@ function BrowserBridgeBlock () {
             ? `the agent can see your tabs, read the page you are on, click, type and screenshot it${st?.version ? ` · extension ${st.version}` : ''}`
             : seen
               ? `it was connected at ${seenAt}${st?.version ? ` (extension ${st.version})` : ''}`
-              : 'nothing has connected since Radiant started'}
+              : `nothing has connected since ${BRAND.productName} started`}
         </span>
       </div>
       <p className='hint'>
         {on
           ? <>The agent works in your own browser now — the tabs you have open, signed in as you.
-              Nothing is sent anywhere: the extension talks only to Radiant on this Mac.</>
+              Nothing is sent anywhere: the extension talks only to {BRAND.productName} on this Mac.</>
           : seen
             ? <>So it is installed. Chrome is probably closed, or the extension is switched off in the
                 profile you are using — it reconnects on its own within half a minute of Chrome opening.
                 Nothing to install again.</>
-            : <>If you have already installed it, open Chrome: it finds Radiant on its own within half a
+            : <>If you have already installed it, open Chrome: it finds {BRAND.productName} on its own within half a
                 minute. Otherwise, Chrome no longer lets any app connect to your everyday browser, so
                 the extension is the way in. It runs inside Chrome with your session and talks only to
-                Radiant on this Mac.</>}
+                {BRAND.productName} on this Mac.</>}
       </p>
       {!on && !seen && (
         <div className='row' style={{ marginTop: 8 }}>
@@ -2820,7 +2820,7 @@ function BrowserBridgeBlock () {
       )}
       {!on && (
         <details className='hint' style={{ marginTop: 10 }}>
-          <summary>Running Radiant from source? Load the folder instead</summary>
+          <summary>Running {BRAND.productName} from source? Load the folder instead</summary>
           <ol style={{ margin: '6px 0 0 18px', padding: 0 }}>
             <li>Open <span className='mono'>chrome://extensions</span></li>
             <li>Turn on <b>Developer mode</b>, top right</li>
@@ -2928,7 +2928,7 @@ function DevicesPane ({ config }) {
 
   return (
     <div className='set-section'>
-      <h3>Using Radiant on more than one Mac</h3>
+      <h3>Using {BRAND.productName} on more than one Mac</h3>
 
       {/* ⚠️ SAY WHAT THIS MAC IS DOING BEFORE OFFERING TO CHANGE IT. The pane
           used to open with three unlabelled mechanisms and no statement of the
@@ -2938,7 +2938,7 @@ function DevicesPane ({ config }) {
           ticked, and no way to tell those two facts were in conflict. */}
       <div className={'devices-now' + (linked ? ' is-linked' : '')}>
         {linked
-          ? <>This Mac is <strong>using the Radiant on another Mac</strong> — everything you see
+          ? <>This Mac is <strong>using the {BRAND.productName} on another Mac</strong> — everything you see
               (models, agents, chats) comes from <code className='mono'>{server.base}</code>, not from here.</>
           : syncing
             ? (folder?.cloud && folder.cloud.exists && !folder.cloud.ubiquitous
@@ -2949,7 +2949,7 @@ function DevicesPane ({ config }) {
                     in <code className='mono'>{folderLabel}</code>.</>)
             : folder?.pendingRestart
               ? <>This Mac is <strong>still using its own setup</strong> — the shared folder you
-                  picked takes effect after you quit Radiant completely and reopen it.</>
+                  picked takes effect after you quit {BRAND.productName} completely and reopen it.</>
               : <>This Mac is <strong>using its own setup</strong>, stored on this machine.</>}
       </div>
       {config?.sharingText && (
@@ -2957,7 +2957,7 @@ function DevicesPane ({ config }) {
       )}
 
       <p className='hint'>
-        Radiant works across Macs in two ways. They solve different problems — pick the
+        {BRAND.productName} works across Macs in two ways. They solve different problems — pick the
         one that matches how you actually work.
       </p>
 
@@ -2967,8 +2967,7 @@ function DevicesPane ({ config }) {
           <div>
             <div className='dev-option-title'>1 · Share one setup across your Macs</div>
             <p className='dev-option-sub'>
-              Every Mac runs its own Radiant, and they all keep their projects, chats,
-              agents and settings in one cloud folder. Sit down at any Mac and it has the
+              Every Mac runs its own {BRAND.productName}, and they all keep their projects, chats,
               same things. <b>Use one Mac at a time</b> — two of them writing at once will
               overwrite each other.
             </p>
@@ -2976,7 +2975,7 @@ function DevicesPane ({ config }) {
         </div>
         {linked
           ? <p className='hint' style={{ marginTop: 2 }}>
-              Not used while this Mac is borrowing another one's Radiant — your setup is
+              Not used while this Mac is borrowing another one's {BRAND.productName} — your setup is
               already coming from that Mac. Switch to this Mac's own server below if you
               want to sync instead.
             </p>
@@ -3043,7 +3042,7 @@ function DevicesPane ({ config }) {
                   </label>
                   {share && share.desired !== share.enabled && (
                     <div className='error-note' style={{ marginTop: 6 }}>
-                      Quit and reopen Radiant to {share.desired ? 'start' : 'stop'} sharing.
+                      Quit and reopen {BRAND.productName} to {share.desired ? 'start' : 'stop'} sharing.
                     </div>
                   )}
                   {!share?.desired && (
@@ -3067,7 +3066,7 @@ function DevicesPane ({ config }) {
                     return (
                       <div style={{ marginTop: 12 }}>
                         <p className='hint' style={{ marginTop: 0 }}>
-                          On the other Mac: Settings &rarr; Devices &rarr; <b>Use another Mac&rsquo;s Radiant</b>.
+                          On the other Mac: Settings &rarr; Devices &rarr; <b>Use another Mac&rsquo;s {BRAND.productName}</b>.
                         </p>
                         <div className='connect-field' style={{ marginTop: 10 }}>Address
                           <div className='row'>
@@ -3110,7 +3109,7 @@ function DevicesPane ({ config }) {
                           </div>
                           <p className='hint' style={{ marginTop: 6 }}>
                             One link signs your phone in — no address or token to type. Open it,
-                            then use Share &rarr; <b>Add to Home Screen</b> and Radiant behaves like an app.
+                            then use Share &rarr; <b>Add to Home Screen</b> and {BRAND.productName} behaves like an app.
                             Your chats are this Mac&rsquo;s chats, so anything you start here you can
                             carry on there.
                           </p>
@@ -3127,7 +3126,7 @@ function DevicesPane ({ config }) {
                                   {anywhere
                                     ? ' It works anywhere your phone can reach Tailscale.'
                                     : ' It only works while your phone is on this same network.'}
-                                  {' '}This Mac has to be awake with Radiant running.
+                                  {' '}This Mac has to be awake with {BRAND.productName} running.
                                 </div>
                               </div>
                             </div>
@@ -3152,8 +3151,7 @@ function DevicesPane ({ config }) {
             <div className='dev-card-head'>
               <span className='dev-card-ico'><Icon.branch size={16} /></span>
               <div>
-                <div className='dev-card-title'>Use another Mac&rsquo;s Radiant</div>
-                <div className='dev-card-sub'>This Mac becomes a window onto that one. Its chats, its models, its agents.</div>
+                <div className='dev-card-title'>Use another Mac&rsquo;s {BRAND.productName}</div>
               </div>
               {linked && <span className='dev-badge'>Current</span>}
             </div>
@@ -3410,6 +3408,12 @@ const GUIDE = [
     ]
   }
 ]
+const guideCopy = text => String(text)
+  .replaceAll('Radiant Browser Bridge', '__RADIANT_BROWSER_BRIDGE__')
+  .replaceAll('Radiant', BRAND.productName)
+  .replaceAll('Templeton Technologies', BRAND.publisherName)
+  .replaceAll('__RADIANT_BROWSER_BRIDGE__', 'Radiant Browser Bridge')
+
 
 function MemoryPane ({ config, onSettings }) {
   // Clearing saved chats lives here, not on About. It is a data action — the
@@ -3432,13 +3436,13 @@ function MemoryPane ({ config, onSettings }) {
   useEffect(() => { load() }, [])
   const add = async () => { if (!draft.trim()) return; setFacts((await api.addMemory(draft.trim())).facts); setDraft('') }
   const del = async id => setFacts((await api.deleteMemory(id)).facts)
-  const clear = async () => { if (window.confirm('Forget everything Radiant has remembered?')) setFacts((await api.clearMemory()).facts) }
+  const clear = async () => { if (window.confirm(`Forget everything ${BRAND.productName} has remembered?`)) setFacts((await api.clearMemory()).facts) }
   return (
     <div className='set-section'>
       <h3>Saved chats</h3>
       <p className='oauth-note' style={{ marginTop: 0 }}>
         {storage
-          ? <>Radiant is keeping <strong>{storage.sessions}</strong> chat session{storage.sessions === 1 ? '' : 's'} ({storage.sizeMB} MB) in <span className='mono'>~/.radiant</span>. Old sessions add up — clear ones you no longer need.</>
+          ? <>{BRAND.productName} is keeping <strong>{storage.sessions}</strong> chat session{storage.sessions === 1 ? '' : 's'} ({storage.sizeMB} MB) in <span className='mono'>~/.radiant</span>. Old sessions add up — clear ones you no longer need.</>
           : 'Reading local storage…'}
       </p>
       <div className='row' style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 12, alignItems: 'center' }}>
@@ -3450,7 +3454,7 @@ function MemoryPane ({ config, onSettings }) {
       <ChatTransfer />
 
       <h3 style={{ marginTop: 26 }}>Memory</h3>
-      <p className='hint' style={{ marginTop: 0 }}>Radiant remembers durable facts about you and your projects across sessions, and gives the relevant ones to the agent. Everything is stored locally in <code className='mono'>~/.radiant/memory.json</code>.</p>
+      <p className='hint' style={{ marginTop: 0 }}>{BRAND.productName} remembers durable facts about you and your projects across sessions, and gives the relevant ones to the agent. Everything is stored locally in <code className='mono'>~/.radiant/memory.json</code>.</p>
       <label className='check-row'>
         <input type='checkbox' checked={on} onChange={e => onSettings({ memory: e.target.checked })} />
         <span>Remember across sessions <span className='desc'>— learn from each chat and recall it later</span></span>
@@ -3461,7 +3465,7 @@ function MemoryPane ({ config, onSettings }) {
       </div>
       <div style={{ marginTop: 14 }}>
         {facts === null ? <div className='v-meta'>Loading…</div>
-          : !facts.length ? <div className='v-meta'>Nothing remembered yet — Radiant will learn as you chat.</div>
+          : !facts.length ? <div className='v-meta'>Nothing remembered yet — {BRAND.productName} will learn as you chat.</div>
           : <>
               <div className='row' style={{ justifyContent: 'space-between', marginBottom: 6 }}>
                 <span className='v-meta'>{facts.length} remembered</span>
@@ -3482,15 +3486,15 @@ function MemoryPane ({ config, onSettings }) {
 function GuidePane () {
   return (
     <div className='set-section guide'>
-      <h3>Read me — what Radiant can do</h3>
+      <h3>Read me — what {BRAND.productName} can do</h3>
       <p className='hint' style={{ marginTop: 0 }}>A quick tour of the features. Everything here is configured in the other tabs.</p>
       {GUIDE.map(sec => (
         <div key={sec.title} className='guide-section'>
-          <div className='guide-title'>{sec.title}</div>
+          <div className='guide-title'>{guideCopy(sec.title)}</div>
           {sec.items.map(([name, desc]) => (
             <div key={name} className='guide-item'>
-              <span className='guide-name'>{name}</span>
-              <span className='guide-desc'>{desc}</span>
+              <span className='guide-name'>{guideCopy(name)}</span>
+              <span className='guide-desc'>{guideCopy(desc)}</span>
             </div>
           ))}
         </div>

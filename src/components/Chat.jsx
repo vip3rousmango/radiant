@@ -9,6 +9,7 @@ import { api, getServer, apiUrl, authHeaders, deviceNoun } from '../api.js'
 import { shouldDrainQueue } from '../queue.js'
 import { emptyDictation, applyDictationEvent, dictationText } from '../dictation.js'
 import { turnStatus, clock } from '../turnstatus.js'
+import { BRAND } from '../../server/brand.js'
 
 // An agent brought in from another app on this Mac (Hermes, OpenClaw). They sit
 // apart from your own agents and keep their icon's own color rather than taking
@@ -418,7 +419,7 @@ function AssistantMessage ({ parts, thinking, thinkingActive, thinkingSecs, stre
       <div className='who'>
         {agent
           ? <><span className='who-agent-emoji' style={isImported(agent) ? undefined : { '--ah': agent.hue ?? 'var(--accent-h)', color: glyphColor(agent.hue, 0.7, 0.16) }}><AgentGlyph agent={agent} size={14} /></span><span className='who-word'>{agent.name}</span></>
-          : <><span className='logo-mark' aria-hidden /><span className='wordmark who-word'>Radiant</span></>}
+          : <><span className='logo-mark' aria-hidden /><span className='wordmark who-word'>{BRAND.productName}</span></>}
         {model && <span className='who-model'>{model}</span>}
         {streaming && <WorkingBadge parts={parts} thinkingActive={thinkingActive} startedAt={startedAt} lastEventAt={lastEventAt} />}
       </div>
@@ -714,12 +715,12 @@ const SLASH_COMMANDS = [
 ]
 
 function exportSessionMarkdown (session) {
-  const lines = [`# ${session.title}`, '', `_${session.model || 'model'} · exported from Radiant_`, '']
+  const lines = [`# ${session.title}`, '', `_${session.model || 'model'} · exported from ${BRAND.productName}_`, '']
   for (const m of session.messages) {
     if (m.role === 'user') {
       lines.push('## You', '', m.text || '', '')
     } else {
-      lines.push(`## Radiant${m.model ? ` (${m.model})` : ''}`, '')
+      lines.push(`## ${BRAND.productName}${m.model ? ` (${m.model})` : ''}`, '')
       for (const p of m.parts || []) {
         if (p.type === 'text') lines.push(p.text, '')
         else if (p.type === 'tool') lines.push(`> **tool** \`${p.name}\` ${p.args?.command || p.args?.path || ''}`.trim(), '')
@@ -939,7 +940,7 @@ function VoiceCaptions ({ rows = [] }) {
   return (
     <div className='voice-captions' ref={ref} onScroll={onScroll}>
       {rows.map(r => (
-        <div key={r.id} className={'voice-row is-' + r.who}><b>{r.who === 'you' ? 'You' : 'Radiant'}</b><span>{r.text}</span></div>
+        <div key={r.id} className={'voice-row is-' + r.who}><b>{r.who === 'you' ? 'You' : BRAND.productName}</b><span>{r.text}</span></div>
       ))}
     </div>
   )
@@ -1220,8 +1221,8 @@ export default function Chat ({ session, live, todos = [], stats, approval, ques
         <div className='chat-scroll'>
           <div className='welcome'>
             <div className='logo-mark big-mark' aria-hidden />
-            <div className='wordmark welcome-word'>Radiant</div>
-            <div className='welcome-tagline'>A Templeton Technologies Product</div>
+            <div className='wordmark welcome-word'>{BRAND.productName}</div>
+            <div className='welcome-tagline'>{BRAND.welcomeTagline}</div>
             {agents.length === 0
               ? <p style={{ marginTop: 26 }}><button className='small-btn primary' onClick={() => onNew()}>Start a session</button></p>
               : !pickAgent
@@ -1229,7 +1230,7 @@ export default function Chat ({ session, live, todos = [], stats, approval, ques
                     <button className='welcome-choice' onClick={() => onNew(agents.find(a => a.id === 'agent-radiant') ? 'agent-radiant' : undefined)}>
                       <span className='welcome-choice-ico'><AgentGlyph agent={agents.find(a => a.id === 'agent-radiant') || agents[0]} size={22} /></span>
                       <span className='welcome-choice-title'>Start a quick chat</span>
-                      <span className='welcome-choice-sub'>Jump straight in with Radiant, your all-purpose assistant.</span>
+                      <span className='welcome-choice-sub'>Jump straight in with {BRAND.productName}, your all-purpose assistant.</span>
                     </button>
                     <button className='welcome-choice' onClick={() => setPickAgent(true)}>
                       <span className='welcome-choice-ico'><Icon.target size={22} /></span>
@@ -1353,7 +1354,7 @@ export default function Chat ({ session, live, todos = [], stats, approval, ques
                       <span>Voice conversation{m.seconds ? ` · ${Math.max(1, Math.round(m.seconds / 60))} min` : ''}</span>
                     </div>
                     {(m.rows || []).map((r, j) => (
-                      <div key={j} className={'voice-row is-' + r.who}><b>{r.who === 'you' ? 'You' : 'Radiant'}</b><span>{r.text}</span></div>
+                      <div key={j} className={'voice-row is-' + r.who}><b>{r.who === 'you' ? 'You' : BRAND.productName}</b><span>{r.text}</span></div>
                     ))}
                   </div>
                 </div>
@@ -1606,9 +1607,9 @@ export default function Chat ({ session, live, todos = [], stats, approval, ques
                 <button
                   className={'attach-btn is-voice' + (voice.state !== 'off' ? ' is-on' : '')}
                   onClick={onToggleVoice}
-                  title={voice.state !== 'off' ? 'End the voice conversation' : 'Talk to Radiant'}
+                  title={voice.state !== 'off' ? 'End the voice conversation' : `Talk to ${BRAND.productName}`}
                   aria-pressed={voice.state !== 'off'}
-                  data-tip={voice.state !== 'off' ? 'End the voice conversation' : 'Talk to Radiant — a live voice conversation\nover this chat. Audio goes to OpenAI (GPT-Live);\nthe thinking stays on this chat\u2019s model.'}
+                  data-tip={voice.state !== 'off' ? 'End the voice conversation' : `Talk to ${BRAND.productName} — a live voice conversation\nover this chat. Audio goes to OpenAI (GPT-Live);\nthe thinking stays on this chat\u2019s model.`}
                 ><Icon.waves size={15} /><span className='pill-label'>{voice.state !== 'off' ? 'On a call' : 'Talk'}</span></button>)}
               {/* ⚠️ EVERY BUTTON ON THIS BAR GROWS INTO ITS WORD. Dictate and
                   Talk did; Attach, Design and Skills stayed bare icons. Tony:

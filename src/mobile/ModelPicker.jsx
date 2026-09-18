@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { deviceWord, deviceText } from './device.js'
+import { BRAND } from '../../server/brand.js'
 import * as GaugeModule from './Gauge.jsx'
 import BrandSpinner, { BrandMark } from './BrandSpinner.jsx'
 import { fitOf, FIT_LABEL, FITS_NO, ramNeededGB } from './fit.js'
@@ -663,7 +663,7 @@ export default function ModelPicker ({
       <div className="rx-mp" ref={rootRef}>
         <div className="rx-mp-scroll"><div className="rx-mp-inner">
           <h1 className="rx-mp-title">{heading}</h1>
-          <p className="rx-mp-note">Downloading a model needs the Radiant app on {deviceWord()}.</p>
+          <p className="rx-mp-note">Downloading a model needs the {BRAND.productName} app on {deviceWord()}.</p>
         </div></div>
       </div>
     )
@@ -847,7 +847,7 @@ function Hero ({ model, Gauge, job, done, busyElsewhere, shortfall, onCommit, on
       {/* Amber means the device itself is spending something. It shows up while
           a download runs and nowhere else on this screen. */}
       {downloading && (
-        <p className="rx-mp-hero-note is-amber rx-mp-fade-in">Keep Radiant open while this downloads.</p>
+        <p className="rx-mp-hero-note is-amber rx-mp-fade-in">Keep {BRAND.productName} open while this downloads.</p>
       )}
       {failed && !downloading && (
         <p className="rx-mp-hero-note is-red">{job.message}</p>

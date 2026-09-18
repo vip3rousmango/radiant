@@ -11,6 +11,7 @@
  * want to change something, not the front door.
  */
 import React, { useCallback, useEffect, useState } from 'react'
+import { BRAND } from '../../server/brand.js'
 import { deviceWord } from './device.js'
 import usePress from './usePress.js'
 import SwipeRow from './SwipeRow.jsx'
@@ -125,7 +126,7 @@ export default function HomeScreen ({
         <span
           className="rx-home-word"
           role="img"
-          aria-label="Radiant"
+          aria-label={BRAND.productName}
           style={{
             WebkitMask: `url(${wordUrl}) center / contain no-repeat`,
             mask: `url(${wordUrl}) center / contain no-repeat`

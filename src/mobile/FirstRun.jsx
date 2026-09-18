@@ -14,6 +14,7 @@
  * not breathe. A phone about to run a language model gets no permanent rAF.
  */
 import React from 'react'
+import { BRAND } from '../../server/brand.js'
 import { deviceWord } from './device.js'
 import usePress from './usePress.js'
 import { BrandMark } from './BrandSpinner.jsx'
@@ -61,7 +62,7 @@ export default function FirstRun ({ onChooseModel, onStartChat, hasModel, appleR
         <span
           className="rx-intro-word"
           role="img"
-          aria-label="Radiant"
+          aria-label={BRAND.productName}
           style={{
             WebkitMask: `url(${wordUrl}) center / contain no-repeat`,
             mask: `url(${wordUrl}) center / contain no-repeat`
@@ -122,7 +123,7 @@ export default function FirstRun ({ onChooseModel, onStartChat, hasModel, appleR
         <img
           className="rx-intro-tt"
           src={ttUrl}
-          alt="Templeton Technologies"
+          alt={BRAND.publisherName}
           width="844"
           height="180"
         />

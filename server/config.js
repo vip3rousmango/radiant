@@ -5,6 +5,7 @@ import { execFileSync } from 'child_process'
 import os from 'os'
 import crypto from 'crypto'
 import { fileURLToPath } from 'url'
+import { BRAND } from './brand.js'
 
 // ── where Radiant keeps everything ──────────────────────────────────────────
 // Config, projects, sessions and memory all live in one directory. Point it at
@@ -371,7 +372,7 @@ const DEFAULT_CONFIG = {
   // Built-in agents the user removed; without this they return on every load.
   removedAgents: [],
   agents: [
-    { id: 'agent-radiant', name: 'Radiant', emoji: '✦', icon: 'radiant', hue: null, persona: '', model: null, provider: null, skills: [], useTools: true, builtin: true },
+    { id: 'agent-radiant', name: BRAND.assistantName, emoji: '✦', icon: 'radiant', hue: null, persona: '', model: null, provider: null, skills: [], useTools: true, builtin: true },
     { id: 'agent-reviewer', name: 'Reviewer', emoji: '🔍', icon: 'search', hue: null, persona: 'You are a meticulous senior code reviewer. Hunt for bugs, edge cases, security issues, race conditions, and unclear code. Be specific — cite files and lines. Prioritize correctness over style, and call out what you are NOT sure about.', model: null, provider: null, skills: [], useTools: true, builtin: true },
     { id: 'agent-architect', name: 'Architect', emoji: '📐', icon: 'compass', hue: null, persona: 'You are a software architect. Before writing code, think about structure, boundaries, data flow, and tradeoffs. Propose a design, note alternatives, and only then implement. Favor simple, evolvable designs.', model: null, provider: null, skills: [], useTools: true, builtin: true },
     { id: 'agent-explainer', name: 'Explainer', emoji: '💡', icon: 'bulb', hue: null, persona: 'You explain code and concepts clearly for someone learning. Use plain language, small examples, and analogies. Read the code first, then teach it top-down. Prefer clarity over completeness.', model: null, provider: null, skills: [], useTools: true, builtin: true },

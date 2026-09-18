@@ -25,6 +25,7 @@ import { fitOf } from './fit.js'
 import * as haptics from './haptics.js'
 import { maybeAskForRating } from './rating.js'
 import { listChats } from './chats.js'
+import { BRAND } from '../../server/brand.js'
 
 const LM = () => (typeof window !== 'undefined' ? window.Capacitor?.Plugins?.LocalModels : null)
 const DEVICE = () => (typeof window !== 'undefined' ? window.Capacitor?.Plugins?.Device : null)
@@ -173,7 +174,7 @@ export function useLocalModels () {
               ...f,
               [id]: !d?.hasReceipt
                 ? 'The download finished but was not recorded. Try again.'
-                : `The download finished but Radiant found only ${gb(d.bytesOnDisk)} of the ${gb(d.expectedBytes)} expected in ${d.folder}. The files may be incomplete, or the repo may store them elsewhere.`
+                : `The download finished but ${BRAND.productName} found only ${gb(d.bytesOnDisk)} of the ${gb(d.expectedBytes)} expected in ${d.folder}. The files may be incomplete, or the repo may store them elsewhere.`
             }))
             setModels(ms => ms.map(m => (m.id === id ? { ...m, downloaded: false } : m)))
           }).catch(() => {})

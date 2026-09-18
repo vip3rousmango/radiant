@@ -28,6 +28,7 @@
  * backend prompt says so.
  */
 import { apiUrl, authHeaders } from './api.js'
+import { BRAND } from '../server/brand.js'
 import { utteranceFrom, addFragment } from '../server/voice-text.js'
 
 const ICE_TIMEOUT_MS = 10_000
@@ -76,12 +77,12 @@ export class VoiceSession {
       // refusal there is a sentence a person can act on, not "Permission denied".
       if (window.radiantNative?.askMicrophone) {
         const allowed = await window.radiantNative.askMicrophone()
-        if (!allowed) throw new Error('Radiant is not allowed to use the microphone. Allow it under System Settings → Privacy & Security → Microphone, then try again.')
+        if (!allowed) throw new Error(`${BRAND.productName} is not allowed to use the microphone. Allow it under System Settings → Privacy & Security → Microphone, then try again.`)
       }
       try {
         this.mic = await navigator.mediaDevices.getUserMedia({ audio: true })
       } catch (e) {
-        throw new Error(/notallowed|denied|permission/i.test(`${e?.name} ${e?.message}`) ? 'The microphone was not allowed. Radiant needs it for a voice conversation — allow it under System Settings → Privacy & Security → Microphone.' : `The microphone could not be opened: ${e?.message || e}`)
+        throw new Error(/notallowed|denied|permission/i.test(`${e?.name} ${e?.message}`) ? `The microphone was not allowed. ${BRAND.productName} needs it for a voice conversation — allow it under System Settings → Privacy & Security → Microphone.` : `The microphone could not be opened: ${e?.message || e}`)
       }
       for (const track of this.mic.getAudioTracks()) peer.addTrack(track, this.mic)
 

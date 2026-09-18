@@ -17,8 +17,9 @@
  */
 import React from 'react'
 import usePress from './usePress.js'
+import { BRAND } from '../../server/brand.js'
 
-export const COMPANY_URL = 'https://templetontech.com'
+export const COMPANY_URL = BRAND.publisherUrl
 
 /**
  * Open in the system browser.
@@ -39,11 +40,11 @@ export default function CompanyLine ({ className = '' }) {
   const press = usePress(() => openExternal(COMPANY_URL), {
     role: 'link',
     haptic: 'LIGHT',
-    label: 'Radiant is a Templeton Technologies product. Opens templetontech.com.'
+    label: `${BRAND.productName} is a ${BRAND.publisherName} product. Opens ${new URL(BRAND.publisherUrl).host}.`
   })
   return (
     <p className={(className + ' rx-byline').trim() + press.className} {...press.handlers}>
-      Radiant is a <span className="rx-byline-co">Templeton&nbsp;Technologies</span> product.
+      {BRAND.productName} is a <span className="rx-byline-co">{BRAND.publisherName.replace(/ /g, '\u00a0')}</span> product.
     </p>
   )
 }

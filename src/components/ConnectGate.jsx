@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { getServer, setServer, testServer, servedByRadiant } from '../api.js'
+import { BRAND } from '../../server/brand.js'
 
 // Shown when the app can't reach its Radiant server.
 //
@@ -44,11 +45,11 @@ export default function ConnectGate ({ error }) {
     <div className='app'>
       <form className='connect-gate' onSubmit={connect}>
         <div className='logo-mark big-mark' aria-hidden />
-        <h2 className='connect-title'>Connect to Radiant</h2>
+        <h2 className='connect-title'>Connect to {BRAND.productName}</h2>
         <p className='connect-sub'>
           {here
             ? <>Enter the access token from the host Mac — <strong>Settings&nbsp;→&nbsp;Devices&nbsp;&amp;&nbsp;sharing</strong>. This device stays signed in afterward.</>
-            : (error || "Couldn't reach a Radiant server.")}
+            : (error || `Couldn't reach a ${BRAND.productName} server.`)}
         </p>
 
         {manual && (

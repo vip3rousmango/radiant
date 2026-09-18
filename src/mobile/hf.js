@@ -33,6 +33,7 @@
  * basis before the next submission; see docs/APP_STORE_LISTING.md.
  */
 
+import { BRAND } from '../../server/brand.js'
 // model_type values the linked mlx-swift-lm (checkout 14414441, 2026-08-22)
 // can build — the keys of LLMModelFactory and VLMModelFactory. Regenerate from
 // the checkout when the package moves; a stale list is a wrong "won't run".
@@ -95,9 +96,9 @@ function paramCount (meta, cfg) {
  * will it load correctly, will it fit. `fit` is fit.js's verdict for the size.
  */
 export function qualify (info, fit) {
-  if (!info.hasWeights) return { ok: false, tone: 'negative', label: 'No weights', why: 'This repo has no safetensors files — it is not a model Radiant can download.' }
-  if (!info.modelType) return { ok: false, tone: 'negative', label: 'Unknown type', why: 'No config.json with a model type — Radiant cannot tell what this is.' }
-  if (!SUPPORTED.has(info.modelType)) return { ok: false, tone: 'negative', label: 'Won’t run', why: `Radiant’s engine has no loader for “${info.modelType}” models yet.` }
+  if (!info.hasWeights) return { ok: false, tone: 'negative', label: 'No weights', why: `This repo has no safetensors files — it is not a model ${BRAND.productName} can download.` }
+  if (!info.modelType) return { ok: false, tone: 'negative', label: 'Unknown type', why: `No config.json with a model type — ${BRAND.productName} cannot tell what this is.` }
+  if (!SUPPORTED.has(info.modelType)) return { ok: false, tone: 'negative', label: 'Won’t run', why: `${BRAND.productName}’s engine has no loader for “${info.modelType}” models yet.` }
   // ⚠️ THE GEMMA 4 DEFECT: packed weights, no declaration. Under ~1.2 bytes per
   // parameter with no quantization in config.json means 4-bit weights that MLX
   // will try to read as 16-bit — "mismatched parameters" after the download.

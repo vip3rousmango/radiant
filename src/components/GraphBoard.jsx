@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { BRAND } from '../../server/brand.js'
 import { api } from '../api.js'
 import { ModelPicker } from './Chat.jsx'
 import { renderMermaid } from './Markdown.jsx'
@@ -303,7 +304,7 @@ export default function GraphBoard ({
           {how === 'describe' && (
             <div className='gb-ask'>
               <p className='lp-panel-lead'>
-                Say what you want done, in a sentence. Radiant proposes the steps and works out which of
+                Say what you want done, in a sentence. {BRAND.assistantName} proposes the steps and works out which of
                 them actually have to wait for each other — you read it, change anything you like, and
                 nothing runs until you press Run.
               </p>

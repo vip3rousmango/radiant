@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
+import { BRAND } from '../../server/brand.js'
 import { api } from '../api.js'
 
 /**
@@ -62,7 +63,7 @@ export default function Hud () {
     } catch (e) {
       // A HUD that silently freezes is worse than one that says it lost contact:
       // an empty panel reads as "nothing running", which is a claim.
-      setErr(e.message || 'Cannot reach Radiant')
+      setErr(e.message || `Cannot reach ${BRAND.productName}`)
     }
   }, [])
 
@@ -83,7 +84,7 @@ export default function Hud () {
   return (
     <div className='hud'>
       <header className='hud-head'>
-        <span className='hud-title'>Radiant</span>
+        <span className='hud-title'>{BRAND.productName}</span>
         <span className='hud-count'>{rows.length ? `${rows.length} running` : ''}</span>
       </header>
 

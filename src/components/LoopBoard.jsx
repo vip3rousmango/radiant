@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { BRAND } from '../../server/brand.js'
 import { api } from '../api.js'
 import { ModelPicker } from './Chat.jsx'
 import LoopDiagram from './LoopDiagram.jsx'
@@ -534,8 +535,8 @@ export default function LoopBoard ({
                   this, and burying the caveat in a Read me is how that happens. */}
               <p className='lp-field-hint'>
                 {draft.everyMinutes > 0
-                  ? 'Radiant has to be open — it runs the turns, which is what lets you watch and interrupt them. It will switch to the chat and run there. Two runs in a row that do not finish switch this back off rather than repeating the same failure all night.'
-                  : 'Nothing starts on its own. A schedule only fires while Radiant is open, because the app runs the turns.'}
+                  ? `${BRAND.productName} has to be open — it runs the turns, which is what lets you watch and interrupt them. It will switch to the chat and run there. Two runs in a row that do not finish switch this back off rather than repeating the same failure all night.`
+                  : `Nothing starts on its own. A schedule only fires while ${BRAND.productName} is open, because the app runs the turns.`}
               </p>
             </div>
           )}
@@ -593,7 +594,7 @@ export default function LoopBoard ({
               {draft.everyMinutes > 0 && (
                 <p className='lp-review-goalcheck'>
                   It will start itself {(EVERY.find(o => o.id === draft.everyMinutes)?.label || '').toLowerCase()},
-                  while Radiant is open.
+                  while {BRAND.productName} is open.
                 </p>
               )}
               <p className='lp-panel-lead'>
@@ -687,7 +688,7 @@ export default function LoopBoard ({
               )}
               {loop.schedule && !isRunning && loop.nextRunAt && (
                 <p className='lp-note lp-note-quiet'>
-                  Next run {new Date(loop.nextRunAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}, if Radiant is open.
+                  Next run {new Date(loop.nextRunAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}, if {BRAND.productName} is open.
                 </p>
               )}
               {/* The goal check is the only thing that can stop a loop whose every

@@ -13,6 +13,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react'
 import usePress from './usePress.js'
+import { BRAND } from '../../server/brand.js'
 import { listSkills, saveSkill, deleteSkill, onSkillsChanged, MAX_SKILL_CHARS,
   parseSkillMarkdown, fetchMacSkills, readMac, saveMac } from './skills.js'
 
@@ -149,7 +150,7 @@ function MacImport ({ onDone, onCancel }) {
       setErr(m === 'bad_address' ? 'That does not look like an address. Try 100.x.y.z:5834.'
         : m === 'unauthorized' ? 'The Mac refused that token. Copy it again from Settings → Devices on the Mac.'
         : m === 'keychain' ? 'Connected, but the token could not be stored securely, so it was not kept. Unlock the phone and try again.'
-        : 'Could not reach that Mac. Check both are on Tailscale and Radiant is open on the Mac.')
+        : `Could not reach that Mac. Check both are on Tailscale and ${BRAND.productName} is open on the Mac.`)
     }
     setBusy(false)
   }, { label: 'Connect' })

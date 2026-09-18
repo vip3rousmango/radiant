@@ -3,6 +3,7 @@ import { Icon } from './Icons.jsx'
 import HoldButton from './HoldButton.jsx'
 import { glyphColor } from '../theme.js'
 import { AgentGlyph } from './AgentIcons.jsx'
+import { BRAND } from '../../server/brand.js'
 import { isImported } from './Chat.jsx'
 import { api, saveToFile, getServer, deviceNoun } from '../api.js'
 
@@ -361,7 +362,7 @@ export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, se
     <nav className='sidebar' style={{ width }}>
       <div className='brand'>
         <div className={'logo-mark brand-mark' + (working ? ' working' : '')} aria-hidden />
-        <span className='wordmark brand-word'>Radiant</span>
+        <span className='wordmark brand-word'>{BRAND.productName}</span>
         {onCloseNav && <button className='nav-close' onClick={onCloseNav} title='Close menu' aria-label='Close menu'>✕</button>}
       </div>
       {/* ⚠️ ONE SWITCHER, NOT TWO. Tasks belongs in the control the sidebar
@@ -599,7 +600,7 @@ export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, se
         </div>
       )}
       {updateInfo && !remoteBase && (
-        <button className='update-pill' onClick={onUpdate} title={`Radiant ${updateInfo.latest} is available`}>
+        <button className='update-pill' onClick={onUpdate} title={`${BRAND.productName} ${updateInfo.latest} is available`}>
           ↑ Update to {updateInfo.latest}
         </button>
       )}
@@ -615,10 +616,10 @@ export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, se
             answering it meant opening another screen. */}
         {version && (
           remoteBase
-            ? <span className='sidebar-version is-remote' title={`Showing Radiant ${version} on ${remoteHost}. Settings → Devices to use this ${deviceNoun(platform)} instead.`}>
+            ? <span className='sidebar-version is-remote' title={`Showing ${BRAND.productName} ${version} on ${remoteHost}. Settings → Devices to use this ${deviceNoun(platform)} instead.`}>
                 {remoteHost} · {version}
               </span>
-            : <span className='sidebar-version' title={`Radiant ${version}`}>{version}</span>
+            : <span className='sidebar-version' title={`${BRAND.productName} ${version}`}>{version}</span>
         )}
       </div>
       <div className='sidebar-resize' onMouseDown={startDrag} title='Drag to resize' />

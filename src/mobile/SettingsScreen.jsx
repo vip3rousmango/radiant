@@ -13,6 +13,7 @@
  * should find it where every other app puts it.
  */
 import React, { useCallback, useState } from 'react'
+import { BRAND } from '../../server/brand.js'
 import { deviceWord } from './device.js'
 import usePress from './usePress.js'
 import { BrandMark } from './BrandSpinner.jsx'
@@ -132,7 +133,7 @@ export default function SettingsScreen ({
         ))}
       </div>
       <p className="rx-section-footer">
-        Whether Radiant opens on Home or straight back into the conversation you
+        Whether {BRAND.productName} opens on Home or straight back into the conversation you
         were last having.
       </p>
 
@@ -143,7 +144,7 @@ export default function SettingsScreen ({
         ))}
       </div>
       <p className="rx-section-footer">
-        Radiant opens dark unless you change this. The welcome screen stays dark
+        {BRAND.productName} opens dark unless you change this. The welcome screen stays dark
         either way — it is a branded moment, like the launch screen.
       </p>
 

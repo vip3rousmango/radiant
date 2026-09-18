@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { BRAND } from '../../server/brand.js'
 import { api } from '../api.js'
 import { whatsNewSince } from '../whatsnew.js'
 
@@ -64,7 +65,7 @@ export default function WhatsNew () {
         <div className='wn-head'>
           <div className='logo-mark wn-mark' aria-hidden />
           <div>
-            <div id='wn-title' className='wn-title'>What’s new in Radiant</div>
+            <div id='wn-title' className='wn-title'>What’s new in {BRAND.productName}</div>
             <div className='wn-ver'>You’re now on {newest}</div>
           </div>
         </div>

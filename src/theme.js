@@ -1,5 +1,6 @@
 import { oklchToHex } from './oklch.js'
 import { derivePalette, deriveAccent } from './palette.js'
+import { BRAND } from '../server/brand.js'
 
 // The whole palette derives in CSS from an OKLCH accent (--accent-h / --accent-c),
 // a surface tint multiplier (--bg-tint), and the mode (light / dark / medium).
@@ -7,7 +8,7 @@ import { derivePalette, deriveAccent } from './palette.js'
 // picker (hex → OKLCH). Everything else is derived, so themes stay tiny.
 
 export const THEMES = [
-  { id: 'radiant', name: 'Radiant', hue: 258, chroma: 0.11, tint: 1 },
+  { id: 'radiant', name: BRAND.productName, hue: 258, chroma: 0.11, tint: 1 },
   { id: 'ember', name: 'Ember', hue: 55, chroma: 0.17, tint: 1.4 },
   { id: 'tokyonight', name: 'Tokyo Night', hue: 265, chroma: 0.14, tint: 2.4 },
   { id: 'catppuccin', name: 'Catppuccin', hue: 310, chroma: 0.11, tint: 2.6 },

@@ -23,6 +23,8 @@
  * Same lesson as the phone's download math: keep the arithmetic out of the
  * thing that needs a device. scripts/test-notify.mjs runs them.
  */
+import { BRAND } from '../server/brand.js'
+
 
 /** Are we looking at Radiant right now? Both halves matter — see rule 1. */
 export function shouldNotify ({ hidden, focused }) {
@@ -91,7 +93,7 @@ export function notifyAway ({ title, body, sessionId }) {
   let here = { hidden: false, focused: true }
   try { here = { hidden: document.hidden, focused: document.hasFocus() } } catch { /* no document */ }
   if (!shouldNotify(here)) return
-  const payload = { title: title || 'Radiant', body: trimBody(body), sessionId: sessionId || null }
+  const payload = { title: title || BRAND.productName, body: trimBody(body), sessionId: sessionId || null }
   if (window.radiantNative?.notify) { try { window.radiantNative.notify(payload); return } catch { /* fall through */ } }
   if (!webAllowed()) return
   try {

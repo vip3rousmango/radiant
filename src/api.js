@@ -1,3 +1,5 @@
+import { BRAND } from '../server/brand.js'
+
 // Which Radiant server to talk to. Empty base = this app's own bundled server
 // (same origin). A remote base + token points at a shared server on another Mac.
 //
@@ -109,7 +111,7 @@ function isLocalHost (host) {
 
 function normalizeBase (raw) {
   const v = String(raw || '').trim().replace(/\/+$/, '')
-  if (!v) throw new Error('Enter the address of the Mac running Radiant.')
+  if (!v) throw new Error(`Enter the address of the Mac running ${BRAND.productName}.`)
   const hasScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(v)
   // A bare address on your own network is the common case — someone typing
   // what the Mac showed them — so assume http there and https everywhere else.
@@ -179,9 +181,9 @@ export async function testServer (base, token) {
       if (/^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(new URL(url).hostname)) {
         throw new Error("That is a Tailscale IP address, and iPhone can't use one — it needs the https address instead. On your Mac, Settings → Devices shows it; it looks like https://your-mac.your-tailnet.ts.net")
       }
-      throw new Error(`No answer from that Mac after ${TEST_TIMEOUT_MS / 1000} seconds. Check Radiant is open on it, and that both devices are on Tailscale.`)
+      throw new Error(`No answer from that Mac after ${TEST_TIMEOUT_MS / 1000} seconds. Check ${BRAND.productName} is open on it, and that both devices are on Tailscale.`)
     }
-    throw new Error("Couldn't reach that server. Check the address is right, Radiant is running and shared on the host (v0.6.9+), and both devices are on Tailscale.")
+    throw new Error(`Couldn't reach that server. Check the address is right, ${BRAND.productName} is running and shared on the host (v0.6.9+), and both devices are on Tailscale.`)
   } finally {
     clearTimeout(timer)
   }
@@ -190,10 +192,10 @@ export async function testServer (base, token) {
   // Prove it is Radiant and not this app's own index.html.
   let cfg
   try { cfg = await res.json() } catch {
-    throw new Error('Something answered at that address, but it is not Radiant.')
+    throw new Error(`Something answered at that address, but it is not ${BRAND.productName}.`)
   }
   if (!cfg || typeof cfg !== 'object' || Array.isArray(cfg)) {
-    throw new Error('Something answered at that address, but it is not Radiant.')
+    throw new Error(`Something answered at that address, but it is not ${BRAND.productName}.`)
   }
   return url
 }

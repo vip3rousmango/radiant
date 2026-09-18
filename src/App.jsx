@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { BRAND } from '../server/brand.js'
 import { api, streamChat } from './api.js'
 import { applyTheme } from './theme.js'
 import { notifyAway, turnBody } from './notify.js'
@@ -147,7 +148,7 @@ function DesktopApp () {
     .catch(e => {
       setProjects([])
       setProjectsError(e?.status === 404
-        ? 'The Mac you are connected to is running an older Radiant that does not have projects. Update it and they will appear.'
+        ? `The Mac you are connected to is running an older ${BRAND.productName} that does not have projects. Update it and they will appear.`
         : `Could not load projects: ${e.message}`)
     }), [])
 
@@ -179,7 +180,7 @@ function DesktopApp () {
       if (cfg.settings.autoUpdateCheck !== false) {
         api.updateCheck().then(u => { if (u.hasUpdate) setUpdateInfo(u) }).catch(() => {})
       }
-    }).catch(e => setError('Cannot reach the Radiant server: ' + e.message))
+    }).catch(e => setError(`Cannot reach the ${BRAND.productName} server: ${e.message}`))
     refreshSessions()
     refreshProjects()
     refreshModels()
@@ -551,7 +552,7 @@ function DesktopApp () {
     // i entered is disappearing in the chat itself." So on a never-started
     // send, keep the optimistic message and say why instead of wiping it.
     let started = false
-    let chatTitle = target.title || 'Radiant'
+    let chatTitle = target.title || BRAND.productName
     const endThinking = () => {
       if (liveMsg.thinkingActive) {
         liveMsg.thinkingActive = false
