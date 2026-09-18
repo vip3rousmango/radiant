@@ -19,16 +19,30 @@ const sleep = ms => new Promise(r => setTimeout(r, ms))
 const freePort = () => new Promise(r => { const s = net.createServer(); s.listen(0, () => { const p = s.address().port; s.close(() => r(p)) }) })
 
 const SILENCE_MS = 2500
+let memoryCalls = 0
 const prov = http.createServer((req, res) => {
   let body = ''; req.on('data', c => body += c); req.on('end', () => {
     if (req.url.endsWith('/models')) { res.writeHead(200, { 'content-type': 'application/json' }); return res.end(JSON.stringify({ data: [{ id: 'm1' }] })) }
-    // headers now, then nothing at all for SILENCE_MS — the shape of a model still loading
+    let request = {}
+    try { request = JSON.parse(body) } catch {}
+    const prompt = String(request.messages?.at(-1)?.content || '')
+    const memory = /From these exchanges/.test(prompt)
+    const answer = memory
+      ? `Remembered first=${prompt.includes('first exchange')} second=${prompt.includes('second exchange')}`
+      : 'Slow but whole.'
+    // Keep the first background extraction in flight so the next turn exercises
+    // cancellation without losing the earlier exchange.
+    const callNo = memory ? ++memoryCalls : 0
+    const delay = memory ? (callNo === 1 ? SILENCE_MS * 4 : SILENCE_MS) : SILENCE_MS
+    // headers now, then nothing at all for the delay — the shape of a model still loading
     res.writeHead(200, { 'content-type': 'text/event-stream' }); res.flushHeaders()
     setTimeout(() => {
-      res.write(`data: ${JSON.stringify({ choices: [{ delta: { content: 'Slow but whole.' } }] })}\n\n`)
-      res.write(`data: ${JSON.stringify({ choices: [{ delta: {}, finish_reason: 'stop' }] })}\n\n`)
+      const contentChunk = JSON.stringify({ choices: [{ delta: { content: answer } }] })
+      const finishChunk = JSON.stringify({ choices: [{ delta: {}, finish_reason: 'stop' }] })
+      res.write(`data: ${contentChunk}\n\n`)
+      res.write(`data: ${finishChunk}\n\n`)
       res.write('data: [DONE]\n\n'); res.end()
-    }, SILENCE_MS)
+    }, delay)
   })
 })
 const [pp, pr] = [await freePort(), await freePort()]
@@ -59,11 +73,33 @@ try {
   for (let i = 0; i < 60 && !up; i++) { try { up = (await fetch(`http://127.0.0.1:${pr}/api/config`)).ok } catch {} if (!up) await sleep(250) }
   ok(up, 'server up')
   const s = await (await fetch(`http://127.0.0.1:${pr}/api/sessions`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ provider: 'slowco', model: 'm1', useTools: false }) })).json()
-  const t = await (await fetch(`http://127.0.0.1:${pr}/api/chat`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sessionId: s.id, content: { text: 'hi' } }) })).text()
+  const started = Date.now()
+  const t = await (await fetch(`http://127.0.0.1:${pr}/api/chat`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sessionId: s.id, content: { text: 'first exchange' } }) })).text()
+  const elapsed = Date.now() - started
   const ev = t.split('\n\n').filter(l => l.startsWith('data: ')).map(l => JSON.parse(l.slice(6)))
   ok(ev.some(e => e.type === 'text_delta' && /Slow but whole/.test(e.text)), 'the reply arrives after the silence')
   ok(!ev.some(e => e.type === 'error'), `no error: ${ev.filter(e => e.type === 'error').map(e => e.message).join(' | ')}`)
   ok(ev.some(e => e.type === 'done'), 'and the turn ends cleanly')
+  for (let i = 0; i < 20 && memoryCalls < 1; i++) await sleep(50)
+  ok(memoryCalls >= 1, 'the first memory extraction is in flight before the next turn')
+  ok(elapsed < SILENCE_MS * 1.7, `optional memory work does not hold the response open (${elapsed} ms)`)
+  const second = await (await fetch(`http://127.0.0.1:${pr}/api/chat`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sessionId: s.id, content: { text: 'second exchange' } }) })).text()
+  const secondEv = second.split('\n\n').filter(l => l.startsWith('data: ')).map(l => JSON.parse(l.slice(6)))
+  ok(secondEv.some(e => e.type === 'done'), 'a new turn can start while memory finishes in the background')
+  let retained = false
+  for (let i = 0; i < 60 && !retained; i++) {
+    const facts = await (await fetch(`http://127.0.0.1:${pr}/api/memory`)).json()
+    retained = (facts.facts || []).some(f => /first=true/.test(f.text || '') && /second=true/.test(f.text || ''))
+    if (!retained) await sleep(100)
+  }
+  const lockedSession = await (await fetch(`http://127.0.0.1:${pr}/api/sessions`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ provider: 'slowco', model: 'm1', useTools: false }) })).json()
+  const requestTurn = () => fetch(`http://127.0.0.1:${pr}/api/chat`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sessionId: lockedSession.id, content: { text: 'lock test' } }) })
+  const [attemptA, attemptB] = await Promise.all([requestTurn(), requestTurn()])
+  const statuses = [attemptA.status, attemptB.status]
+  if (attemptA.ok) await attemptA.text()
+  if (attemptB.ok) await attemptB.text()
+  ok(statuses.filter(status => status === 200).length === 1 && statuses.includes(409), 'concurrent turns keep the session lock')
+  ok(retained, 'canceled memory work keeps both exchanges for the next extraction')
 } finally { srv.kill(); prov.close(); await sleep(200); fs.rmSync(dir, { recursive: true, force: true }) }
 console.log(`\n${pass}/${pass + fail} passed  ·  a silent model is waited for, not terminated`)
 process.exit(fail ? 1 : 0)
