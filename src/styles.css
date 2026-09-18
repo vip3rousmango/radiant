@@ -3508,11 +3508,13 @@ html[data-window-chrome='native'] .brand { padding-top: 12px; }
 
 :root[data-theme='radiant'][data-mode='light'] {
   --zen-vermillion: #c6534a;
+  --zen-focus: #0d5ca8;
 }
 
 :root[data-theme='radiant'][data-mode='medium'],
 :root[data-theme='radiant'][data-mode='dark'] {
   --zen-vermillion: #f08d79;
+  --zen-focus: #8ecbff;
 }
 
 [data-theme='radiant'] body {
@@ -3668,7 +3670,7 @@ html[data-window-chrome='native'] .brand { padding-top: 12px; }
   margin: 0 0 30px;
 }
 
-[data-theme='radiant'] .welcome h1 {
+[data-theme='radiant'] .welcome-word {
   max-width: 650px;
   margin: 0 0 12px;
   font-family: var(--zen-display);
@@ -3676,6 +3678,13 @@ html[data-window-chrome='native'] .brand { padding-top: 12px; }
   font-weight: 500;
   line-height: .98;
   letter-spacing: -0.065em;
+}
+
+[data-theme='radiant'] .welcome-tagline {
+  max-width: 560px;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.6;
 }
 
 [data-theme='radiant'] .welcome p {
@@ -3845,7 +3854,7 @@ html[data-window-chrome='native'] .brand { padding-top: 12px; }
 }
 
 [data-theme='radiant'] :focus-visible {
-  outline: 2px solid var(--zen-pink);
+  outline: 2px solid var(--zen-focus);
   outline-offset: 3px;
 }
 
@@ -3857,20 +3866,23 @@ html[data-window-chrome='native'] .brand { padding-top: 12px; }
   [data-theme='radiant'] .tb-head,
   [data-theme='radiant'] .gb-head,
   [data-theme='radiant'] .lp-head { padding-inline: 16px; }
-  [data-theme='radiant'] .tb-cols,
   [data-theme='radiant'] .gb-list { padding-inline: 16px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  [data-theme='radiant'] .tb-card:hover,
-  [data-theme='radiant'] .gb-card:hover { transform: none; }
-}
-[data-theme='radiant'] .modal.wide {
+[data-theme='radiant'] .modal.wide:not(.embedded) {
   border: 1px solid var(--zen-line);
   border-radius: 24px;
   background: var(--zen-paper);
   box-shadow: var(--zen-shadow);
   overflow: hidden;
+}
+
+[data-theme='radiant'] .modal.embedded {
+  border: 0;
+  border-radius: 0;
+  background: var(--zen-paper);
+  box-shadow: none;
+  overflow: visible;
 }
 
 [data-theme='radiant'] .modal-head {
