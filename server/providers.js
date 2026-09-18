@@ -1316,9 +1316,7 @@ const SUBSCRIPTION_MODELS = {
 
 // ---------- model listing ----------
 // apiKey OR accessToken (OAuth subscription). For OAuth, auth is Bearer.
-const modelListSignal = signal => signal ? AbortSignal.any([signal, AbortSignal.timeout(6000)]) : AbortSignal.timeout(6000)
-
-export async function listModels (provider, apiKey, accessToken, accountId, signal) {
+export async function listModels (provider, apiKey, accessToken, accountId) {
   // ChatGPT subscription: fetch the live Codex model list (rolling codenames)
   if (provider.id === 'openai' && accessToken && !apiKey) {
     return (await chatgptModels(accessToken, accountId)) || fallback(provider, accessToken, apiKey)
@@ -1328,7 +1326,7 @@ export async function listModels (provider, apiKey, accessToken, accountId, sign
       const headers = { 'anthropic-version': '2023-06-01' }
       if (accessToken) { headers.authorization = `Bearer ${accessToken}`; headers['anthropic-beta'] = 'oauth-2025-04-20' }
       else headers['x-api-key'] = apiKey
-      const res = await fetch(`${provider.baseUrl}/v1/models?limit=100`, { headers, signal: modelListSignal(signal) })
+      const res = await fetch(`${provider.baseUrl}/v1/models?limit=100`, { headers, signal: AbortSignal.timeout(6000) })
       if (!res.ok) return fallback(provider, accessToken, apiKey)
       const data = await res.json()
       const list = (data.data || []).map(m => ({ id: m.id, label: m.display_name || m.id }))
@@ -1337,7 +1335,7 @@ export async function listModels (provider, apiKey, accessToken, accountId, sign
     const headers = provider.id === 'copilot' ? { ...COPILOT_HEADERS } : {}
     const bearer = accessToken || apiKey
     if (bearer) headers.authorization = `Bearer ${bearer}`
-    const res = await fetch(`${provider.baseUrl}/models`, { headers, signal: modelListSignal(signal) })
+    const res = await fetch(`${provider.baseUrl}/models`, { headers, signal: AbortSignal.timeout(6000) })
     if (!res.ok) return fallback(provider, accessToken, apiKey)
     const data = await res.json()
     const list = (data.data || []).map(m => ({ id: m.id, label: m.name || m.id }))
