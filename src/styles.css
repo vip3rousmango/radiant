@@ -103,18 +103,18 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 code, pre, .mono { font-family: var(--font-mono); }
 ::selection { background: var(--accent-dim); }
 
-/* the Allegretto wordmark: heavy geometric caps in the platform font */
+/* The Allegretto lockup echoes the landing page's quiet editorial voice while
+   keeping the surrounding controls in the platform UI font. */
 .wordmark {
-  font-family: var(--font-body);
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  font-family: Iowan Old Style, Palatino, "Book Antiqua", "Hiragino Mincho ProN", Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   color: var(--accent);
 }
-.brand-word { font-size: 15px; }
-.welcome-word { font-size: 34px; margin-top: 18px; }
-.welcome-tagline { font-size: 12.5px; color: var(--text-faint); margin-top: 8px; letter-spacing: 0.02em; }
-.who-word { font-size: 10.5px; letter-spacing: 0.06em; }
+.brand-word { font-size: 16px; }
+.welcome-word { font-size: 35px; margin-top: 18px; }
+.welcome-tagline { font-size: 12.5px; color: var(--text-faint); margin-top: 8px; letter-spacing: 0.01em; }
+.who-word { font-size: 10.5px; letter-spacing: 0.01em; }
 .who-model {
   font-family: var(--font-mono); font-size: 10px; font-weight: 400;
   color: var(--text-faint); text-transform: none; letter-spacing: 0;
