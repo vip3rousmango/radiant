@@ -37,7 +37,12 @@ function ProviderRow ({ provider, oauthInfo, onConfig }) {
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [device, setDevice] = useState(null) // { userCode, verificationUrl } for device-code sign-in
+  const [editingUrl, setEditingUrl] = useState(false)
+  const [urlDraft, setUrlDraft] = useState(provider.baseUrl || '')
+  const [savingUrl, setSavingUrl] = useState(false)
   const pollRef = useRef(null)
+
+  const isLocal = provider.id === 'ollama' || provider.id === 'lmstudio'
 
   const [addingKey, setAddingKey] = useState(false) // paste-a-second-key mode
   const accounts = provider.accounts || []
@@ -49,6 +54,19 @@ function ProviderRow ({ provider, oauthInfo, onConfig }) {
     onConfig(cfg)
   }
   const clear = async () => onConfig(await api.setKey(provider.id, ''))
+  const saveUrl = async () => {
+    if (!urlDraft.trim() || savingUrl) return
+    setSavingUrl(true)
+    try {
+      const cfg = await api.updateProvider(provider.id, { baseUrl: urlDraft.trim() })
+      onConfig(cfg)
+      setEditingUrl(false)
+    } catch (e) {
+      window.alert('Could not update the local server address: ' + e.message)
+    } finally {
+      setSavingUrl(false)
+    }
+  }
   const remove = async () => onConfig(await api.removeProvider(provider.id))
   const signOut = async () => onConfig(await api.oauthSignout(provider.id))
   const switchAccount = async id => onConfig(await api.activateAccount(provider.id, id))
@@ -102,7 +120,23 @@ function ProviderRow ({ provider, oauthInfo, onConfig }) {
     <div className='provider-row-wrap'>
       <div className='provider-row'>
         <div className='p-name'>{provider.name}</div>
-        <div className='p-url'>{provider.baseUrl}</div>
+        {editingUrl
+          ? <span className='p-url-editor'>
+              <input
+                className='provider-url-input'
+                aria-label={`${provider.name} server address`}
+                value={urlDraft}
+                onChange={e => setUrlDraft(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && saveUrl()}
+                autoFocus
+              />
+              <button className='small-btn primary' onClick={saveUrl} disabled={!urlDraft.trim() || savingUrl}>{savingUrl ? 'Saving…' : 'Save'}</button>
+              <button className='small-btn' onClick={() => { setUrlDraft(provider.baseUrl || ''); setEditingUrl(false) }}>Cancel</button>
+            </span>
+          : <>
+              <div className='p-url'>{provider.baseUrl}</div>
+              {isLocal && <button className='small-btn' onClick={() => { setUrlDraft(provider.baseUrl || ''); setEditingUrl(true) }}>Edit address</button>}
+            </>}
         {provider.signedIn
           ? <>
               <span className='key-ok'>✓ subscription</span>
@@ -213,6 +247,7 @@ function ProvidersPane ({ config, onConfigChange }) {
       <p style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: 0 }}>
         Keys are stored locally in <span className='mono'>~/.allegretto/config.json</span> and never leave this Mac except to call the provider itself.
         Any OpenAI-compatible server works — Groq, Mistral, Together, a remote Ollama box…
+        For Ollama or LM Studio on another machine, use <strong>Edit address</strong>; enter the server root and Allegretto will use its <span className='mono'>/v1</span> API.
       </p>
     </div>
   )
@@ -3381,7 +3416,7 @@ const GUIDE = [
       ['MiniMax', 'MiniMax is now one of the presets, on the Mac, on Linux and on the iPhone. It gives you MiniMax-M3, which holds a million tokens of context, and the M2 series at around 200,000 — the context meter in the composer knows both, so a long chat on M3 shows how much room is actually left instead of nothing at all. One thing worth knowing before you paste a key: MiniMax runs two separate platforms, an international one and a mainland-China one, and they do not share accounts. A key from one simply does not work on the other, and what you see when that happens is a plain sign-in failure that looks exactly like a mistyped key. The preset is the international one, so a key from platform.minimax.io just works. If yours came from the China platform, use the Add provider row at the bottom of this list — any name you like, and https://api.minimaxi.com/v1 as the base URL — and paste your key into that one instead. That workaround is a Mac and Linux one: the iPhone has no Add provider row, so on the phone MiniMax needs a key from the international platform.'],
       ['Multiple accounts', 'Keep more than one account or key per provider and switch the active one; the sidebar meters follow whichever is active.'],
       ['Any OpenAI-compatible provider', 'Add anything else with a name + base URL.'],
-      ['Local models', 'Run models from Ollama or LM Studio with no key. Search Hugging Face and download GGUFs straight from Settings → Models, with a disk-space check before you pull. The first reply after switching to a local model shows a "loading into memory" note while its weights load; it stays warm after that.'],
+      ['Local model servers can live on another machine', 'Settings → Providers shows Edit address for Ollama and LM Studio. Enter the server root, such as http://10.0.0.183:1338; Radiant adds /v1 for the OpenAI-compatible API, saves it locally, and uses it for model discovery and chats. Automatic LAN discovery is not assumed because it cannot safely identify which machine is your server.'],
       ['Compare', 'Run one prompt against two models side by side (command palette → Compare).'],
       ['Errors you can act on', 'When a provider turns a request down, Radiant explains it in plain language instead of passing along raw API text. If OpenRouter refuses a model because every provider serving it wants to log your prompts, it says so and points you at the privacy setting to change — free and experimental models are usually the ones affected. A model id OpenRouter no longer serves says that instead of a bare 404, and a restricted key, a signed-out account, or an empty balance each name themselves.']
     ]

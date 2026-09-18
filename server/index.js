@@ -464,6 +464,32 @@ app.post('/api/share', (req, res) => {
   res.json({ desired: enabled, enabled: SHARE_ENABLED, token, needsRelaunch: enabled !== SHARE_ENABLED, port: PORT, addresses: hostAddresses(), phone: phoneStatus() })
 })
 
+function normalizeLocalProviderUrl (raw) {
+  let url
+  try { url = new URL(String(raw || '').trim()) } catch { throw new Error('Enter a valid server URL, such as http://10.0.0.183:1338') }
+  if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password || url.search || url.hash) {
+    throw new Error('Local server URLs must be plain http:// or https:// addresses')
+  }
+  const pathname = url.pathname.replace(/\/+$/, '')
+  if (!pathname || pathname === '/') url.pathname = '/v1'
+  else url.pathname = pathname
+  return url.toString().replace(/\/$/, '')
+}
+
+app.patch('/api/providers/:id', (req, res) => {
+  const p = config.providers.find(p => p.id === req.params.id)
+  if (!p) return res.status(404).json({ error: 'Provider not found' })
+  if (!['ollama', 'lmstudio'].includes(p.id)) return res.status(400).json({ error: 'Only local provider addresses can be edited here' })
+  if (typeof req.body?.baseUrl !== 'string' || !req.body.baseUrl.trim()) return res.status(400).json({ error: 'baseUrl required' })
+  try {
+    p.baseUrl = normalizeLocalProviderUrl(req.body.baseUrl)
+  } catch (e) {
+    return res.status(400).json({ error: e.message })
+  }
+  saveConfig(config)
+  res.json(publicConfig(config))
+})
+
 app.post('/api/providers/:id/key', (req, res) => {
   const { key, newAccount, label } = req.body
   if (key) upsertCredential(config, req.params.id, { key }, { label, newAccount })
@@ -513,7 +539,7 @@ app.delete('/api/providers/:id', (req, res) => {
 app.get('/api/quantize/candidates', async (req, res) => {
   try {
     const { quantizableModels, QUANT_TYPES } = await import('./quantize.js')
-    const r = await fetch(`${OLLAMA}/api/tags`, { signal: AbortSignal.timeout(4000) })
+    const r = await fetch(`${OLLAMA()}/api/tags`, { signal: AbortSignal.timeout(4000) })
     const data = await r.json()
     const local = (data.models || []).map(m => ({ name: m.name, sizeGB: +(m.size / 1024 ** 3).toFixed(1) }))
     res.json({ models: await quantizableModels(local), quants: QUANT_TYPES })
@@ -1653,7 +1679,10 @@ app.get('/api/models', async (req, res) => {
 })
 
 // ---------- local models (Ollama) ----------
-const OLLAMA = 'http://127.0.0.1:11434'
+const OLLAMA = () => {
+  const provider = config.providers.find(p => p.id === 'ollama')
+  return (provider?.baseUrl || 'http://127.0.0.1:11434/v1').replace(/\/v1\/?$/, '')
+}
 
 // ---------- the Chrome the agent drives ----------
 //
@@ -1952,7 +1981,7 @@ app.get('/api/registry-files', async (req, res) => {
 
 app.get('/api/local-models', async (req, res) => {
   try {
-    const r = await fetch(`${OLLAMA}/api/tags`, { signal: AbortSignal.timeout(4000) })
+    const r = await fetch(`${OLLAMA()}/api/tags`, { signal: AbortSignal.timeout(4000) })
     const data = await r.json()
     res.json({ running: true, models: (data.models || []).map(m => ({ name: m.name, sizeGB: +(m.size / 1024 ** 3).toFixed(1) })) })
   } catch {
@@ -1968,7 +1997,7 @@ app.get('/api/local-models', async (req, res) => {
 // lives, rather than leaving people to guess which app is at fault.
 app.get('/api/local-models/loaded', async (req, res) => {
   try {
-    const r = await fetch(`${OLLAMA}/api/ps`, { signal: AbortSignal.timeout(4000) })
+    const r = await fetch(`${OLLAMA()}/api/ps`, { signal: AbortSignal.timeout(4000) })
     const data = await r.json()
     res.json({
       running: true,
@@ -1985,7 +2014,7 @@ app.get('/api/local-models/loaded', async (req, res) => {
 
 app.delete('/api/local-models/:name', async (req, res) => {
   try {
-    const r = await fetch(`${OLLAMA}/api/delete`, {
+    const r = await fetch(`${OLLAMA()}/api/delete`, {
       method: 'DELETE',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ model: req.params.name })
@@ -2055,7 +2084,7 @@ app.post('/api/pull', async (req, res) => {
     const resolved = await resolveHfPull(model)
     if (resolved.error) { emit({ error: resolved.error }); return }
     if (resolved.model !== model) { model = resolved.model; emit({ status: resolved.note || `resolved to ${model}` }) }
-    const r = await fetch(`${OLLAMA}/api/pull`, {
+    const r = await fetch(`${OLLAMA()}/api/pull`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ model, stream: true }),

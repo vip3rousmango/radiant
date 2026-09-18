@@ -1444,6 +1444,8 @@ code, pre, .mono { font-family: var(--font-mono); }
 }
 .provider-row .p-name { width: 150px; font-weight: 500; flex-shrink: 0; }
 .provider-row .p-url { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-faint); flex: 1; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.p-url-editor { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+.provider-url-input { width: auto !important; flex: 1; min-width: 160px; font-family: var(--font-mono); font-size: 11px; }
 .provider-row input {
   width: 190px; padding: 6px 10px;
   border: 1px solid var(--border); border-radius: 8px;
@@ -2169,8 +2171,9 @@ button.hf-head:hover { background: var(--bg-hover); }
 
   /* Settings provider rows: stack instead of one cramped line */
   .provider-row { flex-wrap: wrap; gap: 6px 10px; }
-  .provider-row .p-name { width: auto; }
   .provider-row .p-url { flex-basis: 100%; order: 5; font-size: 10px; }
+  .provider-row .p-url-editor { flex-basis: 100%; order: 5; }
+  .provider-row .p-name { width: auto; }
   .provider-row input[type='password'], .account-add-key input { flex: 1; min-width: 120px; }
   /* drop the desktop 160px alignment gutter under provider rows */
   .provider-hint, .provider-oauth, .account-row { padding-left: 0; }

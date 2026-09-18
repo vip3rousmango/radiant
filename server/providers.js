@@ -21,7 +21,7 @@ const ollamaCtxCache = new Map()
 
 /** A local Ollama, whose context is Ollama's choice rather than the model's. */
 export function isOllama (provider) {
-  return Boolean(provider && provider.type === 'openai' && /:11434\b/.test(provider.baseUrl || ''))
+  return Boolean(provider && provider.type === 'openai' && (provider.id === 'ollama' || /:11434\b/.test(provider.baseUrl || '')))
 }
 
 // ⚠️ OLLAMA SIZES THE CONTEXT FROM THE MACHINE'S MEMORY, NOT THE CHAT'S NEEDS:

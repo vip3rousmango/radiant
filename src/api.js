@@ -284,6 +284,11 @@ export const api = {
     return cfg
   },
   setKey: (providerId, key, opts) => json('POST', `/api/providers/${providerId}/key`, { key, ...(opts || {}) }),
+  updateProvider: async (providerId, patch) => {
+    const cfg = await json('PATCH', `/api/providers/${providerId}`, patch)
+    try { window.radiantNative?.notifyConfigChanged?.() } catch {}
+    return cfg
+  },
   addProvider: p => json('POST', '/api/providers', p),
   removeProvider: id => json('DELETE', `/api/providers/${id}`),
   activateAccount: (providerId, accountId) => json('POST', `/api/providers/${providerId}/accounts/activate`, { accountId }),
