@@ -59,11 +59,14 @@ try {
   for (let i = 0; i < 60 && !up; i++) { try { up = (await fetch(`http://127.0.0.1:${pr}/api/config`)).ok } catch {} if (!up) await sleep(250) }
   ok(up, 'server up')
   const s = await (await fetch(`http://127.0.0.1:${pr}/api/sessions`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ provider: 'slowco', model: 'm1', useTools: false }) })).json()
+  const started = Date.now()
   const t = await (await fetch(`http://127.0.0.1:${pr}/api/chat`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ sessionId: s.id, content: { text: 'hi' } }) })).text()
+  const elapsed = Date.now() - started
   const ev = t.split('\n\n').filter(l => l.startsWith('data: ')).map(l => JSON.parse(l.slice(6)))
   ok(ev.some(e => e.type === 'text_delta' && /Slow but whole/.test(e.text)), 'the reply arrives after the silence')
   ok(!ev.some(e => e.type === 'error'), `no error: ${ev.filter(e => e.type === 'error').map(e => e.message).join(' | ')}`)
   ok(ev.some(e => e.type === 'done'), 'and the turn ends cleanly')
+  ok(elapsed < SILENCE_MS * 1.7, `optional memory work does not hold the response open (${elapsed} ms)`)
 } finally { srv.kill(); prov.close(); await sleep(200); fs.rmSync(dir, { recursive: true, force: true }) }
 console.log(`\n${pass}/${pass + fail} passed  ·  a silent model is waited for, not terminated`)
 process.exit(fail ? 1 : 0)

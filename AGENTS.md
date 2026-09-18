@@ -1,5 +1,20 @@
 # Radiant — read this first, every turn
 
+## Allegretto agency fork
+
+Allegretto is the agency fork of Radiant. The source relationship is one-way:
+pull updates from the main Radiant package, adapt and test them here, then ship
+Allegretto changes from the agency fork. The main Radiant repository is never a
+destination for Allegretto work, and Allegretto is never published as a Radiant
+release.
+
+The agency fork is the only Git remote that receives Allegretto commits. Keep
+the main package remote fetch-only. When the agency website is requested, deploy
+only to `allegretto.netlify.app`; the future public domain is
+`allegretto.virtuallycreative.ca`. Use the existing Allegretto logo baseline
+and Zen color assets; do not substitute Radiant branding.
+
+
 ## THE iPHONE APP — 1.0 (build 7) APPROVED by Apple, 2026-09-16
 
 ⚠️ **STILL READ APP STORE CONNECT BEFORE YOU TRUST THIS.** The heading above has
@@ -61,82 +76,40 @@ under ~1.2 bytes per parameter that declares no quantization — the Gemma 4
 defect, which shipped because the old check only asked whether MLX implemented
 the architecture.
 
-Radiant is Tony's own coding harness: an Electron app wrapping a local node
-server (`server/index.js`, port 5834) and a React UI (`src/`). It is a public,
-MIT-licensed repo, signed and notarized, and it auto-updates from GitHub
-Releases. Work on `master`.
+Allegretto is the agency fork of Tony's Radiant coding harness: an Electron app
+wrapping a local node server (`server/index.js`, port 5834) and a React UI
+(`src/`). Pull upstream changes one way into this fork, and work on the agency
+fork's `master`.
+
 
 ## Written is not shipped
 
-**Every change closes all three of these, in the same turn:**
+Every Allegretto change closes these in the same turn:
 
-1. **Git** — committed with a real message, and pushed. Tony runs the packaged
-   app, not the dev server, and other agents work from other checkouts. An
-   uncommitted fix looks exactly like no fix: on 2026-08-22 six corrected files
-   sat in the working tree while he tested the release and reported the bug as
-   still broken.
-2. **The in-app Read me** — the `GUIDE` array in `src/components/Settings.jsx`
-   (Settings → "Read me"). Standing rule from Tony: *"you MUST update that
-   readme when features are added or changed. end users deserve that."* Write it
-   for someone using the app: what they can now do, plain language, US spelling.
-3. **Linear** — team **The Templeton Group** (TG), project **Radiant**. Ship
-   something → its issue goes to Done, or create one already Done. Spot a
-   problem you are not fixing → file it.
+1. **Agency Git** — commit and push only to the agency fork. Pull from the main
+   Radiant package when updating the base; never send Allegretto commits back to
+   the main package.
+2. **The in-app Read me** — update the `GUIDE` array in
+   `src/components/Settings.jsx` whenever a user-facing feature changes. Write
+   it for someone using Allegretto, in plain US English.
+3. **Agency tracking** — record shipped work in the agency's Linear project when
+   access is available. If access is unavailable, report the exact blocker; do
+   not substitute a Radiant issue or pull request.
 
-**This is automatic, not a question to ask.** Tony has standing authorization:
-run the `ship-sync` agent at the end of any turn that changed behavior.
+## Agency publication
 
-Run the objective half and fix whatever it flags:
+The public destination for Allegretto is the agency website only:
+`allegretto.netlify.app`, with `allegretto.virtuallycreative.ca` as the planned
+custom domain. Do not create a Radiant GitHub release, upload Radiant release
+assets, or update the Radiant download page for Allegretto work.
 
-```bash
-node scripts/ship-check.mjs
-```
+Before a website deployment, verify the agency logo baseline, Zen colors,
+version text, download links, and the live Netlify URL. A packaged Mac build is
+an agency artifact for testing or release only when the agency signing and
+publishing prerequisites are present; never claim a release from an unsigned
+or incomplete build.
 
-It verifies committed / pushed / Read-me-kept-current / tagged. Or hand the
-whole job to the **`ship-sync`** agent (runs on Haiku, cheap) — it loops until
-all three are actually verified rather than merely attempted.
 
-## Releasing
-
-A fix Tony cannot run is not shipped. When a change is user-facing:
-
-```bash
-npm version <next> --no-git-tag-version && npm run build
-git add -A && git commit -F <message-file>
-npx electron-builder --mac          # signs + notarizes; takes a few minutes
-git tag v<next> && git push origin master --tags
-gh release create v<next> release/Radiant-<next>-arm64.dmg \
-  release/Radiant-<next>-arm64.dmg.blockmap \
-  release/Radiant-<next>-arm64-mac.zip \
-  release/Radiant-<next>-arm64-mac.zip.blockmap \
-  release/latest-mac.yml --title "v<next>" --notes-file <notes>
-```
-
-All five assets matter — `latest-mac.yml` is what the in-app updater reads.
-Confirm with `spctl -a -vv -t install release/mac-arm64/Radiant.app` ("accepted,
-Notarized Developer ID"). Commit messages and release notes with apostrophes or
-backticks break shell heredocs — write them to a file and use `-F` / `--notes-file`.
-
-## Every release also updates the website
-
-The download page is part of shipping, not a follow-up:
-
-```bash
-cp release/Radiant-<v>-arm64.dmg /tmp/radiant.dmg
-gh release upload v<v> /tmp/radiant.dmg --clobber      # stable-named asset
-```
-
-Then in `~/Projects/templeton-group-dev-website`: set
-`showcase/radiant/version.json` to the new version and size, and update the
-`js-version` / `js-size` fallbacks in `showcase/radiant/index.html` so a failed
-fetch cannot show a stale number. Push to `main` (auto-deploys in ~10s) and
-verify the live URL.
-
-⚠️ The DMG is gitignored — 124 MB, past GitHub's file limit — so it never
-travels through git. The page links to
-`releases/latest/download/radiant.dmg`, which is why that stable-named asset
-has to be uploaded on every release. Skipping it is how the site once
-advertised 0.6.74 while 0.6.100 was current.
 
 ## Sharp edges
 
