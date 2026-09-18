@@ -325,3 +325,23 @@
     .docs-table b { justify-self: start; }
   }
 }
+@layer components {
+  .setup-steps { display: grid; gap: 0; margin: 32px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+  .setup-steps li { display: grid; gap: 5px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+  .setup-steps strong { font-size: .98rem; }
+  .setup-steps span { color: var(--muted); font-size: .92rem; }
+  .docs-surface-cards { grid-template-columns: repeat(2, 1fr); }
+  .docs-surface-cards article:last-child { grid-column: span 2; }
+  .docs-surface-cards .docs-card-number { margin-bottom: 22px; }
+  .docs-troubleshooting { display: grid; gap: 0; margin-top: 30px; border-top: 1px solid var(--line); }
+  .docs-troubleshooting > div { display: grid; grid-template-columns: minmax(160px, .4fr) 1fr; gap: 18px; padding: 17px 0; border-bottom: 1px solid var(--line); }
+  .docs-troubleshooting span { color: var(--muted); }
+}
+
+@layer utilities {
+  @media (max-width: 800px) {
+    .docs-surface-cards { grid-template-columns: 1fr; }
+    .docs-surface-cards article:last-child { grid-column: auto; }
+    .docs-troubleshooting > div { grid-template-columns: 1fr; gap: 4px; }
+  }
+}

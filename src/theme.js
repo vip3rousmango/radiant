@@ -298,13 +298,6 @@ export function applyTheme (settings) {
   // at #141517 / #f5f5f6 regardless of theme — so on a pinned palette like Nous
   // Classic the frame flashed dark grey around a deep blue app. Send the theme's
   // actual --bg so the native frame matches what the page is about to draw.
-  if (window.radiantNative) {
-    window.radiantNative.setMode(mode === 'light' ? 'light' : 'dark')
-    try {
-      const bg = getComputedStyle(root).getPropertyValue('--bg').trim()
-      if (bg && window.radiantNative.setBackground) window.radiantNative.setBackground(bg)
-    } catch {}
-  }
   root.style.setProperty('--accent-h', String(hue))
   root.style.setProperty('--accent-c', String(chroma))
   root.style.setProperty('--bg-tint', String(tint))
@@ -344,4 +337,14 @@ export function applyTheme (settings) {
   const font = FONTS.find(f => f.id === settings.fontFamily) || FONTS[0]
   root.style.setProperty('--font-body', font.stack)
   root.style.setProperty('--ui-scale', String(settings.uiScale || 1))
+  // Electron only knows light/dark for the frame. Set the background after all
+  // preset and custom tokens are applied so the native frame matches the page,
+  // rather than the previous theme's computed value.
+  if (window.radiantNative) {
+    window.radiantNative.setMode(mode === 'light' ? 'light' : 'dark')
+    try {
+      const bg = getComputedStyle(root).getPropertyValue('--bg').trim()
+      if (bg && window.radiantNative.setBackground) window.radiantNative.setBackground(bg)
+    } catch {}
+  }
 }

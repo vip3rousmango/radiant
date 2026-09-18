@@ -39,10 +39,13 @@
           <aside class="docs-nav" aria-label="On this page">
             <p>On this page</p>
             <a href="#start">Start here</a>
+            <a href="#setup">Set up Allegretto</a>
+            <a href="#surfaces">Find your way around</a>
             <a href="#mental-model">The mental model</a>
             <a href="#providers">Choose a model</a>
             <a href="#tools">Tools and approvals</a>
             <a href="#browser">Browser bridge</a>
+            <a href="#troubleshooting">Troubleshooting</a>
             <a href="#privacy">Privacy boundary</a>
             <a href="#glossary">Glossary</a>
           </aside>
@@ -58,6 +61,31 @@
                 <li><span>03</span><div><h3>Choose the permission level</h3><p>Set Ask, Auto, or Allow all to match the work. In Ask, meaningful actions pause for you; broader modes can let more actions proceed without a prompt.</p></div></li>
                 <li><span>04</span><div><h3>Stay in the loop</h3><p>Watch progress in context. Pause, redirect, or take control when the situation changes.</p></div></li>
               </ol>
+            </section>
+
+            <section id="setup" class="docs-section">
+              <p class="eyebrow">Set up Allegretto</p>
+              <h2>Make the first session feel like home.</h2>
+              <p>Allegretto can start with a local model or a provider you connect yourself. These are the useful first five minutes.</p>
+              <ol class="setup-steps">
+                <li><strong>1. Open Settings → Providers &amp; keys.</strong><span>Sign in to a supported provider or add an API key. Keys are kept locally and used to call that provider directly.</span></li>
+                <li><strong>2. Choose Settings → Appearance.</strong><span>Pick the Allegretto theme, then choose Light, Medium, or Dark. The theme carries the warm paper and agency-blue identity into the workspace.</span></li>
+                <li><strong>3. Choose a workspace folder.</strong><span>Use the folder chip at the top of a chat to set where file reads, edits, and commands begin.</span></li>
+                <li><strong>4. Pick a model.</strong><span>Start a chat, use the model picker in the composer, and select the local or hosted model that fits the boundary.</span></li>
+                <li><strong>5. Set permissions before work begins.</strong><span>Use the composer permissions pill for Ask each, Auto approve, or Allow all. Computer control has its separate Settings → Automation choice.</span></li>
+              </ol>
+            </section>
+
+            <section id="surfaces" class="docs-section">
+              <p class="eyebrow">Find your way around</p>
+              <h2>Each surface has one kind of work.</h2>
+              <div class="docs-cards docs-surface-cards">
+                <article><span class="docs-card-number">CHAT</span><h3>Chat</h3><p>Work through one outcome with a model, tools, context, and a visible transcript.</p></article>
+                <article><span class="docs-card-number">AGENTS</span><h3>Agents</h3><p>Choose or edit a named persona with its own model, personality, and skills.</p></article>
+                <article><span class="docs-card-number">TASK</span><h3>Tasks</h3><p>Hand off one defined job and watch it move through Queued, Working, Needs you, Review, and Done.</p></article>
+                <article><span class="docs-card-number">LOOP</span><h3>Loops</h3><p>Run several steps in order, each with a condition that checks whether the work is actually complete.</p></article>
+                <article><span class="docs-card-number">GRAPH</span><h3>Graphs</h3><p>Shape a larger workflow as connected steps with dependencies and parallel paths.</p></article>
+              </div>
             </section>
 
             <section id="mental-model" class="docs-section">
@@ -83,7 +111,7 @@
               <p class="eyebrow">Tools and approvals</p>
               <h2>Let the plan show its work.</h2>
               <p>Tools are named actions with inputs and outcomes. Workflows show their steps and dependencies before they run, giving you a chance to spot an incorrect assumption while the change is still reversible.</p>
-              <div class="docs-callout"><strong>Permission modes matter</strong><p><strong>Ask</strong> pauses for approvals. <strong>Auto</strong> runs lower-risk commands and asks before riskier ones; MCP and computer-control actions still ask. <strong>Allow all</strong> removes those prompts. Check Settings → Permissions before a run.</p></div>
+              <div class="docs-callout"><strong>Permission modes matter</strong><p><strong>Ask</strong> pauses for approvals. <strong>Auto</strong> runs lower-risk commands and asks before riskier ones; MCP tools and computer-control actions still ask in Auto. <strong>Allow all</strong> removes shell and MCP prompts. Computer control has its own Settings → Automation choice: Ask me first or Full automation, which can run computer actions without pausing. Check both settings before a run.</p></div>
               <div class="docs-table" role="list" aria-label="Action guidance">
                 <div role="listitem"><strong>Read</strong><span>Inspect information needed for the next step.</span><b class="docs-safe">Usually safe</b></div>
                 <div role="listitem"><strong>Prepare</strong><span>Draft a file, message, or change without sending it.</span><b class="docs-review">Review first</b></div>
@@ -96,6 +124,18 @@
               <h2>Bring the work to the browser you already use.</h2>
               <p>The browser bridge connects an approved browser context so an agent can read or act where the work already lives. It does not move your sessions into a hosted browser.</p>
               <ul class="docs-bullets"><li>Connect only the browser profile and page you intend to share.</li><li>Review the plan before actions involving credentials, purchases, messages, or deletion.</li><li>Pause the run and take control back whenever a page or intention changes.</li></ul>
+            </section>
+
+            <section id="troubleshooting" class="docs-section">
+              <p class="eyebrow">Troubleshooting</p>
+              <h2>When the path feels unclear.</h2>
+              <div class="docs-troubleshooting">
+                <div><strong>The model picker is empty</strong><span>Open Settings → Providers &amp; keys and confirm the provider is connected or has a usable API key. For local models, make sure the model has finished downloading and is available on this Mac.</span></div>
+                <div><strong>A tool keeps asking</strong><span>Check the composer permissions pill. Auto approve still asks for riskier commands, MCP tools, and computer control. Check Settings → Automation for the separate computer-control mode.</span></div>
+                <div><strong>The browser page is not available</strong><span>Open Settings → Chrome and connect the browser bridge to the browser profile you intend to share. The bridge cannot see a page until that connection is active.</span></div>
+                <div><strong>The work is in the wrong folder</strong><span>Click the folder chip at the top of the chat and choose the workspace folder again. New sessions in that chat will use the selected folder.</span></div>
+                <div><strong>A run is taking too long</strong><span>Read the current tool status before interrupting. Stop the run when the plan is wrong, then revise the request or lower the scope instead of repeating the same path.</span></div>
+              </div>
             </section>
 
             <section id="privacy" class="docs-section">
