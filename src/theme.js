@@ -267,15 +267,16 @@ export function resolvePreset (themeId) {
   return THEMES.find(t => t.id === themeId) || THEMES[0]
 }
 
-function nativeBackgroundHex ({ authored, mode, hue, tint }) {
+function nativeBackgroundHex ({ authored }) {
   if (/^#[0-9a-f]{6}$/i.test(authored)) return authored
-  const ramps = {
-    dark: [0.19, 0.006],
-    medium: [0.30, 0.008],
-    light: [0.99, 0.0018]
-  }
-  const [L, C] = ramps[mode] || ramps.dark
-  return oklchToHex(L, C * tint, hue || 258)
+  const match = authored.match(/^oklch\(\s*([0-9.]+%?)\s+(?:calc\(\s*)?([0-9.]+%?)(?:\s*\*\s*([0-9.]+))?(?:\s*\))?\s+([0-9.+-]+)(?:deg)?(?:\s*\/[^)]*)?\)$/i)
+  if (!match) return null
+  const lightness = match[1].endsWith('%') ? Number.parseFloat(match[1]) / 100 : Number.parseFloat(match[1])
+  const chromaValue = match[2].endsWith('%') ? Number.parseFloat(match[2]) * 0.004 : Number.parseFloat(match[2])
+  const chroma = chromaValue * (match[3] ? Number.parseFloat(match[3]) : 1)
+  const hue = Number.parseFloat(match[4])
+  if (![lightness, chroma, hue].every(Number.isFinite)) return null
+  return oklchToHex(lightness, chroma, hue)
 }
 
 export function applyTheme (settings) {
@@ -325,7 +326,7 @@ export function applyTheme (settings) {
     window.radiantNative.setMode(mode === 'light' ? 'light' : 'dark')
     try {
       const authored = getComputedStyle(root).getPropertyValue('--bg').trim()
-      const bg = nativeBackgroundHex({ authored, mode, hue, tint })
+      const bg = nativeBackgroundHex({ authored })
       if (bg && window.radiantNative.setBackground) window.radiantNative.setBackground(bg)
     } catch {}
   }

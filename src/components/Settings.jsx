@@ -3408,7 +3408,8 @@ const GUIDE = [
       ['Delete a session on iPhone', 'Swipe a row left in Recent Sessions and tap Delete. There is no confirmation — the swipe is the confirmation — and no undo yet, so it goes immediately.'],
       ['Get a skill onto your iPhone', 'Settings → Skills on the phone. Write one, paste a SKILL.md straight in, import a .md from Files or iCloud Drive, or pull short ones across from your Mac (its address and token are on the Mac at Settings → Devices). Anything longer than 900 characters is refused rather than cut in half.'],
       ['Use a skill for one message', 'Type / in the composer, pick a skill, and the command goes in the box. It applies to that message only. Works the same on iPhone — and on iPhone the Skill button above the composer opens the same list, with “Edit skills…” at the bottom to write your own.'],
-      ['Skills that build themselves', 'When an agent notices a repeatable workflow it suggests a reusable skill; review the full description and Add or Reject it in Settings → Skills.']
+      ['Skills that build themselves', 'When an agent notices a repeatable workflow it suggests a reusable skill; review the full description and Add or Reject it in Settings → Skills.'],
+      ['Zen workspace', 'The Allegretto theme now carries the calm visual language from the website into the desktop shell: warm paper surfaces, serif headings, spacious chat, and rounded task, loop, graph, and Settings panels. Choose Settings → Appearance → Allegretto to use it; the other palettes keep their own colors.']
     ]
   },
   {

@@ -91,7 +91,7 @@
   }
   .hero::before { position: absolute; z-index: -1; right: 5%; bottom: -26%; width: 45vw; height: 45vw; border-radius: 50%; background: rgba(22, 135, 239, .11); content: ''; filter: blur(2px); }
   .hero::after { position: absolute; z-index: -1; top: 25%; right: 14%; width: 18vw; height: 18vw; border: 2px solid rgba(229, 111, 190, .42); border-radius: 50%; content: ''; }
-  .hero-inner { width: min(calc(100% - 48px), var(--max)); margin-inline: auto; display: grid; min-height: 760px; grid-template-columns: minmax(0, 1fr) minmax(300px, .8fr); align-items: center; gap: clamp(42px, 8vw, 128px); padding: 148px 0 90px; }
+  .hero-inner { position: relative; z-index: 1; width: min(calc(100% - 48px), var(--max)); margin-inline: auto; display: grid; min-height: 760px; grid-template-columns: minmax(0, 1fr) minmax(300px, .8fr); align-items: center; gap: clamp(42px, 8vw, 128px); padding: 148px 0 90px; }
   .hero-copy { position: relative; z-index: 1; }
   .kicker { display: inline-flex; align-items: center; gap: 10px; margin: 0 0 24px; color: var(--blue-deep); font-size: .74rem; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
   .kicker::before { width: 10px; height: 10px; border-radius: 50%; background: var(--pink); box-shadow: 5px 0 0 var(--blue); content: ''; }
@@ -107,10 +107,10 @@
   .button-secondary:hover { background: var(--paper-deep); }
   .hero-note { max-width: 620px; margin: 22px 0 0; color: var(--quiet); font-size: .81rem; }
   .hero-note strong { color: var(--vermillion); font-weight: 800; }
-  .hero-art { position: relative; display: grid; min-height: 430px; place-items: center; margin: 0; padding: 24px 24px 44px; border: 2px solid var(--ink); border-radius: 38px; background: rgba(255,255,255,.28); box-shadow: 11px 13px 0 rgba(22,135,239,.24); }
-  .hero-art::before { position: absolute; inset: 14px; border: 1px solid rgba(23,23,23,.3); border-radius: 28px; content: ''; pointer-events: none; }
-  .hero-art img { position: relative; z-index: 1; display: block; width: min(100%, 470px); height: auto; }
-  .hero-art figcaption { position: absolute; right: 26px; bottom: 21px; z-index: 2; margin: 0; color: var(--blue-deep); font-size: .68rem; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
+  .hero-art { position: absolute; z-index: 0; inset: 0; display: block; margin: 0; overflow: hidden; border: 0; border-radius: 0; background: transparent; box-shadow: none; pointer-events: none; }
+  .hero-art::before { display: none; }
+  .hero-art img { display: block; width: 100%; height: 100%; max-width: none; margin: 0; object-fit: cover; object-position: center center; transform: none; }
+  .hero-art figcaption { position: absolute; right: max(24px, calc((100vw - var(--max)) / 2 + 20px)); bottom: 28px; z-index: 1; margin: 0; color: var(--blue-deep); font-size: .68rem; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
 
   main { overflow: hidden; }
   .section { padding: 116px 0; }
@@ -212,9 +212,9 @@
     .nav { min-height: 70px; }
     .nav-links { gap: 13px; }
     .nav-links a:not(.nav-cta) { display: none; }
-    .hero-inner { min-height: auto; grid-template-columns: 1fr; gap: 48px; padding: 92px 0 78px; }
+    .hero-inner { min-height: auto; grid-template-columns: 1fr; gap: 48px; padding: 92px 0 330px; }
     .hero::after { top: 58%; right: -2%; width: 32vw; height: 32vw; }
-    .hero-art { width: min(100%, 460px); min-height: 330px; justify-self: center; }
+    .hero-art { inset: 0; width: auto; min-height: 0; }
     .section { padding: 80px 0; }
     .section-heading, .split, .docs { grid-template-columns: 1fr; gap: 22px; }
     .section-heading { margin-bottom: 32px; }
@@ -235,8 +235,8 @@
     .hero h1 { font-size: clamp(2.8rem, 16vw, 4.3rem); }
     h2 { font-size: 2.4rem; }
     .hero-actions .button { width: 100%; }
-    .hero-art { min-height: 260px; }
-    .hero-art figcaption { right: 15px; bottom: 19px; font-size: .62rem; }
+    .hero-art { min-height: 0; }
+    .hero-art img { object-fit: contain; object-position: center bottom; opacity: .74; }
     .status { padding: 21px; }
     .footer-inner { display: block; }
     .footer-links { margin-top: 20px; }
