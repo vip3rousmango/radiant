@@ -2,6 +2,8 @@ const { app, BrowserWindow, Menu, dialog, shell, ipcMain } = require('electron')
 const { autoUpdater } = require('electron-updater')
 const fs = require('fs')
 const path = require('path')
+const os = require('os')
+const { updaterEnabledForPackage } = require('./updater-config.cjs')
 
 // ⚠️ A STAGED PACKAGE IS NOT NECESSARILY THE LATEST ONE.
 //
@@ -90,7 +92,28 @@ function innerVersion () {
 
 let state = { phase: 'idle', percent: 0, version: null }
 
+function packageMetadata () {
+  try { return JSON.parse(fs.readFileSync(path.join(app.getAppPath(), 'package.json'), 'utf8')) } catch { return {} }
+}
+
 function installUpdater ({ getWindow }) {
+  if (!updaterEnabledForPackage(packageMetadata())) {
+    const disabled = () => ({
+      version: null,
+      current: app.getVersion(),
+      hasUpdate: false,
+      blocked: 'Updates are disabled for this build.'
+    })
+    ipcMain.handle('rad:check-update', async () => disabled())
+    ipcMain.handle('rad:update-state', () => ({ phase: 'disabled', percent: 0, version: null }))
+    ipcMain.handle('rad:install-location', () => ({ bundle: null, translocated: false, inApplications: false, updatable: false, disabled: true }))
+    ipcMain.on('rad:download-update', () => {})
+    ipcMain.on('rad:install-update', () => {})
+    ipcMain.on('rad:relaunch', () => { app.relaunch(); app.exit(0) })
+    console.log('[radiant] updater disabled for this build')
+    return { checkNow: async () => disabled(), startAutoCheck: () => {} }
+  }
+
   // Full downloads only. A slightly larger download is a fair price for never
   // assembling a half-patched app on someone's Mac.
   autoUpdater.disableDifferentialDownload = true

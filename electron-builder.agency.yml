@@ -1,0 +1,3 @@
+# Agency package profile. Canonical Radiant builds keep updater enabled in package.json.
+extraMetadata:
+  radiantUpdaterEnabled: false
