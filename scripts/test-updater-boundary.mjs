@@ -11,21 +11,35 @@ assert.equal(updaterEnabledForPackage({ radiantUpdaterEnabled: false }), false)
 assert.equal(updaterEnabledForPackage({}), true)
 assert.equal(updaterEnabledForPackage(null), true)
 
-const handlers = new Set()
+const handlers = new Map()
 const events = new Set()
 const ipcMain = {
-  handle: name => handlers.add(name),
+  handle: (name, callback) => handlers.set(name, callback),
   on: name => events.add(name)
 }
-const disabled = registerDisabledUpdater({ ipcMain, app: { getVersion: () => '0.9.23' } })
-assert.deepEqual([...handlers].sort(), ['rad:check-update', 'rad:install-location', 'rad:update-state'])
+const app = { getVersion: () => '0.9.23' }
+const disabled = registerDisabledUpdater({ ipcMain, app })
+assert.deepEqual([...handlers.keys()].sort(), ['rad:check-update', 'rad:install-location', 'rad:update-state'])
 assert.deepEqual([...events], [])
-assert.deepEqual(await disabled.checkNow(), {
+assert.deepEqual(await handlers.get('rad:check-update')(), {
   version: null,
   current: '0.9.23',
   hasUpdate: false,
   disabled: true,
   blocked: 'Updates are disabled for this build.'
+})
+assert.deepEqual(handlers.get('rad:update-state')(), {
+  phase: 'disabled',
+  percent: 0,
+  version: null,
+  current: '0.9.23'
+})
+assert.deepEqual(handlers.get('rad:install-location')(), {
+  bundle: null,
+  translocated: false,
+  inApplications: false,
+  updatable: false,
+  disabled: true
 })
 assert.equal(disabled.startAutoCheck(), undefined)
 
@@ -36,4 +50,4 @@ assert.equal(labels(disabledMenu).includes('Check for Updates'), false)
 assert.equal(labels(enabledMenu).split('Check for Updates').length - 1, process.platform === 'darwin' ? 2 : 1)
 assert.deepEqual(disabledMenu.filter(item => item.role), [{ role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' }])
 
-console.log('12/12 updater boundary checks passed')
+console.log('13 updater boundary assertions passed')

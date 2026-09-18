@@ -17,6 +17,7 @@ import { readFileSync } from 'node:fs'
 const readme = readFileSync('src/mobile/ReadMeScreen.jsx', 'utf8')
 const providers = readFileSync('src/mobile/providers.js', 'utf8')
 const settings = readFileSync('src/mobile/SettingsScreen.jsx', 'utf8')
+const desktopSettings = readFileSync('src/components/Settings.jsx', 'utf8')
 const swift = readFileSync('apps/ios/ios/App/App/plugins/LocalModels.swift', 'utf8')
 
 let pass = 0, fail = 0
@@ -36,6 +37,10 @@ for (const p of named) {
 // out of the prose — a regex over English kept capturing the following verb.
 const headings = [...settings.matchAll(/className="rx-section-header">([^<]+)</g)].map(m => m[1])
 is('the settings screen has headings to check', headings.length > 3, true)
+const guideStart = desktopSettings.indexOf('const GUIDE = [')
+const guideEnd = desktopSettings.indexOf('const guideCopy =', guideStart)
+const guideSource = guideStart >= 0 && guideEnd > guideStart ? desktopSettings.slice(guideStart, guideEnd) : ''
+is('desktop Read me entries remain comma-separated', !/]\s*\n\s*\[/.test(guideSource), true)
 for (const m of readme.matchAll(/Settings → (\w[\w ]*?)(?= [a-z]+s\b| [a-z]+es\b| chooses| carries| sets| connects| lists| will|,|\.|$)/gm)) {
   const section = m[1].trim()
   if (section.startsWith('Devices')) continue // that one is the MAC's settings, not this app's
