@@ -324,7 +324,7 @@ code, pre, .mono { font-family: var(--font-mono); }
 
 /* ---------- animated motion backgrounds (10 styles) ---------- */
 .motion-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-.app > *:not(.motion-bg) { position: relative; z-index: 1; }
+.app > *:not(.motion-bg):not(.modal-backdrop):not(.group-modal-backdrop):not(.palette-backdrop) { position: relative; z-index: 1; }
 /* let the motion show through: float the main surfaces translucently */
 .app:has(.motion-bg) .sidebar,
 .app:has(.motion-bg) .right-panel { background: color-mix(in oklab, var(--bg-panel) 82%, transparent); backdrop-filter: blur(6px); }
