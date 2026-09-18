@@ -38,6 +38,17 @@ function isUpstreamTarget (owner, repo) {
     cleanPart(repo).toLowerCase().replace(/\.git$/, '') === UPSTREAM_REPO
 }
 
+function targetFromParts (owner, repo) {
+  const cleanOwner = cleanPart(owner)
+  const cleanRepo = cleanPart(repo).replace(/\.git$/, '')
+  if (!validPart(cleanOwner) || !validPart(cleanRepo) || isUpstreamTarget(cleanOwner, cleanRepo)) return null
+  return {
+    owner: cleanOwner,
+    repo: cleanRepo,
+    apiUrl: `https://api.github.com/repos/${cleanOwner}/${cleanRepo}/releases/latest`
+  }
+}
+
 function targetFromFeed (feed) {
   if (!feed) return null
   try {
@@ -58,10 +69,41 @@ function targetFromFeed (feed) {
     } else {
       return null
     }
-    if (!validPart(owner) || !validPart(repo) || isUpstreamTarget(owner, repo)) return null
-    return { owner, repo, apiUrl }
+    const target = targetFromParts(owner, repo)
+    return target ? { ...target, apiUrl } : null
   } catch {
     return null
+  }
+}
+
+function targetFromSource (owner, repo, feed) {
+  const cleanOwner = cleanPart(owner)
+  const cleanRepo = cleanPart(repo)
+  if (cleanOwner || cleanRepo) {
+    if (!cleanOwner || !cleanRepo) return null
+    return targetFromParts(cleanOwner, cleanRepo)
+  }
+  return cleanPart(feed) ? targetFromFeed(feed) : null
+}
+
+function hasPartSource (owner, repo, feed) {
+  return Boolean(cleanPart(owner) || cleanPart(repo) || cleanPart(feed))
+}
+function isPartialPair (owner, repo) {
+  return Boolean(cleanPart(owner)) !== Boolean(cleanPart(repo))
+}
+
+
+function resolveSource (owner, repo, feed) {
+  if (!hasPartSource(owner, repo, feed)) return null
+  return targetFromSource(owner, repo, feed)
+}
+
+function targetWithReleaseUrl (target) {
+  if (!target) return null
+  return {
+    ...target,
+    releaseUrl: `https://${GITHUB_HOST}/${target.owner}/${target.repo}/releases/latest`
   }
 }
 
@@ -72,22 +114,25 @@ function targetFromFeed (feed) {
  */
 export function resolveFeed ({ env = process.env, packageMetadata = {} } = {}) {
   const pkg = packageMetadata && typeof packageMetadata === 'object' ? packageMetadata : {}
-  const configured = targetFromFeed(env?.ALLEGRETTO_UPDATE_FEED || pkg.allegrettoUpdateFeed)
   const envOwner = cleanPart(env?.ALLEGRETTO_UPDATE_OWNER)
-  const envRepo = cleanPart(env?.ALLEGRETTO_UPDATE_REPO).replace(/\.git$/, '')
-  const owner = envOwner || cleanPart(pkg.allegrettoUpdateOwner || configured?.owner)
-  const repo = envRepo || cleanPart(pkg.allegrettoUpdateRepo || configured?.repo).replace(/\.git$/, '')
-  if (!validPart(owner) || !validPart(repo) || isUpstreamTarget(owner, repo)) return null
-  const apiUrl = (configured && !envOwner && !envRepo)
-    ? configured.apiUrl
-    : `https://api.github.com/repos/${owner}/${repo}/releases/latest`
-  return {
-    owner,
-    repo,
-    apiUrl,
-    releaseUrl: `https://${GITHUB_HOST}/${owner}/${repo}/releases/latest`
+  const envRepo = cleanPart(env?.ALLEGRETTO_UPDATE_REPO)
+  const envFeed = cleanPart(env?.ALLEGRETTO_UPDATE_FEED)
+  const pkgOwner = cleanPart(pkg.allegrettoUpdateOwner)
+  const pkgRepo = cleanPart(pkg.allegrettoUpdateRepo)
+  const pkgFeed = cleanPart(pkg.allegrettoUpdateFeed)
+
+  // Each source is atomic. Explicit environment owner/repo values take
+  // precedence over all other sources, but a partial pair fails closed.
+  if (envOwner || envRepo) return targetWithReleaseUrl(resolveSource(envOwner, envRepo))
+  if (envFeed) {
+    if (isPartialPair(pkgOwner, pkgRepo)) return null
+    return targetWithReleaseUrl(resolveSource('', '', envFeed))
   }
+  if (pkgOwner || pkgRepo) return targetWithReleaseUrl(resolveSource(pkgOwner, pkgRepo))
+  if (pkgFeed) return targetWithReleaseUrl(resolveSource('', '', pkgFeed))
+  return null
 }
+
 
 // Compatibility helpers for callers that only need environment resolution.
 export function resolveUpdateFeed (env = process.env) {

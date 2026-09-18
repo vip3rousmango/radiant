@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
-const { updaterEnabledForPackage, disableAutoUpdater, registerDisabledUpdater } = require('../electron/updater-config.cjs')
+const { agencyUpdateTarget, configureUpdater, updaterEnabledForPackage, disableAutoUpdater, registerDisabledUpdater } = require('../electron/updater-config.cjs')
 const { menuTemplate } = require('../electron/menu.cjs')
 
 assert.equal(updaterEnabledForPackage({ radiantUpdaterEnabled: true }), true)
@@ -53,4 +53,63 @@ assert.equal(labels(disabledMenu).includes('Check for Updates'), false)
 assert.equal(labels(enabledMenu).split('Check for Updates').length - 1, process.platform === 'darwin' ? 2 : 1)
 assert.deepEqual(disabledMenu.filter(item => item.role), [{ role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' }])
 
-console.log('14 updater boundary assertions passed')
+function assertUpdaterNotConfigured (caseName, packageMetadata, env) {
+  const calls = []
+  assert.equal(agencyUpdateTarget(packageMetadata, env), null, `${caseName} must resolve to no target`)
+  assert.equal(configureUpdater({ setFeedURL: target => calls.push(target) }, { packageMetadata, env }), false, `${caseName} must not configure the updater`)
+  assert.deepEqual(calls, [], `${caseName} must not call setFeedURL`)
+}
+
+assertUpdaterNotConfigured(
+  'owner-only environment target',
+  { allegrettoUpdateRepo: 'allegretto' },
+  { ALLEGRETTO_UPDATE_OWNER: 'virtuallycreative' }
+)
+assertUpdaterNotConfigured(
+  'repo-only environment target',
+  { allegrettoUpdateOwner: 'virtuallycreative' },
+  { ALLEGRETTO_UPDATE_REPO: 'allegretto' }
+)
+assertUpdaterNotConfigured(
+  'mixed package owner/feed target',
+  {
+    allegrettoUpdateOwner: 'virtuallycreative',
+    allegrettoUpdateFeed: 'https://github.com/other-owner/other-repo'
+  },
+  {}
+)
+assertUpdaterNotConfigured(
+  'mixed environment/package target',
+  { allegrettoUpdateRepo: 'allegretto' },
+  { ALLEGRETTO_UPDATE_OWNER: 'virtuallycreative' }
+)
+assertUpdaterNotConfigured(
+  'mixed environment feed/package target',
+  { allegrettoUpdateOwner: 'other-owner' },
+  { ALLEGRETTO_UPDATE_FEED: 'https://github.com/virtuallycreative/allegretto' }
+)
+assertUpdaterNotConfigured(
+  'upstream target',
+  {},
+  { ALLEGRETTO_UPDATE_OWNER: 'templetongroup', ALLEGRETTO_UPDATE_REPO: 'radiant' }
+)
+
+const agencyTarget = { provider: 'github', owner: 'virtuallycreative', repo: 'allegretto' }
+assert.deepEqual(
+  agencyUpdateTarget(
+    { allegrettoUpdateFeed: 'https://github.com/virtuallycreative/allegretto' },
+    {}
+  ),
+  agencyTarget
+)
+const configuredCalls = []
+assert.equal(
+  configureUpdater({ setFeedURL: target => configuredCalls.push(target) }, {
+    packageMetadata: { allegrettoUpdateOwner: 'virtuallycreative', allegrettoUpdateRepo: 'allegretto' },
+    env: {}
+  }),
+  true
+)
+assert.deepEqual(configuredCalls, [agencyTarget])
+
+console.log('updater boundary assertions passed')

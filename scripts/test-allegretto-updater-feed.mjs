@@ -38,6 +38,43 @@ const agencyFeedMetadata = resolveFeed({
 assert.equal(agencyFeedMetadata?.owner, 'virtuallycreative')
 assert.equal(agencyFeedMetadata?.repo, 'allegretto')
 assert.equal(agencyFeedMetadata?.apiUrl, 'https://api.github.com/repos/virtuallycreative/allegretto/releases/latest')
+// A source may not borrow its missing half from another source. Partial
+// package metadata, env values, and env/package mixes all fail closed.
+assert.equal(resolveFeed({
+  env: metadataEnv,
+  packageMetadata: {
+    allegrettoUpdateOwner: 'virtuallycreative',
+    allegrettoUpdateFeed: 'https://github.com/other-owner/other-repo'
+  }
+}), null, 'package owner-only metadata must not combine with a package feed')
+assert.equal(resolveFeed({
+  env: metadataEnv,
+  packageMetadata: {
+    allegrettoUpdateRepo: 'allegretto',
+    allegrettoUpdateFeed: 'https://github.com/other-owner/other-repo'
+  }
+}), null, 'package repo-only metadata must not combine with a package feed')
+assert.equal(resolveFeed({
+  env: { ALLEGRETTO_UPDATE_OWNER: 'virtuallycreative' },
+  packageMetadata: { allegrettoUpdateRepo: 'allegretto' }
+}), null, 'env owner-only values must not combine with package repo metadata')
+assert.equal(resolveFeed({
+  env: { ALLEGRETTO_UPDATE_REPO: 'allegretto' },
+  packageMetadata: { allegrettoUpdateOwner: 'virtuallycreative' }
+}), null, 'env repo-only values must not combine with package owner metadata')
+assert.equal(resolveFeed({
+  env: { ALLEGRETTO_UPDATE_FEED: 'https://github.com/virtuallycreative/allegretto' },
+  packageMetadata: { allegrettoUpdateOwner: 'other-owner' }
+}), null, 'env feed must not mask partial package metadata')
+const envOverride = resolveFeed({
+  env: {
+    ALLEGRETTO_UPDATE_OWNER: 'virtuallycreative',
+    ALLEGRETTO_UPDATE_REPO: 'allegretto'
+  },
+  packageMetadata: { allegrettoUpdateFeed: 'https://github.com/other-owner/other-repo' }
+})
+assert.equal(envOverride?.owner, 'virtuallycreative')
+assert.equal(envOverride?.repo, 'allegretto')
 
 assert.equal(resolveFeed({
   env: metadataEnv,
@@ -53,10 +90,11 @@ assert.equal(resolveFeed({
   }
 }), null, 'packaged Templeton/Radiant feed metadata must fail closed')
 
-function checkInIsolatedProcess (target = {}, withRelease = false) {
+function checkInIsolatedProcess (target = {}, withRelease = false, packageMetadata = {}) {
   const env = { ...process.env }
   for (const name of TARGET_ENV) delete env[name]
   Object.assign(env, target)
+  const packageMetadataLiteral = JSON.stringify(packageMetadata)
 
   const probe = `
     import { checkForUpdate } from ${JSON.stringify(UPDATER)}
@@ -94,7 +132,7 @@ function checkInIsolatedProcess (target = {}, withRelease = false) {
     }
 
     try {
-      const result = await checkForUpdate('0.9.24')
+      const result = await checkForUpdate('0.9.24', { packageMetadata: ${packageMetadataLiteral} })
       console.log(JSON.stringify({ ok: true, result, calls }))
     } catch (error) {
       console.log(JSON.stringify({ ok: false, error: String(error?.message || error), calls }))
@@ -123,8 +161,43 @@ function assertDisabled (caseName, observed) {
 // No target means no implicit/default repository and, importantly, no request.
 assertDisabled('missing Allegretto update target', checkInIsolatedProcess())
 
-// The upstream repository is never an acceptable agency target, even when it
-// is supplied explicitly through either supported configuration form.
+// Partial and mixed sources are never allowed to reach the network.
+assertDisabled(
+  'owner-only environment target',
+  checkInIsolatedProcess({ ALLEGRETTO_UPDATE_OWNER: 'virtuallycreative' })
+)
+assertDisabled(
+  'repo-only environment target',
+  checkInIsolatedProcess({ ALLEGRETTO_UPDATE_REPO: 'allegretto' })
+)
+assertDisabled(
+  'mixed environment/package target',
+  checkInIsolatedProcess(
+    { ALLEGRETTO_UPDATE_OWNER: 'virtuallycreative' },
+    false,
+    { allegrettoUpdateRepo: 'allegretto' }
+  )
+)
+assertDisabled(
+  'mixed package owner/feed target',
+  checkInIsolatedProcess(
+    {},
+    false,
+    {
+      allegrettoUpdateOwner: 'virtuallycreative',
+      allegrettoUpdateFeed: 'https://github.com/other-owner/other-repo'
+    }
+  )
+)
+assertDisabled(
+  'mixed environment feed/package target',
+  checkInIsolatedProcess(
+    { ALLEGRETTO_UPDATE_FEED: 'https://github.com/virtuallycreative/allegretto' },
+    false,
+    { allegrettoUpdateOwner: 'other-owner' }
+  )
+)
+// The upstream repository is never an acceptable agency target, even when it is
 assertDisabled(
   'Templeton/Radiant feed target',
   checkInIsolatedProcess({ ALLEGRETTO_UPDATE_FEED: 'https://github.com/templetongroup/radiant' })

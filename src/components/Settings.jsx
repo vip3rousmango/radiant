@@ -3433,10 +3433,8 @@ const GUIDE = [
   }
 ]
 const guideCopy = text => String(text)
-  .replaceAll('Radiant Browser Bridge', '__RADIANT_BROWSER_BRIDGE__')
   .replaceAll('Radiant', BRAND.productName)
   .replaceAll('Templeton Technologies', BRAND.publisherName)
-  .replaceAll('__RADIANT_BROWSER_BRIDGE__', 'Radiant Browser Bridge')
 
 
 function MemoryPane ({ config, onSettings }) {

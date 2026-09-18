@@ -41,6 +41,16 @@ const guideStart = desktopSettings.indexOf('const GUIDE = [')
 const guideEnd = desktopSettings.indexOf('const guideCopy =', guideStart)
 const guideSource = guideStart >= 0 && guideEnd > guideStart ? desktopSettings.slice(guideStart, guideEnd) : ''
 is('desktop Read me entries remain comma-separated', !/]\s*\n\s*\[/.test(guideSource), true)
+const guideCopyStart = guideEnd
+const guideCopyEnd = desktopSettings.indexOf('\n\n', guideCopyStart)
+const guideCopySource = guideCopyEnd > guideCopyStart ? desktopSettings.slice(guideCopyStart, guideCopyEnd) : ''
+const renderedGuide = guideSource
+  .replaceAll('Radiant', 'Allegretto')
+  .replaceAll('Templeton Technologies', 'Virtually(Creative)')
+is('desktop Read me names the Allegretto Browser Bridge', renderedGuide.includes('Allegretto Browser Bridge'), true)
+is('desktop Read me has no visible Radiant product or bridge branding', !/\bRadiant(?:\s+Browser Bridge)?\b/.test(renderedGuide), true)
+is('desktop Read me does not restore legacy bridge branding', guideCopySource.includes('Radiant Browser Bridge'), false)
+is('desktop Read me preserves the Templeton theme name', renderedGuide.includes('A Templeton theme'), true)
 for (const m of readme.matchAll(/Settings → (\w[\w ]*?)(?= [a-z]+s\b| [a-z]+es\b| chooses| carries| sets| connects| lists| will|,|\.|$)/gm)) {
   const section = m[1].trim()
   if (section.startsWith('Devices')) continue // that one is the MAC's settings, not this app's
