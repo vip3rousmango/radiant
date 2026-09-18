@@ -28,3 +28,5 @@ _None yet._
 - **What keeps it from 5:** **Missing Mac parity** — agents, subscription sign-in, usage meters. The features that make it the real Radiant rather than a local chat app.
 - **Plan:** Refresh the catalogue against what MLX can actually run today, then take Mac parity in order: usage meters, subscription sign-in (paste + device-code flows that work on iOS), agents.
 
+### 2026-09-18 — Allegretto landing, docs, app theme, and Netlify deployment — ★★★★ (round 1)
+- **Plan:** Ask for any specific minor tweaks; no automatic rework until identified.
