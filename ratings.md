@@ -35,3 +35,7 @@ _None yet._
 ### 2026-09-18 — Allegretto hero placeholder — ★★★★ (round 1)
 - **Feedback:** The generated conductor-cat SVG was rejected; the requested interim direction is the existing Allegretto logo image until a final hero asset is provided.
 - **Plan:** Replace the placeholder when the user supplies the final hero image.
+
+### 2026-09-18 — Allegretto Zen typography hero — ★★★★ (round 1)
+- **Feedback:** Strong delivery with only minor refinements needed.
+- **Plan:** Keep the hero type-led until a future illustration earns its place.
