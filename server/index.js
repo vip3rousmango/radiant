@@ -421,12 +421,13 @@ app.use('/api', (req, res, next) => {
 // ---------- config ----------
 app.get('/api/config', (req, res) => res.json({ ...publicConfig(config), rev: configRev, sharing, sharingText: describeHolder(sharing, LOCK_HOST) }))
 
-app.put('/api/settings', (req, res) => {
+app.put('/api/settings', async (req, res) => {
   // ⚠️ SPLIT THE SAVE. Anything in MACHINE_KEYS describes this Mac — which model
   // is downloaded here, which provider serves it, where work starts — and goes
   // to a file outside the shared folder. Writing them into config.json would
   // mean picking a model on one Mac changes it on a Mac that does not have it.
   const body = req.body || {}
+  if (body.memory === false) await stopAllDurableMemory()
   const machine = {}
   for (const k of MACHINE_KEYS) if (k in body) machine[k] = body[k]
   if (Object.keys(machine).length) saveMachineSettings(machine)
@@ -3012,7 +3013,9 @@ app.patch('/api/sessions/:id', (req, res) => {
   res.json(s)
 })
 
-app.delete('/api/sessions/:id', (req, res) => {
+app.delete('/api/sessions/:id', async (req, res) => {
+  await stopDurableMemory(req.params.id)
+  memoryPending.delete(req.params.id)
   deleteSession(req.params.id)
   res.json({ ok: true })
 })
@@ -3069,7 +3072,7 @@ function recordTurnFailure (session, emit, message) {
 const UTILITY_HINTS = [/haiku/i, /flash[-_ ]?lite/i, /\bnano\b/i, /\bmini\b/i, /flash/i, /\blite\b/i, /\bsmall\b/i, /\b[0-4](?:\.\d)?b\b/i]
 const utilityCache = new Map()   // providerId -> { at, model }
 
-async function pickUtilityModel (provider, sessionModel) {
+async function pickUtilityModel (provider, sessionModel, signal) {
   // An explicit choice always wins; Settings → Models shows what is in use.
   const set = config.settings.utilityModel
   if (set && set.model) return { provider: config.providers.find(p => p.id === set.provider) || provider, model: set.model }
@@ -3079,11 +3082,11 @@ async function pickUtilityModel (provider, sessionModel) {
   try {
     const hasOAuth = Boolean(config.oauth[provider.id])
     const accessToken = hasOAuth ? await validAccessToken(provider.id, config, saveConfig).catch(() => null) : null
-    const models = await listModels(provider, config.keys[provider.id], accessToken, hasOAuth ? config.oauth[provider.id]?.accountId : null)
+    const models = await listModels(provider, config.keys[provider.id], accessToken, hasOAuth ? config.oauth[provider.id]?.accountId : null, signal)
     const ids = (models || []).map(m => m.id)
     for (const rx of UTILITY_HINTS) { const m = ids.find(id => rx.test(id)); if (m) { chosen = m; break } }
   } catch {}
-  utilityCache.set(provider.id, { at: Date.now(), model: chosen })
+  if (!signal?.aborted) utilityCache.set(provider.id, { at: Date.now(), model: chosen })
   return { provider, model: chosen || sessionModel }
 }
 
@@ -3094,7 +3097,8 @@ async function pickUtilityModel (provider, sessionModel) {
  * what the user asked for.
  */
 async function utilityTurn ({ provider, apiKey, session, tmp, signal }) {
-  const { provider: up, model } = await pickUtilityModel(provider, session.model)
+  const { provider: up, model } = await pickUtilityModel(provider, session.model, signal)
+  if (signal?.aborted) return ''
   const hasOAuth = Boolean(config.oauth[up.id])
   let out = ''
   const count = ev => {
@@ -3117,9 +3121,80 @@ async function utilityTurn ({ provider, apiKey, session, tmp, signal }) {
     // ⚠️ A CHEAP MODEL THAT IS NOT ON THIS ACCOUNT MUST NOT KILL THE FEATURE.
     // Falling back once keeps titles and memory working rather than quietly
     // disappearing, which is how a cost optimisation becomes a bug report.
-    if (model !== session.model) { out = ''; try { await run(session.model) } catch {} }
+    if (!signal?.aborted && model !== session.model) { out = ''; try { await run(session.model) } catch {} }
   }
   return out
+}
+
+// Housekeeping must not hold the chat's SSE response open. A local model can
+// take minutes for the optional memory extraction after it has already returned
+// the answer; a proxy or client timeout then turns a successful answer into a
+// misleading "Continue" halt. Each job is cancellable before the next user
+// turn, and its background token counters merge into a fresh session.
+const memoryJobs = new Map()
+const memoryPending = new Map()
+async function stopDurableMemory (id) {
+  const job = memoryJobs.get(id)
+  if (!job) return
+  job.controller.abort()
+  await job.promise
+  if (memoryJobs.get(id)?.promise === job.promise) memoryJobs.delete(id)
+}
+async function stopAllDurableMemory () {
+  while (memoryJobs.size) {
+    const jobs = [...memoryJobs.values()]
+    jobs.forEach(job => job.controller.abort())
+    await Promise.all(jobs.map(job => job.promise))
+    for (const [id, job] of memoryJobs) if (jobs.includes(job)) memoryJobs.delete(id)
+  }
+  memoryPending.clear()
+}
+function queueDurableMemory ({ provider, apiKey, session, exchange }) {
+  const id = session.id
+  const pending = memoryPending.get(id) || []
+  pending.push(exchange)
+  memoryPending.set(id, pending)
+  if (memoryJobs.has(id)) return
+  const exchanges = pending.slice()
+  const controller = new AbortController()
+  const promise = (async () => {
+    while (activeTurns.has(id)) {
+      if (controller.signal.aborted) return
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+    const working = { ...session, stats: { ...(session.stats || {}) } }
+    const before = {
+      bgIn: Number(working.stats.bgIn) || 0,
+      bgOut: Number(working.stats.bgOut) || 0,
+      bgCalls: Number(working.stats.bgCalls) || 0
+    }
+    const tmp = {
+      cwd: working.cwd,
+      messages: [{
+        role: 'user',
+        text: `From these exchanges, extract any NEW durable facts worth remembering long-term about the USER or their PROJECT — preferences, decisions, names, conventions, tools/environment, or goals. Only lasting facts, not task-specific chatter or one-off requests. Write each as a short standalone sentence, one per line. If there is nothing durable, reply exactly "none".\n\n${exchanges.join('\n\n--- NEXT EXCHANGE ---\n\n')}`
+      }]
+    }
+    const out = await utilityTurn({ provider, apiKey, session: working, tmp, signal: controller.signal })
+    if (controller.signal.aborted) return
+    if (out && !/^\s*none\b/i.test(out.trim())) {
+      await addFacts(out.split('\n').map(line => line.trim()).filter(Boolean), working.cwd)
+    }
+    const remaining = memoryPending.get(id) || []
+    if (remaining.length <= exchanges.length) memoryPending.delete(id)
+    else memoryPending.set(id, remaining.slice(exchanges.length))
+    const fresh = loadSession(id)
+    if (!fresh) return
+    const stats = fresh.stats || (fresh.stats = { turns: 0, inTokens: 0, outTokens: 0, llmMs: 0, toolMs: 0 })
+    stats.bgIn = (stats.bgIn || 0) + Math.max(0, (working.stats.bgIn || 0) - before.bgIn)
+    stats.bgOut = (stats.bgOut || 0) + Math.max(0, (working.stats.bgOut || 0) - before.bgOut)
+    stats.bgCalls = (stats.bgCalls || 0) + Math.max(0, (working.stats.bgCalls || 0) - before.bgCalls)
+    saveSession(fresh)
+  })().catch(() => {})
+  memoryJobs.set(id, { controller, promise })
+  promise.finally(() => {
+    if (memoryJobs.get(id)?.promise === promise) memoryJobs.delete(id)
+  }).catch(() => {})
 }
 
 // ⚠️ AND AN ABORTED TURN IS THE SAME CLASS OF SILENCE. recordTurnFailure above
@@ -3156,9 +3231,11 @@ app.post('/api/chat', async (req, res) => {
   // happened. skillIds here is per-turn; session.skillIds still exists for a
   // skill deliberately pinned to a conversation.
   const { sessionId, content, skillIds: turnSkillIds } = req.body
+  if (activeTurns.has(sessionId)) return res.status(409).json({ error: 'a turn is already running' })
+  await stopDurableMemory(sessionId)
+  if (activeTurns.has(sessionId)) return res.status(409).json({ error: 'a turn is already running' })
   const session = loadSession(sessionId)
   if (!session) return res.status(404).json({ error: 'session not found' })
-  if (activeTurns.has(sessionId)) return res.status(409).json({ error: 'a turn is already running' })
 
   // agent (persona + its skills) plus globally-enabled skills
   const agent = session.agentId ? agentsStore.get(session.agentId) : null
@@ -3167,6 +3244,8 @@ app.post('/api/chat', async (req, res) => {
   // own model, skills, and memory. They need no Radiant provider — stream the
   // external agent's reply straight through and skip provider/skills/mcp/runTurn.
   if (agent && agent.relay === 'hermes') {
+    const controller = new AbortController()
+    activeTurns.set(sessionId, { controller })
     res.writeHead(200, {
       'content-type': 'text/event-stream',
       'cache-control': 'no-cache',
@@ -3182,8 +3261,6 @@ app.post('/api/chat', async (req, res) => {
       emit({ type: 'title', title: session.title })
     }
     saveTurnSession(session)
-    const controller = new AbortController()
-    activeTurns.set(sessionId, { controller })
     res.on('close', () => { if (!res.writableEnded) controller.abort() })
     const stopHeartbeat = startHeartbeat(res)
     const assistant = { role: 'assistant', parts: [] }
@@ -3207,12 +3284,18 @@ app.post('/api/chat', async (req, res) => {
   }
 
   let provider = config.providers.find(p => p.id === session.provider)
-  if (!provider) return res.status(400).json({ error: 'Pick a model first — no provider set on this session.' })
+  if (!provider) { activeTurns.delete(sessionId); return res.status(400).json({ error: 'Pick a model first — no provider set on this session.' }) }
   // Qwen's OAuth token names the API host to use; honour it over the default.
   if (provider.id === 'qwen' && config.oauth.qwen?.apiBase) provider = { ...provider, baseUrl: config.oauth.qwen.apiBase }
   const apiKey = config.keys[provider.id]
   const hasOAuth = Boolean(config.oauth[provider.id])
-  if (provider.auth === 'key' && !apiKey && !hasOAuth) return res.status(400).json({ error: `No API key or subscription sign-in for ${provider.name}. Add one in Settings.` })
+  if (provider.auth === 'key' && !apiKey && !hasOAuth) {
+    activeTurns.delete(sessionId)
+    return res.status(400).json({ error: `No API key or subscription sign-in for ${provider.name}. Add one in Settings.` })
+  }
+  const controller = new AbortController()
+  activeTurns.set(sessionId, { controller })
+  res.on('close', () => { if (!res.writableEnded) controller.abort() })
 
   // agent (persona + its skills, resolved above) plus globally-enabled skills
   const allSkills = skillsStore.list()
@@ -3256,11 +3339,6 @@ app.post('/api/chat', async (req, res) => {
   }
   saveTurnSession(session)
 
-  const controller = new AbortController()
-  activeTurns.set(sessionId, { controller })
-  // res 'close' fires on client disconnect (req 'close' fires once the body is
-  // consumed in modern Node, which would abort the turn immediately)
-  res.on('close', () => { if (!res.writableEnded) controller.abort() })
   const stopHeartbeat = startHeartbeat(res)
 
   const requestApproval = call => new Promise(resolve => {
@@ -3534,21 +3612,10 @@ app.post('/api/chat', async (req, res) => {
     const readElsewhere = (m => (m?.parts || []).some(p => p.type === 'tool' && FROM_ELSEWHERE.test(p.name || '')))(
       [...session.messages].reverse().find(m => m.role === 'assistant'))
     if (memoryOn && !readElsewhere && !session.group && !controller.signal.aborted) {
-      try {
-        const lastUser = [...session.messages].reverse().find(m => m.role === 'user')
-        const lastAsst = [...session.messages].reverse().find(m => m.role === 'assistant')
-        const exchange = `User: ${(lastUser?.text || '').slice(0, 1500)}\n\nAssistant: ${(lastAsst?.parts || []).filter(p => p.type === 'text').map(p => p.text).join(' ').slice(0, 1500)}`
-        const tmp = { cwd: session.cwd, messages: [{ role: 'user', text: `From this exchange, extract any NEW durable facts worth remembering long-term about the USER or their PROJECT — preferences, decisions, names, conventions, tools/environment, or goals. Only lasting facts, not task-specific chatter or one-off requests. Write each as a short standalone sentence, one per line. If there is nothing durable, reply exactly "none".\n\n${exchange}` }] }
-        const out = await utilityTurn({ provider, apiKey, session, tmp, signal: controller.signal })
-        if (out && !/^\s*none\b/i.test(out.trim())) {
-          // Replacing a fact is not adding one. addFacts used to return the two
-          // summed, so restating a preference reported facts remembered when the
-          // count had not grown — and that distinction is the whole point of
-          // supersession.
-          const { added, superseded } = await addFacts(out.split('\n').map(l => l.trim()).filter(Boolean), session.cwd)
-          if (added || superseded) emit({ type: 'memory_added', count: added, updated: superseded })
-        }
-      } catch {}
+      const lastUser = [...session.messages].reverse().find(m => m.role === 'user')
+      const lastAsst = [...session.messages].reverse().find(m => m.role === 'assistant')
+      const exchange = `User: ${(lastUser?.text || '').slice(0, 1500)}\n\nAssistant: ${(lastAsst?.parts || []).filter(p => p.type === 'text').map(p => p.text).join(' ').slice(0, 1500)}`
+      queueDurableMemory({ provider, apiKey, session, exchange })
     }
     // skillsmith: draft a reusable-skill proposal from procedural work (best-effort,
     // cloud models only, and only when the turn looks skill-worthy). Never auto-saves.

@@ -15,7 +15,7 @@ const home = mkdtempSync(path.join(tmpdir(), 'radiant-api-'))
 const data = path.join(home, 'data')
 mkdirSync(data, { recursive: true })
 writeFileSync(path.join(data, 'config.json'), JSON.stringify({ settings: { themeId: 'violet' } }))
-writeFileSync(path.join(home, '.radiant-location'), data)
+writeFileSync(path.join(home, '.allegretto-location'), data)
 
 const server = spawn(process.execPath, ['server/index.js'], {
   env: { ...process.env, HOME: home }, stdio: ['ignore', 'pipe', 'pipe']
