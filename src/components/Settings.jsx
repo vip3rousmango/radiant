@@ -2170,6 +2170,7 @@ function AboutPane ({ config, onSettings }) {
   const [checking, setChecking] = useState(false)
   const [phase, setPhase] = useState('idle') // idle | downloading | ready
   const [progress, setProgress] = useState(0)
+  const [updatesDisabled, setUpdatesDisabled] = useState(false)
   const native = typeof window !== 'undefined' && window.radiantUpdater
   const remote = getServer()
   const remoteLabel = remote.base ? (() => { try { return new URL(remote.base).host } catch { return remote.base } })() : ''
@@ -2186,8 +2187,12 @@ function AboutPane ({ config, onSettings }) {
   // where there is no Electron to ask. A genuinely damaged bundle is still
   // caught at startup in updater.cjs, which repairs it instead of reporting it.
   useEffect(() => {
-    if (native) { native.check().then(r => r.current && setVersion(r.current)).catch(() => {}) }
-    else api.getVersion().then(v => setVersion(v.version)).catch(() => {})
+    if (native) {
+      native.check().then(r => {
+        if (r?.disabled) setUpdatesDisabled(true)
+        if (r?.current) setVersion(r.current)
+      }).catch(() => {})
+    } else api.getVersion().then(v => setVersion(v.version)).catch(() => {})
   }, [native])
 
   // ⚠️ ASK WHAT WAS MISSED, THEN LISTEN. Events only reach a window that is open
@@ -2198,7 +2203,10 @@ function AboutPane ({ config, onSettings }) {
     if (!native?.state) return
     native.state().then(st => {
       if (!st) return
-      if (st.phase === 'downloading') { setPhase('downloading'); setProgress(st.percent || 0) }
+      if (st.phase === 'disabled') {
+        setUpdatesDisabled(true)
+        if (st.current) setVersion(st.current)
+      } else if (st.phase === 'downloading') { setPhase('downloading'); setProgress(st.percent || 0) }
       else if (st.phase === 'ready') { setPhase('ready'); setProgress(100) }
     }).catch(() => {})
   }, [native])
@@ -2219,6 +2227,7 @@ function AboutPane ({ config, onSettings }) {
       if (native) {
         const r = await native.check()
         if (r.error) setStatus({ error: r.error })
+        else if (r.disabled) setUpdatesDisabled(true)
         else setStatus({ hasUpdate: r.hasUpdate, latest: r.version, current: r.current, blocked: r.blocked || null })
       } else {
         const r = await api.updateCheck()
@@ -2254,16 +2263,17 @@ function AboutPane ({ config, onSettings }) {
           “Use this Mac's own server”.
         </div>
       )}
-      <div style={{ marginTop: 14 }}>
+      {!updatesDisabled && <div style={{ marginTop: 14 }}>
         <button className='small-btn primary' onClick={check} disabled={checking || phase !== 'idle'}>
           {checking ? 'Checking…' : 'Check for updates'}
         </button>
-      </div>
+      </div>}
+      {updatesDisabled && <div className='update-none' style={{ marginTop: 14 }}>Updates are disabled for this build.</div>}
 
       {/* A copy that cannot replace itself says so, above everything else the
           pane might say about versions — see installLocation() in updater.cjs. */}
       {status?.blocked && <div className='error-note' style={{ marginTop: 10 }}>⚠ {status.blocked}</div>}
-      {status && !status.error && !status.blocked && (
+      {status && !updatesDisabled && !status.error && !status.blocked && (
         status.hasUpdate
           ? <div className='update-avail'>
               <div><strong>{BRAND.productName} {status.latest}</strong> is available (you have {status.current}).</div>
@@ -2300,18 +2310,18 @@ function AboutPane ({ config, onSettings }) {
       )}
       {status?.error && <div className='error-note'>⚠ Couldn't check: {status.error}</div>}
 
-      <label className='check-row' style={{ marginTop: 14 }}>
+      {!updatesDisabled && <label className='check-row' style={{ marginTop: 14 }}>
         <input
           type='checkbox'
           checked={s.autoUpdateCheck !== false}
           onChange={e => onSettings({ autoUpdateCheck: e.target.checked })}
         />
         <span>Automatically check for updates on launch</span>
-      </label>
-      <div className='oauth-note'>
+      </label>}
+      {!updatesDisabled && <div className='oauth-note'>
         The desktop app also has <span className='mono'>{BRAND.productName} → Check for Updates…</span> in the menu bar.
         Updates download in the background and install when you restart.
-      </div>
+      </div>}
 
       <div className='about-footer' style={{ marginTop: 22 }}>
         <div className='about-footer-text'>{BRAND.welcomeTagline}</div>
@@ -3270,6 +3280,7 @@ const GUIDE = [
       ['Pick your own background and text color', 'Settings \u203a Appearance has a Background & text row: two color wells, one for the page and one for the text, chosen independently of the accent. Until now the background could only be a stronger or weaker version of the accent color \u2014 you could not have, say, a warm grey page under a blue accent. You can now. Everything else \u2014 panels, raised surfaces, hover states, secondary labels \u2014 is worked out from the two colors you pick, and a Contrast slider controls how far apart they sit. If a pairing would make text hard to read, it says so and gives the actual contrast ratio, but it still applies what you chose: it warns, it does not overrule you. Clear puts you back on the theme.'],
       ['Updating shows real progress again', 'Pressing Download & install left the bar at 0% and looked frozen. The download was working the whole time \u2014 it finished normally and waited on disk \u2014 but the progress messages were being sent to the main window while the bar you were watching is in the Settings window, so nothing ever reached it. It updates properly now, and if you close Settings and come back it picks up where things actually are instead of offering to download the same 160 MB again. An update that has finished downloading installs when you quit Radiant.'],
       ['Radiant tells you what is new after it updates', 'Radiant updates itself quietly in the background, so features used to just appear with nothing to announce them. Now, the first time you open a version you have not run before, a short list of what changed is shown once. A brand-new install never sees it, and if several updates went by while your Mac was shut you get all of them, newest first. Settings \u203a Read me still has the full detail.'],
+      ['Agency builds do not update themselves', 'The agency package can be built with updates disabled, so it will not check Templeton\u2019s release feed or offer download and install controls. The rest of the app menu stays available. Canonical Radiant builds keep their normal updater.']
       ['A browser extension, so the agent works in your own Chrome', 'Settings \u203a Automation now has a small Chrome extension you install once. With it, the agent works inside the browser you are already signed into: it can list your open tabs, read the page you are looking at, take a picture of it, click things by name, and fill in fields \u2014 as you, with your logins. Chrome no longer lets any app connect to your everyday browser from outside, and it will not let Radiant install this for you either, so the panel gives you the folder and the four steps. The extension talks only to Radiant on this Mac and to nothing else; quitting Chrome or removing it unplugs it completely.'],
       ['The agent can use the Chrome you are already signed into', 'Chrome no longer lets any app attach to your everyday browser profile, so Radiant used to open a fresh, empty Chrome instead \u2014 no tabs, no extensions, signed in to nothing \u2014 and the agent would describe that one, or tell you your permissions were wrong. It now drives your real Chrome through macOS automation: it can list your open tabs, bring one to the front, read the page you are looking at, open a URL, and click things by their visible text. Ask it about \u201cmy GoDaddy tab\u201d and it can actually see it. It cannot take a picture of that browser \u2014 nothing can \u2014 so it reads the page instead and says so plainly. If macOS or Chrome needs a permission, it names the exact one.'],
       ['You can always see whether the agent is working', 'The small badge beside the agent\u2019s name says what is happening for as long as a turn is running: waiting for the model, thinking, writing, or the name of the tool it is running, with a clock. If nothing has happened for 25 seconds and no tool is running, it turns red and adds how long it has been quiet, so a stuck turn looks different from a busy one. A tool that takes minutes is not called stuck \u2014 it is named instead. There is one badge, not two.'],

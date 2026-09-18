@@ -1,9 +1,10 @@
-const { app, BrowserWindow, Menu, dialog, shell, ipcMain } = require('electron')
+const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron')
 const { autoUpdater } = require('electron-updater')
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
-const { updaterEnabledForPackage } = require('./updater-config.cjs')
+const { updaterEnabledForPackage, registerDisabledUpdater } = require('./updater-config.cjs')
+const { menuTemplate } = require('./menu.cjs')
 
 // ⚠️ A STAGED PACKAGE IS NOT NECESSARILY THE LATEST ONE.
 //
@@ -96,22 +97,15 @@ function packageMetadata () {
   try { return JSON.parse(fs.readFileSync(path.join(app.getAppPath(), 'package.json'), 'utf8')) } catch { return {} }
 }
 
+function buildMenu (checkNow, updatesEnabled) {
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate({ checkNow, updatesEnabled })))
+}
 function installUpdater ({ getWindow }) {
   if (!updaterEnabledForPackage(packageMetadata())) {
-    const disabled = () => ({
-      version: null,
-      current: app.getVersion(),
-      hasUpdate: false,
-      blocked: 'Updates are disabled for this build.'
-    })
-    ipcMain.handle('rad:check-update', async () => disabled())
-    ipcMain.handle('rad:update-state', () => ({ phase: 'disabled', percent: 0, version: null }))
-    ipcMain.handle('rad:install-location', () => ({ bundle: null, translocated: false, inApplications: false, updatable: false, disabled: true }))
-    ipcMain.on('rad:download-update', () => {})
-    ipcMain.on('rad:install-update', () => {})
-    ipcMain.on('rad:relaunch', () => { app.relaunch(); app.exit(0) })
     console.log('[radiant] updater disabled for this build')
-    return { checkNow: async () => disabled(), startAutoCheck: () => {} }
+    const updater = registerDisabledUpdater({ ipcMain, app })
+    buildMenu(updater.checkNow, false)
+    return updater
   }
 
   // Full downloads only. A slightly larger download is a fair price for never
@@ -285,31 +279,6 @@ function installUpdater ({ getWindow }) {
     if (response === 0) setImmediate(() => autoUpdater.quitAndInstall(false, true))
   })
 
-  function buildMenu () {
-    const isMac = process.platform === 'darwin'
-    const template = [
-      ...(isMac ? [{
-        label: 'Radiant',
-        submenu: [
-          { role: 'about' },
-          { label: 'Check for Updates…', click: () => checkNow(false) },
-          { type: 'separator' },
-          { role: 'services' }, { type: 'separator' },
-          { role: 'hide' }, { role: 'hideOthers' }, { role: 'unhide' },
-          { type: 'separator' }, { role: 'quit' }
-        ]
-      }] : []),
-      { role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' },
-      {
-        label: 'Help',
-        submenu: [
-          { label: 'Check for Updates…', click: () => checkNow(false) },
-          { label: 'Radiant on GitHub', click: () => shell.openExternal('https://github.com/templetongroup/radiant') }
-        ]
-      }
-    ]
-    Menu.setApplicationMenu(Menu.buildFromTemplate(template))
-  }
 
   function startAutoCheck () {
     const tick = () => { if (autoUpdatesEnabled()) checkNow(true) }
@@ -317,7 +286,7 @@ function installUpdater ({ getWindow }) {
     setInterval(tick, 6 * 60 * 60 * 1000)
   }
 
-  buildMenu()
+  buildMenu(checkNow, true)
   return { checkNow, startAutoCheck }
 }
 
