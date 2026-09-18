@@ -31,3 +31,7 @@ _None yet._
 ### 2026-09-18 — Allegretto landing, docs, app theme, and Netlify deployment — ★★★★ (round 1)
 - **Feedback:** The user rated the delivered landing page, docs, and app theme exceptional.
 - **Plan:** Ask for any specific minor tweaks; no automatic rework until identified.
+
+### 2026-09-18 — Allegretto hero placeholder — ★★★★ (round 1)
+- **Feedback:** The generated conductor-cat SVG was rejected; the requested interim direction is the existing Allegretto logo image until a final hero asset is provided.
+- **Plan:** Replace the placeholder when the user supplies the final hero image.
