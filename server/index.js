@@ -472,7 +472,8 @@ function normalizeLocalProviderUrl (raw) {
   }
   const pathname = url.pathname.replace(/\/+$/, '')
   if (!pathname || pathname === '/') url.pathname = '/v1'
-  else url.pathname = pathname
+  else if (pathname === '/v1') url.pathname = '/v1'
+  else throw new Error('Local server URLs may only use the server root or /v1')
   return url.toString().replace(/\/$/, '')
 }
 

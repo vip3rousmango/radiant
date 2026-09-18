@@ -243,8 +243,9 @@ function DesktopApp () {
     if (!window.radiantNative?.onConfigChanged) return
     return window.radiantNative.onConfigChanged(() => {
       api.getConfig().then(cfg => { setConfig(cfg); applyTheme(cfg.settings) }).catch(() => {})
+      refreshModels()
     })
-  }, [])
+  }, [refreshModels])
 
   // when the separate settings window closes, pull in any changes it made
   useEffect(() => {
