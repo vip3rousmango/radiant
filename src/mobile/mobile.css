@@ -3,7 +3,7 @@
 
    This file is loaded ONLY in the native iOS shell, from the dynamic import in
    src/main.jsx. styles.css is never loaded alongside it, and that is the whole
-   boundary: the Mac app keeps Inter, its twelve themes, its visible scrollbars
+   boundary: the Mac app uses platform fonts, its twelve themes, its visible scrollbars
    and its 13.5px body text, and the phone starts from nothing. If you find
    yourself wanting to override something from styles.css, you have loaded the
    wrong file — nothing from it is in scope here.

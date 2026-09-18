@@ -403,7 +403,7 @@ const DEFAULT_CONFIG = {
     themeId: 'radiant',
     customHue: 258,
     customChroma: 0.19,
-    fontFamily: 'inter',
+    fontFamily: 'system',
     uiScale: 1,
     customTint: 1,
     motionBg: 'off',

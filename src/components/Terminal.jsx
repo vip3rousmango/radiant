@@ -23,7 +23,7 @@ export default function Terminal ({ cwd, mode }) {
 
   useEffect(() => {
     const term = new XTerm({
-      fontFamily: "'JetBrains Mono', monospace",
+      fontFamily: "ui-monospace, 'SF Mono', Menlo, monospace",
       fontSize: 12.5,
       cursorBlink: true,
       theme: termTheme(),

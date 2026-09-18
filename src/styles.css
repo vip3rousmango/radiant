@@ -1,20 +1,14 @@
-@import '@fontsource/montserrat/800.css';
-@import '@fontsource/inter/400.css';
-@import '@fontsource/inter/500.css';
-@import '@fontsource/inter/600.css';
-@import '@fontsource/jetbrains-mono/400.css';
-@import '@fontsource/jetbrains-mono/700.css';
 
 /* ---------- tokens ----------
    Design language after beautifului.dev: near-neutral surfaces (the accent hue
    survives only as a whisper of chroma), hairline borders drawn with alpha,
-   pill chips, Inter for UI, one restrained accent from the theme system. */
+   pill chips, platform fonts for UI, one restrained accent from the theme system. */
 :root {
   --accent-h: 258;
   --accent-c: 0.11;
   --bg-tint: 1;   /* themes scale this to tint the surfaces more strongly */
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
   --radius: 10px;
 }
 
@@ -109,9 +103,9 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 code, pre, .mono { font-family: var(--font-mono); }
 ::selection { background: var(--accent-dim); }
 
-/* the RADIANT wordmark: heavy geometric caps in the accent color */
+/* the RADIANT wordmark: heavy geometric caps in the platform font */
 .wordmark {
-  font-family: 'Montserrat', var(--font-body);
+  font-family: var(--font-body);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.02em;

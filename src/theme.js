@@ -178,11 +178,10 @@ export const MODES = [
 ]
 
 export const FONTS = [
-  { id: 'inter', name: 'Inter', stack: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif" },
   { id: 'system', name: 'System', stack: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" },
   { id: 'rounded', name: 'Rounded', stack: "'SF Pro Rounded', 'Avenir Next', 'Segoe UI', sans-serif" },
   { id: 'serif', name: 'Serif', stack: "'Iowan Old Style', Georgia, 'Times New Roman', serif" },
-  { id: 'mono', name: 'Mono', stack: "'JetBrains Mono', ui-monospace, monospace" }
+  { id: 'mono', name: 'Mono', stack: "ui-monospace, 'SF Mono', Menlo, monospace" }
 ]
 
 export const UI_SCALES = [
