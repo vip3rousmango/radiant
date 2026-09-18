@@ -104,7 +104,6 @@ function installUpdater ({ getWindow }) {
   if (!updaterEnabledForPackage(packageMetadata())) {
     console.log('[radiant] updater disabled for this build')
     disableAutoUpdater(autoUpdater)
-    clearStaged('updates disabled for this build')
     const updater = registerDisabledUpdater({ ipcMain, app })
     buildMenu(updater.checkNow, false)
     return updater
