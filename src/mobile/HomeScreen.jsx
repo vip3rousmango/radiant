@@ -16,7 +16,7 @@ import { deviceWord } from './device.js'
 import usePress from './usePress.js'
 import SwipeRow from './SwipeRow.jsx'
 import { BrandMark } from './BrandSpinner.jsx'
-import wordUrl from '../assets/brand/radiant-wordmark.png'
+import wordUrl from '../assets/allegretto-wordmark.png'
 import { listChats, deleteChat, setArchived, whenLabel, onChatsChanged } from './chats.js'
 import CompanyLine from './CompanyLine.jsx'
 
@@ -118,9 +118,9 @@ export default function HomeScreen ({
   return (
     <>
       {/* The lockup IS the header — which is why the route carries no large
-          title: "Radiant" set in the nav bar above a RADIANT wordmark would be
-          the name twice. The model card that used to sit here is gone; the
-          model is named on the button that uses it. */}
+          title set in the nav bar above an Allegretto logo would be the name
+          twice. The model card that used to sit here is gone; the model is
+          named on the button that uses it. */}
       <div className="rx-home-head">
         <span className="rx-home-mark"><BrandMark size={72} /></span>
         <span
@@ -128,6 +128,7 @@ export default function HomeScreen ({
           role="img"
           aria-label={BRAND.productName}
           style={{
+            aspectRatio: '320 / 161',
             WebkitMask: `url(${wordUrl}) center / contain no-repeat`,
             mask: `url(${wordUrl}) center / contain no-repeat`
           }}

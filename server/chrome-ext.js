@@ -1,3 +1,5 @@
+import { BRAND } from './brand.js'
+
 /**
  * The other end of the Radiant browser extension.
  *
@@ -67,7 +69,7 @@ export function attachExtension (ws) {
     if (socket === ws) { socket = null; clearInterval(heartbeat); heartbeat = null }
     for (const [id, p] of pending) {
       clearTimeout(p.timer)
-      p.reject(new Error('The Radiant browser extension disconnected mid-request.'))
+      p.reject(new Error(`The ${BRAND.productName} browser extension disconnected mid-request.`))
       pending.delete(id)
     }
   }
@@ -77,7 +79,7 @@ export function attachExtension (ws) {
 
 export function callExtension (op, args = {}, timeout = 20000) {
   if (!extensionConnected()) {
-    return Promise.reject(new Error('The Radiant browser extension is not connected. Open Chrome, or install it from Settings › Chrome.'))
+    return Promise.reject(new Error(`The ${BRAND.productName} browser extension is not connected. Open Chrome, or install it from ${BRAND.productName} Settings › Chrome.`))
   }
   const id = ++seq
   return new Promise((resolve, reject) => {

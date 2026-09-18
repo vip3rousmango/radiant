@@ -3,7 +3,7 @@ const { autoUpdater } = require('electron-updater')
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
-const { updaterEnabledForPackage, disableAutoUpdater, registerDisabledUpdater } = require('./updater-config.cjs')
+const { updaterEnabledForPackage, configureUpdater, disableAutoUpdater, registerDisabledUpdater } = require('./updater-config.cjs')
 const { menuTemplate } = require('./menu.cjs')
 
 // ⚠️ A STAGED PACKAGE IS NOT NECESSARILY THE LATEST ONE.
@@ -35,10 +35,10 @@ function clearStaged (why) {
   if (!fs.existsSync(dir)) return false
   try {
     fs.rmSync(dir, { recursive: true, force: true })
-    console.log(`[radiant] discarded staged update (${why})`)
+    console.log(`[allegretto] discarded staged update (${why})`)
     return true
   } catch (e) {
-    console.warn('[radiant] could not discard staged update:', e.message)
+    console.warn('[allegretto] could not discard staged update:', e.message)
     return false
   }
 }
@@ -64,7 +64,8 @@ function cmpVersion (a, b) {
 // v0.6.91, which worked.
 function autoUpdatesEnabled () {
   try {
-    const cfg = JSON.parse(fs.readFileSync(path.join(require('os').homedir(), '.radiant', 'config.json'), 'utf8'))
+    const configDir = process.env.ALLEGRETTO_CONFIG_DIR || path.join(os.homedir(), '.allegretto')
+    const cfg = JSON.parse(fs.readFileSync(path.join(configDir, 'config.json'), 'utf8'))
     return cfg.settings?.autoUpdateCheck !== false
   } catch { return true }
 }
@@ -101,8 +102,19 @@ function buildMenu (checkNow, updatesEnabled) {
   Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate({ checkNow, updatesEnabled })))
 }
 function installUpdater ({ getWindow }) {
-  if (!updaterEnabledForPackage(packageMetadata())) {
-    console.log('[radiant] updater disabled for this build')
+  const metadata = packageMetadata()
+  if (!updaterEnabledForPackage(metadata)) {
+    console.log('[allegretto] updater disabled for this build')
+    disableAutoUpdater(autoUpdater)
+    const updater = registerDisabledUpdater({ ipcMain, app })
+    buildMenu(updater.checkNow, false)
+    return updater
+  }
+
+  // Never inherit a feed from the upstream fork or from an unspecified builder
+  // default. Production builds must carry an explicit Allegretto target.
+  if (!configureUpdater(autoUpdater, { packageMetadata: metadata })) {
+    console.warn('[allegretto] updater disabled: no valid Allegretto update target')
     disableAutoUpdater(autoUpdater)
     const updater = registerDisabledUpdater({ ipcMain, app })
     buildMenu(updater.checkNow, false)
@@ -137,12 +149,12 @@ function installUpdater ({ getWindow }) {
   // Repair a damaged bundle before anything else looks at versions.
   const inner = innerVersion()
   if (inner && cmpVersion(inner, app.getVersion()) !== 0) {
-    console.warn(`[radiant] damaged install: bundle says ${app.getVersion()}, code is ${inner} — repairing`)
+    console.warn(`[allegretto] damaged install: bundle says ${app.getVersion()}, code is ${inner} — repairing`)
     repairing = true
     clearStaged('bundle is inconsistent')
     autoUpdater.checkForUpdates().catch(e => {
       repairing = false
-      console.warn('[radiant] could not reach the update feed to repair:', e.message)
+      console.warn('[allegretto] could not reach the update feed to repair:', e.message)
     })
   }
 
@@ -193,7 +205,7 @@ function installUpdater ({ getWindow }) {
       const loc = installLocation()
       const r = await autoUpdater.checkForUpdates()
       const v = r && r.updateInfo && r.updateInfo.version
-      if (loc.translocated) return { version: v, current: app.getVersion(), hasUpdate: Boolean(v) && cmpVersion(v, app.getVersion()) > 0, blocked: `Radiant is running from ${loc.bundle.includes('.dmg') || /Volumes/.test(loc.bundle) ? 'the disk image' : 'a temporary location'}, so it cannot replace itself. Drag Radiant into the Applications folder and open it from there; updates work from then on.` }
+      if (loc.translocated) return { version: v, current: app.getVersion(), hasUpdate: Boolean(v) && cmpVersion(v, app.getVersion()) > 0, blocked: `Allegretto is running from ${loc.bundle.includes('.dmg') || /Volumes/.test(loc.bundle) ? 'the disk image' : 'a temporary location'}, so it cannot replace itself. Drag Allegretto into the Applications folder and open it from there; updates work from then on.` }
       // ⚠️ COMPARE, DO NOT JUST TEST INEQUALITY. `v !== current` is also true
       // when the published release is OLDER than what is installed — a pulled
       // or rolled-back release would have been offered as an "update" that
@@ -227,8 +239,8 @@ function installUpdater ({ getWindow }) {
         try {
           await dialog.showMessageBox(getWindow() || undefined, {
             type: 'warning',
-            message: `Radiant ${v} is available, but this copy cannot update itself`,
-            detail: 'Radiant is running from the disk image or a temporary location, so macOS will not let it replace itself. Quit, drag Radiant into the Applications folder, and open it from there — it updates on its own after that.',
+            message: `Allegretto ${v} is available, but this copy cannot update itself`,
+            detail: 'Allegretto is running from the disk image or a temporary location, so macOS will not let it replace itself. Quit, drag Allegretto into the Applications folder, and open it from there — it updates on its own after that.',
             buttons: ['OK']
           })
         } finally { dialogOpen = false }
@@ -251,15 +263,15 @@ function installUpdater ({ getWindow }) {
       try {
         ;({ response } = await dialog.showMessageBox(getWindow() || undefined, {
           type: 'info',
-          message: `Radiant ${v} is available`,
-          detail: `You have ${app.getVersion()}. Download it now? Radiant will install it and relaunch when it's ready.`,
+          message: `Allegretto ${v} is available`,
+          detail: `You have ${app.getVersion()}. Download it now? Allegretto will install it and relaunch when it's ready.`,
           buttons: ['Download', 'Later'], defaultId: 0, cancelId: 1
         }))
       } finally { dialogOpen = false }
       promptedFor = v
       if (response === 0) autoUpdater.downloadUpdate()
     } else if (!silent) {
-      dialog.showMessageBox(getWindow() || undefined, { type: 'info', message: "You're up to date", detail: `Radiant ${app.getVersion()} is the latest version.`, buttons: ['OK'] })
+      dialog.showMessageBox(getWindow() || undefined, { type: 'info', message: "You're up to date", detail: `Allegretto ${app.getVersion()} is the latest version.`, buttons: ['OK'] })
     }
   }
 
@@ -272,7 +284,7 @@ function installUpdater ({ getWindow }) {
     try {
       ;({ response } = await dialog.showMessageBox(getWindow() || undefined, {
         type: 'info',
-        message: `Radiant ${info.version} is ready`,
+        message: `Allegretto ${info.version} is ready`,
         detail: 'Restart now to finish updating?',
         buttons: ['Restart now', 'Later'], defaultId: 0, cancelId: 1
       }))

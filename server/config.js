@@ -7,19 +7,19 @@ import crypto from 'crypto'
 import { fileURLToPath } from 'url'
 import { BRAND } from './brand.js'
 
-// ── where Radiant keeps everything ──────────────────────────────────────────
+// ── where Allegretto keeps everything ───────────────────────────────────────
 // Config, projects, sessions and memory all live in one directory. Point it at
 // a folder your other Macs already see — iCloud Drive, Dropbox, a synced
-// volume — and your setup follows you without Radiant growing an account
+// volume — and your setup follows you without Allegretto growing an account
 // system, a server, or a copy of your data on someone else's disk.
 //
 // ⚠️ THE POINTER CANNOT LIVE INSIDE THE DIRECTORY IT POINTS AT. That is the
 // obvious place for it and it is circular: once the data moves, the file
 // naming the new location has moved with it and cannot be found. It sits in
 // the home directory instead, next to where the default would have been.
-export const DIR_POINTER = path.join(os.homedir(), '.radiant-location')
+export const DIR_POINTER = path.join(os.homedir(), '.allegretto-location')
 
-export function defaultDataDir () { return path.join(os.homedir(), '.radiant') }
+export function defaultDataDir () { return path.join(os.homedir(), '.allegretto') }
 
 // ⚠️ SOME SETTINGS DESCRIBE THE MAC, NOT THE PERSON. The synced folder carries
 // one settings object, which is right for a theme and wrong for anything that
@@ -32,7 +32,7 @@ export function defaultDataDir () { return path.join(os.homedir(), '.radiant') }
 // can never sync no matter which folder is shared. Everything else stays in
 // config.json and follows him between Macs, which is the point of syncing.
 export const MACHINE_KEYS = ['defaultModel', 'defaultProvider', 'defaultCwd']
-const MACHINE_FILE = path.join(os.homedir(), '.radiant-machine.json')
+const MACHINE_FILE = path.join(os.homedir(), '.allegretto-machine.json')
 
 export function loadMachineSettings () {
   try {
@@ -55,7 +55,7 @@ function reachable (dir) {
     return true
   } catch (e) {
     if (e && (e.code === 'ETIMEDOUT' || e.signal)) {
-      console.warn('[radiant] data folder did not respond in 3s, treating as unreachable:', dir)
+      console.warn('[allegretto] data folder did not respond in 3s, treating as unreachable:', dir)
     }
     return false
   }
@@ -100,7 +100,7 @@ function resolveDataDir () {
     const p = fs.readFileSync(DIR_POINTER, 'utf8').trim()
     // A pointer at a folder that has gone away (an unmounted volume, a signed
     // out cloud drive) must NOT silently start a blank profile: that reads as
-    // "Radiant lost all my work". Fall back to the default and let the UI say
+    // "Allegretto lost all my work". Fall back to the default and let the UI say
     // the configured folder is unreachable.
     //
     // ⚠️ existsSync ITSELF CAN HANG. A path inside a wedged File Provider — an
@@ -111,7 +111,7 @@ function resolveDataDir () {
     //
     // A blocked syscall cannot be raced from inside this process, so the probe
     // happens in a child that can be killed. Slow means unreachable here, which
-    // is the safe reading: worst case Radiant starts on the local folder and
+    // is the safe reading: worst case Allegretto starts on the local folder and
     // says the configured one is unreachable, which is recoverable. Freezing is
     // not.
     if (p && reachable(p)) return p
@@ -372,6 +372,7 @@ const DEFAULT_CONFIG = {
   // Built-in agents the user removed; without this they return on every load.
   removedAgents: [],
   agents: [
+    // Keep the upstream id and icon stable; only the display name follows the agency brand.
     { id: 'agent-radiant', name: BRAND.assistantName, emoji: '✦', icon: 'radiant', hue: null, persona: '', model: null, provider: null, skills: [], useTools: true, builtin: true },
     { id: 'agent-reviewer', name: 'Reviewer', emoji: '🔍', icon: 'search', hue: null, persona: 'You are a meticulous senior code reviewer. Hunt for bugs, edge cases, security issues, race conditions, and unclear code. Be specific — cite files and lines. Prioritize correctness over style, and call out what you are NOT sure about.', model: null, provider: null, skills: [], useTools: true, builtin: true },
     { id: 'agent-architect', name: 'Architect', emoji: '📐', icon: 'compass', hue: null, persona: 'You are a software architect. Before writing code, think about structure, boundaries, data flow, and tradeoffs. Propose a design, note alternatives, and only then implement. Favor simple, evolvable designs.', model: null, provider: null, skills: [], useTools: true, builtin: true },

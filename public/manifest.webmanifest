@@ -1,7 +1,7 @@
 {
-  "name": "Radiant",
-  "short_name": "Radiant",
-  "description": "A Templeton Technologies coding harness",
+  "name": "Allegretto",
+  "short_name": "Allegretto",
+  "description": "The agent orchestrator",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0e1121",

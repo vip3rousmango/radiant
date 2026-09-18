@@ -29,7 +29,10 @@
  * settings.voice.enabled is on, and a missing key is a sentence rather than a
  * 4xx.
  */
+import { BRAND } from './brand.js'
 import { liveInstructions, seedFrom } from './voice-text.js'
+
+const brandedLiveInstructions = options => liveInstructions(options).replace(/\bRadiant\b/g, BRAND.productName)
 
 // From the model list, not the blog post. 3.8 Live is Google's recommended
 // default; the extended-thinking variant trades latency for reasoning.
@@ -48,7 +51,7 @@ const AUTH_TOKENS_URL = 'https://generativelanguage.googleapis.com/v1beta/auth_t
 /** The one tool Gemini gets. Calling it IS a delegation to Radiant's own turn. */
 export const ASK_RADIANT = {
   name: 'ask_radiant',
-  description: 'Hand a request to Radiant, the assistant running on the user\'s computer. Use it for anything involving their files, code, commands, the web, earlier conversations, or facts you are not certain of — which is almost everything. Radiant answers with the real result.',
+  description: `Hand a request to ${BRAND.productName}, the assistant running on the user's computer. Use it for anything involving their files, code, commands, the web, earlier conversations, or facts you are not certain of — which is almost everything. ${BRAND.productName} answers with the real result.`,
   parameters: {
     type: 'object',
     properties: {
@@ -99,7 +102,7 @@ export function geminiLiveModel (settings) {
 export function geminiSetupFrame ({ session, settings, host }) {
   const voice = GEMINI_LIVE_VOICES.includes(settings?.voice?.geminiVoice) ? settings.voice.geminiVoice : 'Kore'
   const seed = seedFrom(session?.messages || [])
-  const base = liveInstructions({ title: session?.title, model: session?.model, host })
+  const base = brandedLiveInstructions({ title: session?.title, model: session?.model, host })
   const instructions = [
     base,
     'Call ask_radiant for anything real. Do not answer from your own knowledge when the question is about their work.',

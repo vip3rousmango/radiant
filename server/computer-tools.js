@@ -2,6 +2,8 @@ import { desktop, screenshot as screenScreenshot, screenSize, helperAvailable, p
 import { web, browserAvailable, chromeReachable } from './browser.js'
 import * as osa from './chrome-osa.js'
 import { ext, extensionConnected } from './chrome-ext.js'
+import { BRAND } from './brand.js'
+
 // ⚠️ A PAGE READ THROUGH THE BROWSER IS AS UNTRUSTED AS ONE READ WITH fetch_url —
 // more so, because this one comes from the Chrome the user is signed into.
 // tools.js wrapped every web read and these did not, so the same injected text
@@ -27,11 +29,11 @@ export const COMPUTER_TOOL_DEFS = [
   { name: 'browser_navigate', description: 'Open a URL in the controlled browser. Returns a screenshot of the page.', input_schema: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } },
   { name: 'browser_screenshot', description: 'Take a screenshot of the current browser page.', input_schema: { type: 'object', properties: {}, required: [] } },
   { name: 'browser_click', description: 'Click in the browser at pixel coordinates from the latest browser screenshot (1280x800 space).', input_schema: { type: 'object', properties: { x: { type: 'number' }, y: { type: 'number' } }, required: ['x', 'y'] } },
-  { name: 'browser_type', description: "Type text into the browser. With the Radiant extension installed this types into the user's own signed-in Chrome: give a CSS selector for the field, or leave it out to use whatever is focused, and set submit to press Enter afterwards.", input_schema: { type: 'object', properties: { text: { type: 'string' }, selector: { type: 'string' }, submit: { type: 'boolean' }, tabId: { type: 'number' } }, required: ['text'] } },
+  { name: 'browser_type', description: `Type text into the browser. With the ${BRAND.productName} extension installed this types into the user's own signed-in Chrome: give a CSS selector for the field, or leave it out to use whatever is focused, and set submit to press Enter afterwards.`, input_schema: { type: 'object', properties: { text: { type: 'string' }, selector: { type: 'string' }, submit: { type: 'boolean' }, tabId: { type: 'number' } }, required: ['text'] } },
   { name: 'browser_key', description: 'Press a key or combo in the browser, e.g. "Enter", "cmd+a".', input_schema: { type: 'object', properties: { keys: { type: 'string' } }, required: ['keys'] } },
   { name: 'browser_scroll', description: 'Scroll the browser page vertically. Positive dy scrolls up, negative down.', input_schema: { type: 'object', properties: { dy: { type: 'number' } }, required: ['dy'] } },
   { name: 'browser_read', description: "Get the visible text of a page in the user's own Chrome. Defaults to the tab they are looking at; pass tabId from browser_tabs for another one.", input_schema: { type: 'object', properties: { tabId: { type: 'number' } }, required: [] } },
-  { name: 'browser_tabs', description: "List the tabs open in the user's own signed-in Chrome, with window and tab numbers. Use this FIRST when the user refers to a page they already have open ('my GoDaddy tab', 'the dashboard I'm looking at') — those pages are logged in, and the browser Radiant can launch itself is not.", input_schema: { type: 'object', properties: {}, required: [] } },
+  { name: 'browser_tabs', description: `List the tabs open in the user's own signed-in Chrome, with window and tab numbers. Use this FIRST when the user refers to a page they already have open ('my GoDaddy tab', 'the dashboard I'm looking at') — those pages are logged in, and the browser ${BRAND.productName} can launch itself is not.`, input_schema: { type: 'object', properties: {}, required: [] } },
   { name: 'browser_select_tab', description: "Bring one of the user's own Chrome tabs to the front, by the window and tab numbers from browser_tabs. Afterwards browser_read and browser_click_text act on it.", input_schema: { type: 'object', properties: { tabId: { type: 'number' }, window: { type: 'number' }, tab: { type: 'number' } }, required: [] } },
   { name: 'browser_click_text', description: "Click an element in the user's own Chrome by its visible text or a CSS selector — more reliable than pixel coordinates, and it works on the signed-in browser. Give either text or selector.", input_schema: { type: 'object', properties: { text: { type: 'string' }, selector: { type: 'string' }, tabId: { type: 'number' } }, required: [] } },
   { name: 'browser_network', description: 'List the XHR/fetch JSON API calls the current site has made — its hidden API. Use it AFTER performing an action in the browser (search, load more, submit) to see the underlying requests (method, URL, headers, body, response sample), then recreate them as a plain HTTP client. Sensitive header values (cookies, tokens) are shown as present-but-hidden. Optional filter matches the URL.', input_schema: { type: 'object', properties: { filter: { type: 'string', description: 'Only calls whose URL contains this substring (optional).' } }, required: [] } },
@@ -195,7 +197,7 @@ export async function runComputerTool (name, input) {
   } catch (e) {
     // surface the common macOS permission failure clearly
     const msg = /could not create image|not authorized|not permitted/i.test(e.message)
-      ? `${e.message} — grant Screen Recording (screenshots) and Accessibility (clicks/keys) to Radiant in System Settings → Privacy & Security.`
+      ? `${e.message} — grant Screen Recording (screenshots) and Accessibility (clicks/keys) to ${BRAND.productName} in System Settings → Privacy & Security.`
       : e.message
     return { content: `Error: ${msg}` }
   }

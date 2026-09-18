@@ -1,4 +1,5 @@
 import express from 'express'
+import { BRAND } from './brand.js'
 import { listGatewayAgents } from './openclaw.js'
 import http from 'http'
 import crypto from 'crypto'
@@ -410,7 +411,7 @@ app.get(/^\/(?!api).*/, (req, res, next) => {
 })
 
 app.use('/api', (req, res, next) => {
-  if (!tokenOk(req)) return res.status(401).json({ error: 'This Radiant server requires an access token.' })
+  if (!tokenOk(req)) return res.status(401).json({ error: `This ${BRAND.productName} server requires an access token.` })
   // Presented a good token by header? Leave a cookie so this device stays signed
   // in even if the page's stored copy is cleared.
   if (SHARE_TOKEN && !isLocalRequest(req) && cookieToken(req) !== SHARE_TOKEN) setTokenCookie(res)
@@ -724,7 +725,7 @@ function chatToMarkdown (s) {
       out.push('## You', '', m.text || '', '')
       for (const a of m.attachments || []) out.push(`_[attached: ${a.name || a.kind}]_`, '')
     } else {
-      out.push('## Radiant', '')
+      out.push(`## ${BRAND.productName}`, '')
       for (const p of m.parts || []) {
         if (p.type === 'text') out.push(p.text || '', '')
         // A tool call is a fact about what the agent DID; losing it would make
@@ -755,7 +756,7 @@ app.get('/api/chats/export', (req, res) => {
   const chats = listSessions().map(r => loadSession(r.id)).filter(Boolean)
   const stamp = new Date().toISOString().slice(0, 10)
   res.json({
-    filename: `radiant-chats-${stamp}.json`,
+    filename: `${BRAND.productName.toLowerCase()}-chats-${stamp}.json`,
     mime: 'application/json',
     count: chats.length,
     content: JSON.stringify({ radiantChats: 1, exportedAt: new Date().toISOString(), chats }, null, 2)
@@ -767,7 +768,7 @@ app.post('/api/chats/import', (req, res) => {
   const incoming = Array.isArray(body.chats) ? body.chats
     : (body.messages ? [body]
     : (looksLikeChatGPT(body) ? fromChatGPT(body) : null))
-  if (!incoming) return res.status(400).json({ error: 'That file does not look like a Radiant or ChatGPT chat export.' })
+  if (!incoming) return res.status(400).json({ error: `That file does not look like a ${BRAND.productName} or ChatGPT chat export.` })
 
   // ⚠️ IMPORTED CHATS NEED A HOME OR THEY ARE LOST ON ARRIVAL. Without this
   // they land loose in the sidebar, indistinguishable from your own, and with
@@ -831,11 +832,11 @@ app.post('/api/chats/import', (req, res) => {
 })
 
 // ── where the data lives ────────────────────────────────────────────────────
-// Radiant has no account and no server of ours. "Sync across devices" is
+// Allegretto has no account and no server of ours. "Sync across devices" is
 // therefore a folder question, not an identity question: put the data
 // directory somewhere your other Macs already see.
 // ⚠️ SAY WHEN A SECOND MAC IS ON THIS FOLDER. Settings has always warned that
-// "two copies of Radiant writing to the same folder at once will overwrite each
+// "two copies of Allegretto writing to the same folder at once will overwrite each
 // other" — in a hint, inside a collapsed section, which nobody reads before it
 // matters. Nothing detected it, so the first sign was work quietly going
 // missing. This notices, and deliberately does NOT block: refusing to start
@@ -847,7 +848,7 @@ function refreshLock (first) {
   const r = first ? claimLock(RADIANT_DIR, { host: LOCK_HOST }) : beatLock(RADIANT_DIR, { host: LOCK_HOST })
   const was = sharing?.host || null
   sharing = r.contested ? r.holder : null
-  if (sharing && sharing.host !== was) console.log(`[radiant] ${describeHolder(sharing, LOCK_HOST)}`)
+  if (sharing && sharing.host !== was) console.log(`[allegretto] ${describeHolder(sharing, LOCK_HOST)}`)
   return sharing
 }
 refreshLock(true)
@@ -913,7 +914,7 @@ app.post('/api/data-dir', (req, res) => {
 
   try {
     fs.mkdirSync(dest, { recursive: true })
-    const probe = path.join(dest, '.radiant-write-test')
+    const probe = path.join(dest, '.allegretto-write-test')
     fs.writeFileSync(probe, 'ok'); fs.rmSync(probe)
   } catch (e) {
     // Say which kind of failure it is. "Cannot write to that folder: EPERM" is
@@ -921,7 +922,7 @@ app.post('/api/data-dir', (req, res) => {
     // means the service is signed out. Both were previously one opaque line.
     const code = e?.code || ''
     const why = /EPERM|EACCES/.test(code)
-      ? 'macOS would not let Radiant write there. If this is a managed Mac, that folder may be restricted.'
+      ? 'macOS would not let Allegretto write there. If this is a managed Mac, that folder may be restricted.'
       : /ENOENT|ENOTDIR/.test(code)
         ? 'That folder does not exist and could not be created. If it is a cloud folder, check the service is signed in.'
         : e.message
@@ -985,7 +986,7 @@ app.get('/api/sync-targets', (req, res) => {
   const push = (label, dir, note) => {
     if (!dir || seen.has(dir)) return
     seen.add(dir)
-    out.push({ label, path: path.join(dir, 'Radiant'), note })
+    out.push({ label, path: path.join(dir, 'Allegretto'), note })
   }
   const addIfPresent = (label, dir) => { try { if (dir && fs.existsSync(dir)) push(label, dir) } catch {} }
 
@@ -1148,7 +1149,7 @@ function refreshImportedAvatars (cfg) {
   if (changed) saveConfig(cfg)
   return changed
 }
-if (refreshImportedAvatars(config)) console.log('[radiant] refreshed imported agent avatars')
+if (refreshImportedAvatars(config)) console.log(`[${BRAND.productName.toLowerCase()}] refreshed imported agent avatars`)
 
 function hexToHue (hex) {
   const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim())
@@ -1785,7 +1786,7 @@ app.post('/api/browser/enable', async (req, res) => {
     return res.status(400).json({
       error: IS_MAC
         ? 'Google Chrome is not installed.'
-        : 'Neither Google Chrome nor Chromium was found. Install one, or use the Radiant extension instead — it drives the browser you already have.'
+        : `Neither Google Chrome nor Chromium was found. Install one, or use the ${BRAND.productName} extension instead — it drives the browser you already have.`
     })
   }
   try {
@@ -2093,7 +2094,7 @@ app.post('/api/pull', async (req, res) => {
 // Download exact GGUF file(s) straight from Hugging Face (the way LM Studio does),
 // then register them with Ollama via `ollama create`. This sidesteps Ollama's
 // fragile registry tag-matching entirely and handles sharded quants too.
-const DL_DIR = path.join(os.homedir(), '.radiant', 'downloads')
+const DL_DIR = path.join(os.homedir(), '.allegretto', 'downloads')
 const hfUrl = (repo, file) => `https://huggingface.co/${repo}/resolve/main/${encodeURIComponent(file)}?download=true`
 
 // Downloads run detached from the request that starts them and are tracked here,
@@ -3732,8 +3733,8 @@ if (SHARE_ENABLED) {
   // Try to raise the front door, then find out the truth either way.
   try { enableTailscaleServe(PORT) } catch { /* never block startup */ }
   refreshRemoteUrl()
-    .then(u => { if (u) console.log(`radiant reachable from anywhere at ${u}`) })
+    .then(u => { if (u) console.log(`${BRAND.productName} reachable from anywhere at ${u}`) })
     .catch(() => {})
 }
 
-ready.then(port => console.log(`radiant server listening on http://${BIND_HOST}:${port}${SHARE_ENABLED ? ' (shared — token required for remote clients)' : ''}`))
+ready.then(port => console.log(`${BRAND.productName} server listening on http://${BIND_HOST}:${port}${SHARE_ENABLED ? ' (shared — token required for remote clients)' : ''}`))

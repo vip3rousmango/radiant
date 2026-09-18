@@ -1,4 +1,4 @@
-// Remembering where a window was, so Radiant reopens the size you left it.
+// Remembering where a window was, so Allegretto reopens the size you left it.
 //
 // Kept in its own file rather than config.json: the server owns that file and
 // rewrites it on every settings change, so two writers would race and lose
@@ -7,7 +7,7 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 
-const FILE = path.join(os.homedir(), '.radiant', 'window-state.json')
+const FILE = path.join(os.homedir(), '.allegretto', 'window-state.json')
 
 function readAll () {
   try { return JSON.parse(fs.readFileSync(FILE, 'utf8')) || {} } catch { return {} }

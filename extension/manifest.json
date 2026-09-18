@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Radiant Browser Bridge",
+  "name": "Allegretto Browser Bridge",
   "version": "0.9.14",
-  "description": "Lets Radiant see and act in the Chrome you are already signed into.",
+  "description": "Lets Allegretto see and act in the Chrome you are already signed into.",
   "permissions": [
     "tabs",
     "scripting",
@@ -16,7 +16,7 @@
     "service_worker": "sw.js"
   },
   "action": {
-    "default_title": "Radiant — click for connection status",
+    "default_title": "Allegretto — click for connection status",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icon16.png",

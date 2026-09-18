@@ -9,7 +9,7 @@ const windowState = require('./window-state.cjs')
 // window chrome follows the app's own light/dark setting, not the OS
 function savedMode () {
   try {
-    const cfg = JSON.parse(fs.readFileSync(path.join(os.homedir(), '.radiant', 'config.json'), 'utf8'))
+    const cfg = JSON.parse(fs.readFileSync(path.join(os.homedir(), '.allegretto', 'config.json'), 'utf8'))
     return cfg.settings?.mode === 'light' ? 'light' : 'dark'
   } catch { return 'dark' }
 }
@@ -91,7 +91,7 @@ ipcMain.handle('rad:pick-path', async (e, { current, title, kind } = {}) => {
 ipcMain.handle('rad:save-file', async (e, { name, content } = {}) => {
   const res = await dialog.showSaveDialog(win || undefined, {
     title: 'Save',
-    defaultPath: path.join(os.homedir(), 'Downloads', name || 'radiant-export'),
+    defaultPath: path.join(os.homedir(), 'Downloads', name || 'allegretto-export'),
     properties: ['createDirectory']
   })
   if (res.canceled || !res.filePath) return null
@@ -117,7 +117,7 @@ ipcMain.on('rad:open-settings', async (e, tab) => {
     ...setState.bounds,
     minWidth: 720,
     minHeight: 520,
-    title: 'Radiant Settings',
+    title: 'Allegretto Settings',
     backgroundColor: lastBg || (nativeTheme.themeSource === 'light' ? '#f5f5f6' : '#141517'),
     // ⚠️ NO `parent`. On macOS a child window is ATTACHED to its parent: it floats
     // above it always, and it MOVES WITH IT — drag the main window and Settings
@@ -184,7 +184,7 @@ async function createWindow () {
     ...state.bounds,
     minWidth: 900,
     minHeight: 600,
-    title: 'Radiant',
+    title: 'Allegretto',
     // ⚠️ NO NATIVE TITLE BAR, SO THE THEME REACHES THE TOP OF THE WINDOW. macOS
     // draws its own opaque strip by default, which stayed black above a green app
     // and could not be coloured. Tony: "the top bar is black. cant we make it
@@ -250,6 +250,7 @@ async function toggleHud () {
   hudWin = new BrowserWindow({
     width: W,
     height: H,
+    title: 'Allegretto HUD',
     // Top-right of the screen it was summoned on, clear of the menu bar.
     x: x + width - W - 24,
     y: y + 24,
@@ -308,7 +309,7 @@ ipcMain.on('rad:notify', (e, { title, body, sessionId } = {}) => {
   const bounce = () => { try { app.dock?.bounce('informational') } catch {} }
   if (!Notification.isSupported()) return bounce()
   try {
-    const n = new Notification({ title: title || 'Radiant', body: body || '' })
+    const n = new Notification({ title: title || 'Allegretto', body: body || '' })
     n.on('click', () => raise(sessionId))
     n.on('failed', err => { console.warn('[radiant] notification refused:', err?.message || err); bounce() })
     n.show()

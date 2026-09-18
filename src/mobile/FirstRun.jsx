@@ -1,5 +1,5 @@
 /**
- * FirstRun — the first five seconds of Radiant, and the only screen that is
+ * FirstRun — the first five seconds of Allegretto, and the only screen that is
  * allowed to be a piece of design rather than a piece of iOS.
  *
  * THE HANDOFF IS THE TRICK. The launch image (Splash.imageset, built by
@@ -18,8 +18,7 @@ import { BRAND } from '../../server/brand.js'
 import { deviceWord } from './device.js'
 import usePress from './usePress.js'
 import { BrandMark } from './BrandSpinner.jsx'
-import wordUrl from '../assets/brand/radiant-wordmark.png'
-import ttUrl from '../assets/brand/templeton-tech-mark.png'
+import wordUrl from '../assets/allegretto-wordmark.png'
 import CompanyLine from './CompanyLine.jsx'
 
 export default function FirstRun ({ onChooseModel, onStartChat, hasModel, appleReady }) {
@@ -55,15 +54,14 @@ export default function FirstRun ({ onChooseModel, onStartChat, hasModel, appleR
           <BrandMark size={132} className="rx-intro-mark-img" />
         </span>
 
-        {/* Artwork, not type — the wordmark is the logo, not a font choice. But
-            masked rather than drawn, so it takes the theme color the way the
-            Mac's .wordmark does. Its alpha IS the letterforms, so the shapes
-            are still exactly the brand's. */}
+        {/* Supplied Allegretto artwork, not type — the logo keeps its own
+            proportions instead of being stretched into the square mark box. */}
         <span
           className="rx-intro-word"
           role="img"
           aria-label={BRAND.productName}
           style={{
+            aspectRatio: '320 / 161',
             WebkitMask: `url(${wordUrl}) center / contain no-repeat`,
             mask: `url(${wordUrl}) center / contain no-repeat`
           }}
@@ -104,29 +102,11 @@ export default function FirstRun ({ onChooseModel, onStartChat, hasModel, appleR
         </button>
       </div>
 
-      {/* The site's footer, on the app's first screen.
-          radiant-site/index.html `.footer-fine`: the line, then the Templeton
-          Technologies mark under it, centered. Tony asked for this screen to
-          carry what the web splash carries.
-
-          ⚠️ THE MARK KEEPS ITS OWN COLORS. Every other brand element here is
-          masked so it follows the user's accent — that is right for Radiant's
-          own swirl, and wrong for this: it is a different company's logo, and
-          recoloring it green-to-whatever is exactly the thing you do not do to
-          someone's mark. It is an <img>, composited as drawn.
-
-          It works on this ground because it is the SAME ground: the site sets
-          oklch(0.15 0.018 262) behind it and so does this screen, so the mark
-          is being used in the condition it was approved in. */}
+      {/* The site's footer, on the app's first screen. CompanyLine carries the
+          Allegretto attribution in the same place as the web splash, without
+          introducing a second publisher mark. */}
       <div className="rx-intro-footer">
         <CompanyLine className="rx-intro-byline" />
-        <img
-          className="rx-intro-tt"
-          src={ttUrl}
-          alt={BRAND.publisherName}
-          width="844"
-          height="180"
-        />
       </div>
     </div>
   )

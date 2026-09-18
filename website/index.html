@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b0c16">
+    <meta name="description" content="Allegretto is a local-first agent orchestrator by Virtually(Creative).">
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <title>Allegretto — The agent orchestrator</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+    <header class="site-header">
+      <div class="container nav">
+        <a class="brand" href="./" aria-label="Allegretto home">
+          <img src="assets/allegretto-mark.png" width="34" height="34" alt="">
+          <span>Allegretto</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#how-it-works">How it works</a>
+          <a href="#privacy">Privacy</a>
+          <a href="#status">Status</a>
+          <a class="nav-cta" href="privacy.html">Data policy</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="content">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-inner">
+          <p class="kicker">Virtually(Creative) presents</p>
+          <h1 id="hero-title">Make room for<br><em>better agency.</em></h1>
+          <p class="hero-lead">Allegretto is a local-first agent orchestrator for people who want capable models, useful tools, and a clear line between what happens on their machine and what leaves it.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#how-it-works">Explore the architecture</a>
+            <a class="button button-secondary" href="privacy.html">Read the data policy</a>
+          </div>
+          <p class="hero-note"><strong>Internal testing:</strong> this is currently an unsigned build. There is no public binary download or production update feed yet.</p>
+        </div>
+      </section>
+
+      <section class="section" id="how-it-works" aria-labelledby="architecture-title">
+        <div class="container">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">The agent orchestrator</p>
+              <h2 id="architecture-title">A calm control surface for complex work.</h2>
+            </div>
+            <p class="section-intro">Allegretto keeps the plan visible, the model choice explicit, and every side effect behind a tool boundary you can inspect. It is not a chat box with hidden automation bolted on.</p>
+          </div>
+          <div class="grid-3">
+            <article class="card">
+              <img class="card-mark" src="assets/allegretto-mark.png" width="39" height="39" alt="">
+              <h3>Orchestrate locally</h3>
+              <p>The app owns the conversation, context, approvals, and run state on your machine. Stop, edit, or redirect work without waiting for a remote control plane.</p>
+            </article>
+            <article class="card">
+              <img class="card-mark" src="assets/allegretto-mark.png" width="39" height="39" alt="">
+              <h3>Choose the boundary</h3>
+              <p>Use an on-device model for private work, or connect a provider with your own key when the task needs a larger model. The active model is always named.</p>
+            </article>
+            <article class="card">
+              <img class="card-mark" src="assets/allegretto-mark.png" width="39" height="39" alt="">
+              <h3>Make action legible</h3>
+              <p>Tools have names, inputs, and approvals. Workflows show their steps and dependencies before they run, so agency remains something you can reason about.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tint" aria-labelledby="provider-title">
+        <div class="container split">
+          <div>
+            <p class="eyebrow">Models, not mystery</p>
+            <h2 id="provider-title">The model is a component. The agency is yours.</h2>
+            <p class="split-lead">Allegretto separates the model/provider boundary from the work it coordinates. Swap models without losing your tools, workflows, or local context.</p>
+          </div>
+          <ul class="points">
+            <li class="point">
+              <span class="point-icon" aria-hidden="true">01</span>
+              <div><h3>Local models stay local</h3><p>When a model runs on your device, its prompt and response remain there. No Allegretto account or hosted inference service is required.</p></div>
+            </li>
+            <li class="point">
+              <span class="point-icon" aria-hidden="true">02</span>
+              <div><h3>Provider calls are direct</h3><p>For a hosted model, your request goes to the provider you selected using your own credentials. Virtually(Creative) does not proxy or read it.</p></div>
+            </li>
+            <li class="point">
+              <span class="point-icon" aria-hidden="true">03</span>
+              <div><h3>Context follows the task</h3><p>Models can propose and explain; the orchestrator decides which context, tools, and approvals belong to the next step.</p></div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="tools-title">
+        <div class="container">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Tools and workflows</p>
+              <h2 id="tools-title">From a sentence to a sequence you can see.</h2>
+            </div>
+            <p class="section-intro">Ask for an outcome. Allegretto turns it into a proposed sequence, surfaces dependencies, and waits for you before anything consequential happens.</p>
+          </div>
+          <div class="diagram" aria-label="Allegretto workflow overview">
+            <article class="diagram-step">
+              <span class="step-number">STEP 01</span>
+              <h3>Describe the outcome</h3>
+              <p>Start with intent instead of a maze of menus. Keep the conversation attached to the work as the plan evolves.</p>
+            </article>
+            <article class="diagram-step">
+              <span class="step-number">STEP 02</span>
+              <h3>Review the plan</h3>
+              <p>See what can happen in parallel, what has to wait, and which tools each step would use. Change the plan before running it.</p>
+            </article>
+            <article class="diagram-step">
+              <span class="step-number">STEP 03</span>
+              <h3>Run with agency</h3>
+              <p>Approve the side effects you want, watch progress in context, and interrupt when the situation changes.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tint" aria-labelledby="bridge-title">
+        <div class="container split">
+          <div>
+            <p class="eyebrow">The browser bridge</p>
+            <h2 id="bridge-title">Useful where the work already lives.</h2>
+            <p class="split-lead">The browser bridge lets an agent work with an approved browser context instead of pretending the web is a text-only API. You choose when it can act.</p>
+          </div>
+          <ul class="points">
+            <li class="point"><span class="point-icon" aria-hidden="true">↗</span><div><h3>Connect an existing browser</h3><p>Keep your normal browser, profiles, and sessions. Allegretto does not need to move your work into a hosted browser.</p></div></li>
+            <li class="point"><span class="point-icon" aria-hidden="true">✓</span><div><h3>Approve meaningful actions</h3><p>Reading, clicking, typing, and navigation are tool actions with visible state—not silent background activity.</p></div></li>
+            <li class="point"><span class="point-icon" aria-hidden="true">×</span><div><h3>Interrupt at any time</h3><p>When a page changes or the plan is wrong, pause the run and take control back immediately.</p></div></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section" id="privacy" aria-labelledby="privacy-title">
+        <div class="container">
+          <div class="boundary">
+            <p class="eyebrow">A deliberate data boundary</p>
+            <h2 id="privacy-title">Your work should have a clear home.</h2>
+            <div class="boundary-grid">
+              <article class="boundary-cell"><h3><strong>On your device</strong></h3><p>Conversations, local model files, workflow state, and app preferences live on the device running Allegretto.</p></article>
+              <article class="boundary-cell"><h3><strong>At your provider</strong></h3><p>Hosted-model prompts and responses travel directly to the provider you select, under its terms and privacy policy.</p></article>
+              <article class="boundary-cell"><h3><strong>With Virtually(Creative)</strong></h3><p>We run the product site, not a hidden inference relay. We do not receive your model traffic or sell your work.</p></article>
+              <article class="boundary-cell"><h3><strong>Your call</strong></h3><p>Choose local inference when data must stay local; choose a hosted provider when its capability is worth the explicit boundary.</p></article>
+            </div>
+            <p class="hero-note">This summary is not a substitute for the full policy. <a href="privacy.html">Read the Allegretto data policy →</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-tint" id="status" aria-labelledby="status-title">
+        <div class="container">
+          <div class="status">
+            <div class="status-copy"><h3 id="status-title">Current release posture</h3><p>Allegretto is in internal testing as an unsigned build. Future agency releases will use a separate signed update channel after review; they will not silently pull binaries from an upstream project.</p></div>
+            <span class="status-badge">UNSIGNED · INTERNAL</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="docs-title">
+        <div class="container docs">
+          <article class="docs-panel"><div><p class="docs-label">Next surface</p><h3 id="docs-title">A docs site is on the way.</h3><p>Product documentation will follow the internal testing pass: setup, provider boundaries, tool permissions, workflow patterns, and browser bridge guidance in one place.</p></div><p class="hero-note">Until then, this page describes the product direction—not a public download channel.</p></article>
+          <article class="docs-panel"><div><p class="docs-label">Made by</p><h3>Virtually(Creative)</h3><p>Allegretto is built for thoughtful agency: capable enough to help, clear enough to supervise.</p></div><a class="button button-secondary" href="https://virtuallycreative.ca/" rel="noopener">Visit Virtually(Creative) ↗</a></article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-inner">
+        <div>
+          <div class="footer-brand"><img src="assets/allegretto-mark.png" width="28" height="28" alt=""> <span>Allegretto</span></div>
+          <div class="footer-meta"><p>The agent orchestrator by Virtually(Creative).</p><p>Built local-first. Designed for visible agency.</p></div>
+        </div>
+        <nav class="footer-links" aria-label="Footer navigation"><a href="privacy.html">Privacy and data boundary</a><a href="#status">Internal testing status</a><a href="https://virtuallycreative.ca/" rel="noopener">Virtually(Creative) ↗</a></nav>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -16,7 +16,7 @@
        the microphone is refused unless the entitlement is present, and the failure
        is a TCC kill of the helper process, not an error anyone can catch. Pair it
        with mac.extendInfo in package.json: the entitlement grants the right to ask,
-       the usage strings are what makes macOS willing to ask on Radiant's behalf.
+       the usage strings are what makes macOS willing to ask on Allegretto's behalf.
        Measured 2026-09-03: a helper spawned by a process WITHOUT those strings is
        killed outright — "attempted to access privacy-sensitive data without a usage
        description" — however the helper itself is signed or bundled. -->

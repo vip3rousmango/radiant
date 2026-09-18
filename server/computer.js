@@ -4,6 +4,7 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { BRAND } from './brand.js'
 
 const execFileP = promisify(execFile)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -109,7 +110,7 @@ async function runHelper (args, timeout) {
   // returns null where we ship no helper, and every desktop.* method reaches
   // here without asking helperAvailable() first — so this is the message a
   // Windows user would otherwise never get instead of a TypeError.
-  if (!helper) throw new Error(`Radiant has no desktop helper for ${process.platform}.`)
+  if (!helper) throw new Error(`${BRAND.productName} has no desktop helper for ${process.platform}.`)
   const argv = args.map(String)
   // Read the environment now rather than at import: a snapshot taken at module
   // load cannot see anything set afterwards.

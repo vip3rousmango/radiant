@@ -1,3 +1,4 @@
+import { BRAND } from './brand.js'
 import os from 'os'
 import path from 'path'
 import crypto from 'crypto'
@@ -101,7 +102,7 @@ function systemPrompt (cwd, useTools, model, computerControl, skills, persona, p
   const skillText = (skills && skills.length)
     ? `\n\nActive skills (follow these):\n${skills.map(s => `• ${s.name}: ${s.content}${s.dir && resolveSkillDir(s.dir) ? `\n  Skill folder: ${resolveSkillDir(s.dir)}` : ''}`).join('\n')}`
     : ''
-  const stable = `You are a coding agent running inside Radiant, a local coding harness on the user's ${os.type() === 'Darwin' ? 'Mac' : os.type()} (${os.platform()} ${os.release()}). Radiant is the app, not you: you are the model "${model}". If asked what model you are, answer with your actual model name and maker.${personaText}
+  const stable = `You are a coding agent running inside ${BRAND.productName}, a local coding harness on the user's ${os.type() === 'Darwin' ? 'Mac' : os.type()} (${os.platform()} ${os.release()}). ${BRAND.productName} is the app, not you: you are the model "${model}". If asked what model you are, answer with your actual model name and maker.${personaText}
 Workspace directory: ${cwd}
 ${useTools ? 'You have tools to read, write, and edit files and to run shell commands in the workspace. Use them to investigate before answering and to make changes when asked. Prefer edit_file for small changes and write_file for new files. After making changes, verify them when practical (run the code, run tests).' : 'Tools are disabled for this conversation; answer from knowledge and the conversation only.'}${computerControl ? `
 You can also control the computer. browser_* tools drive an automated browser; screen_* tools control the whole desktop. ALWAYS take a screenshot first (browser_screenshot / screen_screenshot) and look at it before clicking or typing — click coordinates are pixel positions read from the most recent screenshot. Work in small steps: screenshot, act, screenshot again to confirm. Prefer browser_* for web tasks.` : ''}
@@ -743,7 +744,7 @@ async function chatgptRound ({ accessToken, accountId, model, messages, system, 
 function askAgentToolDef (peers) {
   return {
     name: 'ask_agent',
-    description: `Consult another Radiant agent and get their answer back as text. Use it for a second opinion or to delegate a sub-question to a specialist, then incorporate their reply. Available agents:\n${peers.map(p => `- ${p.name}: ${p.blurb}`).join('\n')}`,
+    description: `Consult another ${BRAND.productName} agent and get their answer back as text. Use it for a second opinion or to delegate a sub-question to a specialist, then incorporate their reply. Available agents:\n${peers.map(p => `- ${p.name}: ${p.blurb}`).join('\n')}`,
     input_schema: {
       type: 'object',
       properties: {
@@ -1020,7 +1021,7 @@ export async function runTurn ({ provider, model, apiKey, getAccessToken, getAcc
       hardFold = true
       const k = n => `${Math.round(n / 1000)}k`
       emit({ type: 'notice', text: localCap && reported > window_
-        ? `This chat reached the ${k(window_)} working limit Radiant uses for local models (${lastPrompt ? k(lastPrompt) + ' used; ' : ''}${model} is loaded in Ollama with ${k(reported)}). Older tool results are trimmed from here on so it can keep going. To let local chats use more, raise "Local model context" in Settings → Models — that is separate from how much memory Ollama reserves, which is Ollama's own Settings → Context length.`
+        ? `This chat reached the ${k(window_)} working limit ${BRAND.productName} uses for local models (${lastPrompt ? k(lastPrompt) + ' used; ' : ''}${model} is loaded in Ollama with ${k(reported)}). Older tool results are trimmed from here on so it can keep going. To let local chats use more, raise "Local model context" in Settings → Models — that is separate from how much memory Ollama reserves, which is Ollama's own Settings → Context length.`
         : `The conversation is close to ${model}'s limit (${k(lastPrompt)} of ${k(window_)} tokens) — older tool results are trimmed from here on so it can keep going.` })
     }
     const args = {
@@ -1132,7 +1133,7 @@ export async function runTurn ({ provider, model, apiKey, getAccessToken, getAcc
       // ~/.zshrc, a LaunchAgent, or .git/hooks/pre-commit reached the same place
       // without one. Writes always ask now, and a READ that leaves the workspace
       // asks too — read_file plus fetch_url was a complete, un-prompted path from
-      // ~/.radiant/config.json (every provider key and OAuth token) to a URL.
+      // ~/.allegretto/config.json (every provider key and OAuth token) to a URL.
       const isWrite = call.name === 'write_file' || call.name === 'edit_file'
       const leavesWorkspace = (isWrite || call.name === 'read_file') &&
         outsideWorkspace(call.args?.path, session.cwd)
@@ -1291,7 +1292,7 @@ export async function runTurn ({ provider, model, apiKey, getAccessToken, getAcc
       // ⚠️ NEVER LET THE EXPLANATION BE THE THING THAT FAILS. Whatever went
       // wrong here, the halt below still has to reach the user — that is the
       // entire bug being fixed.
-      console.warn('[radiant] wrap-up after the round limit failed:', e.message)
+      console.warn(`[${BRAND.productName.toLowerCase()}] wrap-up after the round limit failed:`, e.message)
     }
   }
   finishStats()

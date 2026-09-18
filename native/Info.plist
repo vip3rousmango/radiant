@@ -11,13 +11,13 @@
 
   Probed on 2026-09-03 before any of this was written: with the section present,
   Bundle.main reads NSMicrophoneUsageDescription, SFSpeechRecognizer builds, and
-  supportsOnDeviceRecognition is true. Radiant.app carries the same two strings
+  supportsOnDeviceRecognition is true. Allegretto.app carries the same two strings
   (electron-builder extendInfo) because the prompt the user actually sees is
   attributed to the app that spawned the helper.
 -->
 <plist version="1.0"><dict>
-  <key>CFBundleIdentifier</key><string>com.tonyricciardi.radiant.control</string>
-  <key>CFBundleName</key><string>Radiant Control</string>
-  <key>NSMicrophoneUsageDescription</key><string>Radiant turns what you say into text in the message box. Audio is transcribed on this Mac and is never sent anywhere.</string>
-  <key>NSSpeechRecognitionUsageDescription</key><string>Radiant transcribes your dictation on this Mac, using Apple's on-device speech recognition. Nothing is sent to Apple or to any server.</string>
+  <key>CFBundleIdentifier</key><string>com.virtuallycreative.allegretto.control</string>
+  <key>CFBundleName</key><string>Allegretto Control</string>
+  <key>NSMicrophoneUsageDescription</key><string>Allegretto turns what you say into text in the message box. Audio is transcribed on this Mac and is never sent anywhere.</string>
+  <key>NSSpeechRecognitionUsageDescription</key><string>Allegretto transcribes your dictation on this Mac, using Apple's on-device speech recognition. Nothing is sent to Apple or to any server.</string>
 </dict></plist>

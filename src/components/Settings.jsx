@@ -12,6 +12,7 @@ import { AGENT_TEMPLATES, AGENT_TEMPLATE_CATS } from '../agentTemplates.js'
 import ConfirmButton from './ConfirmButton.jsx'
 import { ModelPicker } from './Chat.jsx'
 import { BRAND } from '../../server/brand.js'
+import allegrettoWordmark from '../assets/allegretto-wordmark.png'
 
 // ⚠️ A BUILT-IN'S PERSONA IS ITS INSTRUCTIONS, NOT A SUMMARY — several sentences
 // of "You are a…". Its opening sentence is the description a person recognises
@@ -210,7 +211,7 @@ function ProvidersPane ({ config, onConfigChange }) {
         <button className='small-btn' onClick={addProvider}>Add provider</button>
       </div>
       <p style={{ fontSize: 12, color: 'var(--text-faint)', marginBottom: 0 }}>
-        Keys are stored locally in <span className='mono'>~/.radiant/config.json</span> and never leave this Mac except to call the provider itself.
+        Keys are stored locally in <span className='mono'>~/.allegretto/config.json</span> and never leave this Mac except to call the provider itself.
         Any OpenAI-compatible server works — Groq, Mistral, Together, a remote Ollama box…
       </p>
     </div>
@@ -2241,7 +2242,10 @@ function AboutPane ({ config, onSettings }) {
   const startDownload = () => { setPhase('downloading'); setProgress(0); native.download() }
   const restart = () => native.install()
   const relaunch = () => native.relaunch()
-  const openReleasePage = () => window.open(status?.downloadUrl || 'https://github.com/templetongroup/radiant/releases/latest', '_blank', 'noopener')
+  const openReleasePage = () => {
+    const url = status?.downloadUrl
+    if (url) window.open(url, '_blank', 'noopener')
+  }
 
   return (
     <div className='set-section'>
@@ -2253,6 +2257,13 @@ function AboutPane ({ config, onSettings }) {
           <div className='about-ver'>Version {version || '…'}</div>
         </div>
       </div>
+      {updatesDisabled
+        ? <div className='oauth-note' style={{ marginTop: 10 }}>
+            This is an unsigned Allegretto build for internal testing. It has no production update feed.
+          </div>
+        : <div className='oauth-note' style={{ marginTop: 10 }}>
+            Signed Allegretto builds check the agency release feed and install signed agency updates.
+          </div>}
 
       {/* If this window is pointed at another Mac, say so here too. The number
           above is this app; everything else in the window is that Mac. */}
@@ -2269,7 +2280,7 @@ function AboutPane ({ config, onSettings }) {
           {checking ? 'Checking…' : 'Check for updates'}
         </button>
       </div>}
-      {updatesDisabled && <div className='update-none' style={{ marginTop: 14 }}>Updates are disabled for this build.</div>}
+      {updatesDisabled && <div className='update-none' style={{ marginTop: 14 }}>Updates are disabled for this unsigned internal testing build; no production update feed is configured.</div>}
 
       {/* A copy that cannot replace itself says so, above everything else the
           pane might say about versions — see installLocation() in updater.cjs. */}
@@ -2320,12 +2331,12 @@ function AboutPane ({ config, onSettings }) {
         <span>Automatically check for updates on launch</span>
       </label>}
       {!updatesDisabled && <div className='oauth-note'>
-        The desktop app also has <span className='mono'>{BRAND.productName} → Check for Updates…</span> in the menu bar.
-        Updates download in the background and install when you restart.
+        The desktop app also has <span className='mono'>{BRAND.productName} → Check for Updates…</span> in the menu bar when the signed Allegretto agency release feed is configured.
+        Allegretto checks that agency release feed and installs signed agency updates.
       </div>}
 
       <div className='about-footer' style={{ marginTop: 22 }}>
-        <div className='about-footer-text'>{BRAND.welcomeTagline}</div>
+        <div className='about-footer-text'>{BRAND.tagline}</div>
         {/* Electron denies in-window navigation, so a plain href does nothing —
             window.open goes through setWindowOpenHandler and out to the browser. */}
         <a
@@ -2336,7 +2347,7 @@ function AboutPane ({ config, onSettings }) {
         >
           <img
             className='about-footer-logo'
-            src='/templeton-tech.png'
+            src={allegrettoWordmark}
             alt={BRAND.publisherName}
             onError={e => { e.currentTarget.style.display = 'none' }}
           />
@@ -2514,7 +2525,7 @@ function DataFolderBlock () {
           is chosen when Radiant starts, so ticking this writes the choice but
           changes nothing until the app is quit and reopened. That was a grey
           line under a ticked checkbox, and "Where it is now" — still reading
-          ~/.radiant — was collapsed out of sight. Tony had it on three Macs and
+          ~/.allegretto — was collapsed out of sight. Tony had it on three Macs and
           saw his projects on one: "home dev and work are all on with sync but i
           only see project folder on home mbp." The setting was saved on all
           three and in effect on one. */}
@@ -3220,7 +3231,7 @@ const GUIDE = [
       ['Skills have categories', 'With dozens of skills, one flat list stopped working. Every skill now has a category \u2014 Coding, Apple, Design, Writing, Research, Quality, Ops, Business, Other \u2014 guessed from its name and description, shown faint until you confirm or change it in the small menu on its row; your choice is saved and wins from then on. Settings \u2192 Skills has category chips across the top with counts, and the Skills button in the composer groups the list by category with a fold on each heading, like the model picker, remembering which you folded, and listing the categories alphabetically \u2014 Other last, since it is the catch-all. Within each one the skills are alphabetical too. The filter box searches across all of them.'],
       ['In a group chat, @Name picks who acts \u2014 and they get tools', 'Every agent in a group chat used to answer every message, and none of them could use tools \u2014 so \u201clet\u2019s do the frontend in React\u201d had four agents all trying to do it at once, none of them able to. Now type @ and pick someone from the room (or write @coder, @dev-ops): only they act on that message, with the chat\u2019s tools and skills, and the rest of the room stays quiet but reads it \u2014 what the addressed agent does is in the transcript for everyone\u2019s next turn. Mention two and both act, in order. No mention keeps the round table as before. Asked for by a user on GitHub (#16, #18).'],
       ['MCP servers can be edited, and they find npx', 'Each MCP server row has an Edit button now \u2014 name, command or address, token \u2014 instead of remove-and-re-add. And a server\u2019s command runs with the same PATH your terminal has, so npx, uvx and anything your shell profile sets up are found; before this, a Mac-launched app only saw the bare system PATH and a server like \u201cnpx -y some-server\u201d failed with ENOENT. A command written the way a terminal would take it (PATH=\u2026 npx \u2026, or with a pipe) is run through your shell as written. Asked for on GitHub (#15).'],
-      ['A copy that cannot update itself now says so', 'If Radiant is opened from the disk image, or from Downloads before it has been moved, macOS runs it from a temporary read-only spot and will not let it replace itself \u2014 so updates downloaded every six hours and quietly failed, and that Mac stayed on the version it opened with. Settings \u2192 About and Check for Updates\u2026 now say exactly that, with the fix: quit, drag Radiant into the Applications folder, open it from there. Updates work on their own after that.'],
+      ['Updates depend on the build', 'Unsigned internal Allegretto builds have updates disabled and no production update feed. Signed Allegretto builds check the agency release feed and install signed agency updates.'],
       ['Every composer button grows into its word', 'Attach, Design and Skills now open into a labeled button on hover, the way Dictate, Talk and the toggles on the right already did \u2014 point at any icon under the message box and it tells you what it is.'],
       ['The sparkle button is Skills now', 'The button beside the microphone used to open Recipes, a menu of task templates. It opens your skills instead: pick one and it goes into the message as /name, visible and editable, and sending is what uses it \u2014 the same thing typing a slash does. Skills already pinned to the chat are left out, since they are on every turn anyway; with more than six there is a filter box. Recipes themselves still exist in Settings; they just no longer take a button.'],
       ['Several Macs on one folder is fine \u2014 the banner that said otherwise is gone', 'The bar across the bottom of the window that said \u201cRadiant is also open on <another Mac>\u2026 quit one of them\u201d was written for a two-Mac evening in August and was wrong advice for someone who runs five. Radiant re-reads the shared settings whenever another Mac writes them, so a theme or a key changed on one Mac shows up on the others within a few seconds and nothing is saved over it. The one thing to avoid is editing the same chat on two Macs at the same moment \u2014 the last one to finish wins. That sentence now lives in Settings \u2192 Devices, beside the other Macs, instead of across every window.'],
@@ -3279,9 +3290,9 @@ const GUIDE = [
       ['The accent color picker works again', 'Choosing your own accent color did nothing \u2014 the app quietly went back to Radiant blue every time, so anything tinted by the accent stayed blue no matter what you picked. The swatch showed your color; the app ignored it. Fixed.'],
       ['Appearance is less cluttered', 'Background tint and the new Background & text pickers do the same job in different ways, and only one of them can be in effect \u2014 so only one is shown. Pick your own background and the tint slider goes away; clear it and the slider comes back. The vividness slider next to the accent swatch is labeled now instead of being an unexplained bar.'],
       ['Pick your own background and text color', 'Settings \u203a Appearance has a Background & text row: two color wells, one for the page and one for the text, chosen independently of the accent. Until now the background could only be a stronger or weaker version of the accent color \u2014 you could not have, say, a warm grey page under a blue accent. You can now. Everything else \u2014 panels, raised surfaces, hover states, secondary labels \u2014 is worked out from the two colors you pick, and a Contrast slider controls how far apart they sit. If a pairing would make text hard to read, it says so and gives the actual contrast ratio, but it still applies what you chose: it warns, it does not overrule you. Clear puts you back on the theme.'],
-      ['Updating shows real progress again', 'Pressing Download & install left the bar at 0% and looked frozen. The download was working the whole time \u2014 it finished normally and waited on disk \u2014 but the progress messages were being sent to the main window while the bar you were watching is in the Settings window, so nothing ever reached it. It updates properly now, and if you close Settings and come back it picks up where things actually are instead of offering to download the same 160 MB again. An update that has finished downloading installs when you quit Radiant.'],
-      ['Radiant tells you what is new after it updates', 'Radiant updates itself quietly in the background, so features used to just appear with nothing to announce them. Now, the first time you open a version you have not run before, a short list of what changed is shown once. A brand-new install never sees it, and if several updates went by while your Mac was shut you get all of them, newest first. Settings \u203a Read me still has the full detail.'],
-      ['Updates', 'Radiant normally checks for updates in the background. Some distributions disable self-updates; if yours does, the About pane says so and your distributor provides the next version.'],
+      ['Internal builds explain update status', 'Unsigned internal Allegretto builds have updates disabled and no production update feed. Signed Allegretto builds check the agency release feed and install signed agency updates.'],
+      ['Release notes are separate from internal builds', 'Signed Allegretto updates are installed from the agency release feed; unsigned internal builds have no production feed and do not self-update.'],
+      ['Updates', 'Unsigned internal Allegretto builds have updates disabled and no production update feed. Signed Allegretto builds check the agency release feed and install signed agency updates.'],
       ['The desktop app uses platform fonts', 'Radiant uses the fonts built into your Mac, with platform fallbacks on other systems. This keeps the interface crisp without downloading a separate UI typeface. Code and terminal text use the system monospace font.'],
       ['A browser extension, so the agent works in your own Chrome', 'Settings \u203a Automation now has a small Chrome extension you install once. With it, the agent works inside the browser you are already signed into: it can list your open tabs, read the page you are looking at, take a picture of it, click things by name, and fill in fields \u2014 as you, with your logins. Chrome no longer lets any app connect to your everyday browser from outside, and it will not let Radiant install this for you either, so the panel gives you the folder and the four steps. The extension talks only to Radiant on this Mac and to nothing else; quitting Chrome or removing it unplugs it completely.'],
       ['The agent can use the Chrome you are already signed into', 'Chrome no longer lets any app attach to your everyday browser profile, so Radiant used to open a fresh, empty Chrome instead \u2014 no tabs, no extensions, signed in to nothing \u2014 and the agent would describe that one, or tell you your permissions were wrong. It now drives your real Chrome through macOS automation: it can list your open tabs, bring one to the front, read the page you are looking at, open a URL, and click things by their visible text. Ask it about \u201cmy GoDaddy tab\u201d and it can actually see it. It cannot take a picture of that browser \u2014 nothing can \u2014 so it reads the page instead and says so plainly. If macOS or Chrome needs a permission, it names the exact one.'],
@@ -3455,7 +3466,7 @@ function MemoryPane ({ config, onSettings }) {
       <h3>Saved chats</h3>
       <p className='oauth-note' style={{ marginTop: 0 }}>
         {storage
-          ? <>{BRAND.productName} is keeping <strong>{storage.sessions}</strong> chat session{storage.sessions === 1 ? '' : 's'} ({storage.sizeMB} MB) in <span className='mono'>~/.radiant</span>. Old sessions add up — clear ones you no longer need.</>
+          ? <>{BRAND.productName} is keeping <strong>{storage.sessions}</strong> chat session{storage.sessions === 1 ? '' : 's'} ({storage.sizeMB} MB) in <span className='mono'>~/.allegretto</span>. Old sessions add up — clear ones you no longer need.</>
           : 'Reading local storage…'}
       </p>
       <div className='row' style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 12, alignItems: 'center' }}>
@@ -3467,7 +3478,7 @@ function MemoryPane ({ config, onSettings }) {
       <ChatTransfer />
 
       <h3 style={{ marginTop: 26 }}>Memory</h3>
-      <p className='hint' style={{ marginTop: 0 }}>{BRAND.productName} remembers durable facts about you and your projects across sessions, and gives the relevant ones to the agent. Everything is stored locally in <code className='mono'>~/.radiant/memory.json</code>.</p>
+      <p className='hint' style={{ marginTop: 0 }}>{BRAND.productName} remembers durable facts about you and your projects across sessions, and gives the relevant ones to the agent. Everything is stored locally in <code className='mono'>~/.allegretto/memory.json</code>.</p>
       <label className='check-row'>
         <input type='checkbox' checked={on} onChange={e => onSettings({ memory: e.target.checked })} />
         <span>Remember across sessions <span className='desc'>— learn from each chat and recall it later</span></span>

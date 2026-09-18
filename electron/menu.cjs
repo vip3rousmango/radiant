@@ -1,4 +1,4 @@
-function menuTemplate ({ checkNow, updatesEnabled, productName = 'Radiant', releaseLabel = 'Radiant on GitHub', releaseUrl = 'https://github.com/templetongroup/radiant' }) {
+function menuTemplate ({ checkNow, updatesEnabled, productName = 'Allegretto', releaseLabel = 'Allegretto website', releaseUrl = 'https://allegretto.netlify.app/' }) {
   const isMac = process.platform === 'darwin'
   const updateItem = updatesEnabled ? [{ label: 'Check for Updates…', click: () => checkNow(false) }] : []
   return [

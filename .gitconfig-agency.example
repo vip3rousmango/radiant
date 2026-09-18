@@ -1,0 +1,12 @@
+# Local-only safety settings for the Allegretto checkout.
+# This file is intended to be included by this repository's .git/config, not by
+# the developer's global config:
+#
+#   git config --local include.path ../.gitconfig-agency.example
+#
+# The sentinel makes accidental `git push upstream ...` fail locally instead of
+# falling back to upstream.url. Fetches continue to use the URL below.
+[remote "upstream"]
+    url = https://github.com/templetongroup/radiant.git
+    fetch = +refs/heads/*:refs/remotes/upstream/*
+    pushurl = DISABLED

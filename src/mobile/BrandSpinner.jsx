@@ -1,21 +1,17 @@
 /**
- * The Radiant swirl, in whatever color the app is themed.
+ * The Allegretto mark, in whatever color the app is themed.
  *
  * ⚠️ IT IS A MASK, NOT A PICTURE. The Mac paints the mark by masking
- * src/assets/logo-mark.png — a white swirl on transparent — with the current
- * accent (see `.logo-mark` in src/styles.css). This does the same, so picking a
- * theme recolors the swirl everywhere, exactly as it does on the Mac.
+ * src/assets/allegretto-mark.png — the supplied Allegretto favicon — with the
+ * current accent (see `.logo-mark` in src/styles.css). This does the same, so
+ * picking a theme recolors the mark everywhere.
  *
- * That is why this uses logo-mark.png and NOT brand/radiant-mark.png. The brand
- * PNG is a filled disc: masking with it would give a plain circle, because its
- * alpha is the whole disc rather than the linework. The white-on-transparent
- * file's alpha IS the swirl.
- *
- * The launch image still uses the finished brand artwork in brand blue — a
- * native PNG cannot follow a theme chosen inside the app.
+ * The supplied mark is square, so it is appropriate for the compact mark
+ * surfaces this component serves. The wider Allegretto logo remains separate
+ * and is only used in a box with its own aspect ratio.
  */
 import React from 'react'
-import maskUrl from '../assets/logo-mark.png'
+import maskUrl from '../assets/allegretto-mark.png'
 
 const maskStyle = (size) => ({
   width: size,
@@ -25,7 +21,7 @@ const maskStyle = (size) => ({
   mask: `url(${maskUrl}) center / contain no-repeat`
 })
 
-/** The mark, still. Anything that means "this is Radiant" uses this. */
+/** The still Allegretto mark used by compact brand surfaces. */
 export function BrandMark ({ size = 29, className = '' }) {
   return (
     <span

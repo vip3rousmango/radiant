@@ -1,24 +1,26 @@
 {
-  "name": "radiant",
+  "name": "allegretto",
   "version": "0.9.24",
   "private": true,
-  "description": "Radiant — a local coding harness: chat with coding agents across cloud and local models.",
-  "author": "Tony Ricciardi",
+  "description": "Allegretto — the agent orchestrator.",
+  "author": "Virtually(Creative)",
   "license": "MIT",
-  "radiantUpdaterEnabled": true,
+  "allegrettoUpdaterEnabled": true,
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "concurrently -k -n server,ui \"RADIANT_DEV_ORIGIN=http://localhost:5833 node server/index.js\" \"vite --port 5833 --strictPort\"",
     "build": "vite build",
-    "dist:agency": "npm run build && npm run compile:helper && electron-builder --mac --publish never -c.extraMetadata.radiantUpdaterEnabled=false",
+    "dist:allegretto:unsigned": "npm run build && npm run compile:helper && SKIP_NOTARIZE=1 electron-builder --mac --publish never -c.mac.identity=null -c.extraMetadata.allegrettoUpdaterEnabled=false",
+    "dist:agency": "npm run dist:allegretto:unsigned",
     "start": "NODE_ENV=production node server/index.js",
     "compile:helper": "swiftc -O native/RadiantControl.swift -o native/radiant-control -Xlinker -sectcreate -Xlinker __TEXT -Xlinker __info_plist -Xlinker native/Info.plist",
     "app": "npm run build && electron .",
     "dist": "npm run build && npm run compile:helper && electron-builder --mac",
     "dist:linux": "npm run build && electron-builder --linux --publish never",
     "postinstall": "chmod +x node_modules/node-pty/prebuilds/darwin-*/spawn-helper 2>/dev/null || true",
-    "release": "node scripts/release.mjs",
+    "release": "node scripts/release-allegretto.mjs",
+    "release:allegretto": "node scripts/release-allegretto.mjs",
     "test:smoke": "node scripts/test-smoke.mjs",
     "test:notify": "node scripts/test-notify.mjs",
     "test:cwd": "node scripts/test-cwd.mjs",
@@ -27,24 +29,17 @@
     "test:supply": "node scripts/test-supply-chain.mjs",
     "catalog:export": "python3 scripts/catalog-export.py",
     "catalog:check": "python3 scripts/catalog-check.py",
-    "catalog:publish": "npm run catalog:export && npm run catalog:check && cp apps/ios/catalog.json ~/Projects/templeton-group-dev-website/showcase/radiant/catalog.json && echo \"  copied — commit and push the website to publish\"",
     "screenshots": "node scripts/screenshots.mjs"
   },
   "build": {
-    "appId": "com.tonyricciardi.radiant",
-    "productName": "Radiant",
+    "appId": "com.virtuallycreative.allegretto",
+    "productName": "Allegretto",
     "directories": {
       "output": "release",
       "buildResources": "build"
     },
     "afterSign": "build/notarize-hook.cjs",
-    "publish": [
-      {
-        "provider": "github",
-        "owner": "templetongroup",
-        "repo": "radiant"
-      }
-    ],
+    "publish": [],
     "files": [
       "dist/**",
       "server/**",
@@ -84,15 +79,15 @@
           "arch": "arm64"
         }
       ],
-      "identity": "Anthony Ricciardi (5VY66S6G3M)",
+      "identity": null,
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
       "icon": "build/icon.icns",
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "Radiant turns what you say into text in the message box; dictation is transcribed on this Mac. If you turn on voice conversations in Settings, your microphone goes to OpenAI while a call is open.",
-        "NSSpeechRecognitionUsageDescription": "Radiant transcribes your dictation on this Mac, using Apple's on-device speech recognition. Nothing is sent to Apple or to any server."
+        "NSMicrophoneUsageDescription": "Allegretto turns what you say into text in the message box; dictation is transcribed on this Mac. If you turn on voice conversations in Settings, your microphone goes to OpenAI while a call is open.",
+        "NSSpeechRecognitionUsageDescription": "Allegretto transcribes your dictation on this Mac, using Apple's on-device speech recognition. Nothing is sent to Apple or to any server."
       }
     },
     "linux": {
@@ -107,12 +102,12 @@
       ],
       "category": "Development",
       "icon": "build/icon.png",
-      "maintainer": "Templeton Technologies",
-      "synopsis": "A local coding harness",
+      "maintainer": "Virtually(Creative)",
+      "synopsis": "The agent orchestrator",
       "syncDesktopName": true,
       "desktop": {
         "entry": {
-          "StartupWMClass": "radiant"
+          "StartupWMClass": "allegretto"
         }
       }
     }

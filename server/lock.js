@@ -1,8 +1,8 @@
 /**
  * Who else is using this folder.
  *
- * ⚠️ TWO MACS ON ONE SHARED FOLDER IS A DATA HAZARD RADIANT ONLY EVER MENTIONED
- * IN PASSING. Settings says "One Mac at a time. Two copies of Radiant writing to
+ * ⚠️ TWO MACS ON ONE SHARED FOLDER IS A DATA HAZARD ALLEGRETTO ONLY EVER MENTIONED
+ * IN PASSING. Settings says "One Mac at a time. Two copies of Allegretto writing to
  * the same folder at once will overwrite each other" — in a hint, inside a
  * collapsed section, which nobody reads before it matters. Nothing detected it,
  * so the first sign was work quietly disappearing.
@@ -25,7 +25,7 @@ import fs from 'fs'
 import os from 'os'
 import path from 'path'
 
-export const LOCK_NAME = '.radiant-lock.json'
+export const LOCK_NAME = '.allegretto-lock.json'
 export const BEAT_MS = 15_000
 export const STALE_MS = 90_000
 
@@ -40,7 +40,7 @@ export function lockRecord (host = os.hostname(), pid = process.pid, now = Date.
  * Is this record abandoned? Pure.
  *
  * A record with no beat is treated as stale rather than trusted: an older
- * Radiant that never wrote one must not lock a folder forever.
+ * Allegretto that never wrote one must not lock a folder forever.
  */
 export function isStale (rec, now = Date.now()) {
   if (!rec || !rec.beatAt) return true
@@ -55,7 +55,7 @@ export function isOurs (rec, host = os.hostname(), pid = process.pid) {
 }
 
 /**
- * ⚠️ A CRASHED RADIANT ON THIS MAC MUST NOT LOOK LIKE A SECOND MAC. Same host,
+ * ⚠️ A CRASHED ALLEGRETTO ON THIS MAC MUST NOT LOOK LIKE A SECOND MAC. Same host,
  * and the pid is gone — that is our own wreckage and taking it over is right.
  * Only ever asked about this machine's own records; a pid from another Mac means
  * nothing here, which is exactly why `host` is checked first.
@@ -89,7 +89,7 @@ export function releaseLock (dir, host = os.hostname(), pid = process.pid) {
 /**
  * Claim the folder and say what we found. Never throws, never blocks.
  *
- * `holder` is another live Radiant we are now sharing with — the only case the
+ * `holder` is another live Allegretto we are now sharing with — the only case the
  * UI has anything to say about.
  */
 export function claimLock (dir, { host = os.hostname(), pid = process.pid, now = Date.now() } = {}) {
@@ -111,11 +111,11 @@ export function beatLock (dir, { host = os.hostname(), pid = process.pid, now = 
 /**
  * One sentence for the UI, or null when there is nothing to say.
  *
- * ⚠️ NAME THE MACHINE. "Another copy of Radiant" sends someone hunting.
+ * ⚠️ NAME THE MACHINE. "Another copy of Allegretto" sends someone hunting.
  *
  * ⚠️ AND DO NOT TELL THEM TO QUIT IT. This used to say "quit one of them",
  * written for a two-Mac evening in August. Tony runs five Macs on one folder:
- * "youre telling me i need to quit radiant on each one to work on another
+ * "youre telling me i need to quit Allegretto on each one to work on another
  * mac?" Since then the server reloads config.json when another Mac writes it,
  * so several copies are safe to run; what is left is the honest limit of a
  * shared folder, and this sentence states it instead of an order.
@@ -125,5 +125,5 @@ export function describeHolder (holder, thisHost = os.hostname()) {
   const elsewhere = holder.host && holder.host !== thisHost
   return elsewhere
     ? `Also open on ${holder.host}, sharing this folder. Settings changed on either Mac reach the other within a few seconds; a chat runs on whichever Mac you send from. Avoid editing the same chat on both at the same moment.`
-    : 'Radiant is open twice on this Mac, sharing one folder. Two windows editing the same chat at once can overwrite each other — close one.'
+    : 'Allegretto is open twice on this Mac, sharing one folder. Two windows editing the same chat at once can overwrite each other — close one.'
 }

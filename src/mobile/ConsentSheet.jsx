@@ -7,14 +7,13 @@ import React, { useEffect, useState } from 'react'
 import { BRAND } from '../../server/brand.js'
 import { usePress } from './usePress.js'
 import { providerHost } from './consent.js'
-const PRIVACY_URL = 'https://www.templetongroup.dev/showcase/radiant/privacy.html'
 
 function openPrivacy () {
   try {
     const browser = window.Capacitor?.Plugins?.Browser
-    if (browser?.open) { browser.open({ url: PRIVACY_URL }); return }
+    if (browser?.open) { browser.open({ url: BRAND.privacyUrl }); return }
   } catch { /* fall through */ }
-  window.open(PRIVACY_URL, '_blank', 'noopener')
+  window.open(BRAND.privacyUrl, '_blank', 'noopener')
 }
 
 export default function ConsentSheet ({ provider, onAllow, onDecline }) {

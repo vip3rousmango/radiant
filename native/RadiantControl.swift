@@ -1,4 +1,4 @@
-// Radiant desktop control helper — CGEvent-based mouse/keyboard/scroll.
+// Allegretto desktop control helper — CGEvent-based mouse/keyboard/scroll.
 // Coordinates are in global display POINTS (top-left origin), matching the
 // logical screen size reported by `screensize`. Screenshots are captured by
 // the caller via `screencapture` and normalized to that same point space.
@@ -57,14 +57,14 @@ switch args[1] {
 // never asked about permissions at all, so the Settings screen said everything was
 // fine while screencapture returned a wallpaper-only image and CGEvents went
 // nowhere. Tony spent a session on that: "the agent is saying it cant control my
-// active chrome because of settings but Radiant has access in privacy and disk
+// active chrome because of settings but Allegretto has access in privacy and disk
 // access" — and an agent, told the same lie, invented tccutil commands for a bundle
 // id that does not exist.
 //
 // CGPreflightScreenCaptureAccess and AXIsProcessTrusted are the real answers. Both
 // are read-only: neither shows a prompt, so this is safe to call on every status
 // poll. TCC attributes a bundled, co-signed helper to the app that spawned it, so
-// these report Radiant's own grants rather than the helper's.
+// these report Allegretto's own grants rather than the helper's.
 case "permissions":
     let screen = CGPreflightScreenCaptureAccess()
     let ax = AXIsProcessTrusted()
@@ -99,7 +99,7 @@ case "dictate":
         die("no-recognizer", "Speech recognition is not available for \(localeId) on this Mac.")
     }
     guard recognizer.supportsOnDeviceRecognition else {
-        die("not-on-device", "\(localeId) has no on-device speech model, and Radiant will not send your audio to Apple. Add the language under System Settings › Keyboard › Dictation.")
+        die("not-on-device", "\(localeId) has no on-device speech model, and Allegretto will not send your audio to Apple. Add the language under System Settings › Keyboard › Dictation.")
     }
 
     // Both prompts, resolved before a single sample is captured. Asking for the
@@ -112,20 +112,20 @@ case "dictate":
     let sem = DispatchSemaphore(value: 0)
     func waited(_ what: String) {
         if sem.wait(timeout: .now() + 25) == .timedOut {
-            die("no-prompt", "macOS never answered the request for \(what). Open Radiant, try again, and allow it when asked.")
+            die("no-prompt", "macOS never answered the request for \(what). Open Allegretto, try again, and allow it when asked.")
         }
     }
     var speechOK = false
     SFSpeechRecognizer.requestAuthorization { st in speechOK = (st == .authorized); sem.signal() }
     waited("Speech Recognition")
     if !speechOK {
-        die("speech-denied", "Speech Recognition is off for Radiant. Turn it on in System Settings › Privacy & Security › Speech Recognition.")
+        die("speech-denied", "Speech Recognition is off for Allegretto. Turn it on in System Settings › Privacy & Security › Speech Recognition.")
     }
     var micOK = false
     AVCaptureDevice.requestAccess(for: .audio) { granted in micOK = granted; sem.signal() }
     waited("the microphone")
     if !micOK {
-        die("mic-denied", "The microphone is off for Radiant. Turn it on in System Settings › Privacy & Security › Microphone.")
+        die("mic-denied", "The microphone is off for Allegretto. Turn it on in System Settings › Privacy & Security › Microphone.")
     }
 
     let engine = AVAudioEngine()
@@ -243,7 +243,7 @@ case "key":
 // ⚠️ A FOLDER AT THE iCLOUD PATH IS NOT NECESSARILY IN iCLOUD.
 //
 // If iCloud Drive is off, or signed into a different Apple ID, the CloudDocs
-// path can still exist as an ordinary local directory. Radiant would mkdir its
+// path can still exist as an ordinary local directory. Allegretto would mkdir its
 // hierarchy inside it and write there happily forever, syncing to nobody, while
 // the checkbox said "Keep my setup in iCloud Drive". That is what happened to
 // Tony's dev Mac: the same setup worked on two other Macs and that one stayed
@@ -288,7 +288,7 @@ case "ubiquity":
 
 // ⚠️ IS iCLOUD AVAILABLE AT ALL? Asking whether the CloudDocs *root* is a
 // ubiquitous item was a proxy, and it was wrong on Tony's dev Mac: System
-// Settings plainly showed iCloud Drive → "Sync this Mac" ON while Radiant
+// Settings plainly showed iCloud Drive → "Sync this Mac" ON while Allegretto
 // announced it was switched off. ubiquityIdentityToken is the documented answer
 // — non-nil when iCloud is signed in and available to this process.
 case "icloud":

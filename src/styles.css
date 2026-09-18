@@ -103,7 +103,7 @@ input, textarea, select { font-family: inherit; font-size: inherit; color: inher
 code, pre, .mono { font-family: var(--font-mono); }
 ::selection { background: var(--accent-dim); }
 
-/* the RADIANT wordmark: heavy geometric caps in the platform font */
+/* the Allegretto wordmark: heavy geometric caps in the platform font */
 .wordmark {
   font-family: var(--font-body);
   font-weight: 800;
@@ -121,12 +121,13 @@ code, pre, .mono { font-family: var(--font-mono); }
   opacity: 0.75;
 }
 
-/* the brand swirl: an alpha mask painted with the current accent */
+/* The supplied Allegretto mark is a square 64px favicon, so these compact
+   surfaces keep square dimensions while the wider logo stays in its own ratio. */
 .logo-mark {
   display: inline-block;
   background: var(--accent);
-  -webkit-mask: url('./assets/logo-mark.png') center / contain no-repeat;
-  mask: url('./assets/logo-mark.png') center / contain no-repeat;
+  -webkit-mask: url('./assets/allegretto-mark.png') center / contain no-repeat;
+  mask: url('./assets/allegretto-mark.png') center / contain no-repeat;
 }
 
 .back-link {
@@ -242,7 +243,7 @@ code, pre, .mono { font-family: var(--font-mono); }
 .share-token { user-select: all; overflow-wrap: anywhere; }
 
 /* The connect screen is the first thing a phone sees, so it gets the same
-   surface, type, and spacing as the rest of Radiant rather than a bare form —
+   surface, type, and spacing as the rest of Allegretto rather than a bare form —
    and touch-sized controls, since it is mostly used with a thumb. */
 .connect-gate {
   margin: auto; width: min(400px, 100%);
@@ -428,9 +429,8 @@ code, pre, .mono { font-family: var(--font-mono); }
 }
 .brand-mark { width: 24px; height: 24px; }
 .nav-close { display: none; margin-left: auto; border: none; background: var(--bg-hover); color: var(--text-muted); width: 30px; height: 30px; border-radius: 8px; font-size: 15px; cursor: pointer; align-items: center; justify-content: center; }
-.nav-close:hover { color: var(--text); }
-.brand-mark.working { animation: radiant-glow 1.5s ease-in-out infinite; }
-@keyframes radiant-glow {
+.brand-mark.working { animation: allegretto-glow 1.5s ease-in-out infinite; }
+@keyframes allegretto-glow {
   0%, 100% { filter: drop-shadow(0 0 1px var(--accent)); opacity: 1; }
   50% { filter: drop-shadow(0 0 7px var(--accent)); opacity: 0.75; }
 }
@@ -3371,7 +3371,7 @@ html[data-window-chrome='native'] .brand { padding-top: 12px; }
    strip entirely. */
 .view-actions { display: flex; gap: 8px; padding: 0 18px 12px; }
 
-/* Two copies of Radiant on one shared folder. A strip that stays for as long as
+/* Two copies of Allegretto on one shared folder. A strip that stays for as long as
    it is true, rather than a toast — a thing that can quietly cost you work
    should not fade away after four seconds.
 
@@ -3410,7 +3410,7 @@ html[data-window-chrome='native'] .brand { padding-top: 12px; }
 .qr { border-radius: 6px; background: #fff; padding: 6px; flex: none; }
 
 /* ── voice conversation ──────────────────────────────────────────────────────
-   A call over the chat: GPT-Live speaks and listens, Radiant's own turn does
+   A call over the chat: GPT-Live speaks and listens, Allegretto's own turn does
    the work. The strip sits above the composer for as long as the call is open
    — it is the one place that says audio is leaving the Mac. */
 .voice-strip {

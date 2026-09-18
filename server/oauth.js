@@ -1,3 +1,4 @@
+import { BRAND } from './brand.js'
 import crypto from 'crypto'
 import http from 'http'
 import { fetchRetry, isTransient } from './util.js'
@@ -170,7 +171,7 @@ export function startLoopback (providerId, onDone) {
     if (!u.pathname.startsWith(p.redirectPath)) { res.writeHead(404); res.end(); return }
     const code = u.searchParams.get('code')
     res.writeHead(200, { 'content-type': 'text/html' })
-    res.end('<html><body style="font-family:system-ui;background:#141517;color:#eee;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center"><h2>Radiant is signed in</h2><p>You can close this tab and return to Radiant.</p></div></body></html>')
+    res.end(`<html><body style="font-family:system-ui;background:#141517;color:#eee;display:grid;place-items:center;height:100vh;margin:0"><div style="text-align:center"><h2>${BRAND.productName} is signed in</h2><p>You can close this tab and return to ${BRAND.productName}.</p></div></body></html>`)
     server.close()
     try {
       if (!code) throw new Error('no code in callback')

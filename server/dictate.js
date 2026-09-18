@@ -20,6 +20,7 @@
  * child's stdin is what stops it — that survives the server being killed, which
  * a SIGTERM handler does not.
  */
+import { BRAND } from './brand.js'
 import { spawn } from 'child_process'
 import { helperPath, helperAvailable } from './computer.js'
 
@@ -46,7 +47,7 @@ export function startDictation (req, res, locale = 'en-US') {
     res.writeHead(503, { 'content-type': 'application/json' })
     return res.end(JSON.stringify({
       error: process.platform === 'darwin'
-        ? 'The Radiant helper is not installed, so dictation cannot start.'
+        ? `The ${BRAND.productName} helper is not installed, so dictation cannot start.`
         : 'Dictation uses macOS speech recognition, which this machine does not have. Type instead — nothing else is affected.'
     }))
   }

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b0c16">
+    <meta name="description" content="Allegretto privacy and data boundary.">
+    <link rel="icon" href="assets/favicon.ico">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <link rel="stylesheet" href="styles.css">
+    <title>Privacy and data boundary — Allegretto</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+    <header class="site-header">
+      <div class="container nav">
+        <a class="brand" href="index.html" aria-label="Allegretto home"><img src="assets/allegretto-mark.png" width="34" height="34" alt=""><span>Allegretto</span></a>
+        <nav class="nav-links" aria-label="Primary navigation"><a href="index.html#how-it-works">How it works</a><a href="index.html#privacy">Privacy</a><a href="index.html#status">Status</a><a class="nav-cta" href="index.html">Home</a></nav>
+      </div>
+    </header>
+
+    <main id="content">
+      <section class="page-hero" aria-labelledby="page-title">
+        <div class="container">
+          <p class="eyebrow">Allegretto privacy</p>
+          <h1 id="page-title">A short policy for a clear boundary.</h1>
+          <p>Allegretto is designed to keep orchestration close to you. This page explains what stays on your device, what goes to a model provider you choose, and what the product site can see.</p>
+        </div>
+      </section>
+
+      <section class="policy" aria-label="Privacy policy">
+        <div class="container policy-layout">
+          <aside class="policy-nav" aria-label="On this page"><p>On this page</p><a href="#scope">Scope</a><a href="#local">On your device</a><a href="#providers">Model providers</a><a href="#browser">Browser bridge</a><a href="#site">This website</a><a href="#choices">Your choices</a><a href="#contact">Contact</a></aside>
+          <div class="policy-copy">
+            <section id="scope"><h2>Scope</h2><p>This policy describes the Allegretto desktop app and the static product website at <code>allegretto.netlify.app</code>. Allegretto is an internal-testing product from Virtually(Creative), and this page is not a promise that every future feature or provider has identical terms. When a third party receives data, its own policy applies too.</p><p class="last-updated">Last reviewed: September 2026</p></section>
+
+            <section id="local"><h2>What stays on your device</h2><p>The local-first parts of Allegretto are intended to remain on the device where you run the app. Depending on how you use it, that includes:</p><ul><li>conversation history, drafts, workflow definitions, run state, and app preferences;</li><li>local model files and responses from a model running on your device;</li><li>tool plans, approvals, and the local records needed to show you what an agent did.</li></ul><p>Allegretto does not require a Virtually(Creative) account or a Virtually(Creative) hosted inference service for local model use. Keep your device protected: anyone who can access its user account or app data may be able to access local conversations and files.</p></section>
+
+            <section id="providers"><h2>When you use a hosted model</h2><p>If you select a hosted model, Allegretto sends the prompt, relevant conversation context, and tool information needed for that request directly to the model provider you selected. Your provider credentials identify that request to the provider; they are not a Virtually(Creative) proxy credential.</p><div class="policy-callout"><p><strong>The practical rule:</strong> a hosted model can see what you include in its request. Do not send sensitive information to a provider unless you have reviewed that provider’s terms, retention settings, and security practices.</p></div><p>Provider names, endpoints, retention, training use, and regional processing can change. Check the provider’s current privacy policy before connecting an account or key. Allegretto does not make those provider practices its own.</p></section>
+
+            <section id="browser"><h2>Browser bridge</h2><p>The browser bridge can let an agent read or act in an approved browser context. That may expose page content, form fields, cookies represented by the active session, or other information that is visible to the connected browser and included in a tool call.</p><p>Browser actions are intended to be visible and interruptible. You are responsible for the account, page, and permissions you connect. Review an agent’s plan before approving actions involving purchases, messages, credentials, deletion, or other irreversible changes.</p></section>
+
+            <section id="site"><h2>What this website sees</h2><p>This product page is a static site. It has no sign-in, chat, model request, or public binary download flow. It does not need your conversations or model credentials to display the information here.</p><p>Netlify may process ordinary request information to deliver a hosted website, such as an IP address, user agent, timestamps, and access logs, according to Netlify’s current terms and privacy documentation. Virtually(Creative) does not use this site as an inference relay or conversation store.</p><p>Links to Virtually(Creative), providers, or other sites take you to services with their own policies and practices.</p></section>
+
+            <section id="choices"><h2>Your choices and control</h2><ul><li>Use a local model when the task should not leave your device.</li><li>Choose which hosted provider receives a request, and avoid sending context that provider does not need.</li><li>Disconnect the browser bridge when you are finished with browser-based work.</li><li>Delete local conversations, workflows, or model files using the app’s controls or your operating system’s file controls.</li><li>Do not use an unsigned internal build as a production release; wait for a reviewed, signed agency build.</li></ul><p>Because Allegretto is local-first, Virtually(Creative) generally cannot retrieve or delete data that remains only on your device. The provider or service that receives a request controls data held on its side.</p></section>
+
+            <section id="contact"><h2>Questions</h2><p>For questions about this policy or Allegretto’s data boundary, contact <a href="https://virtuallycreative.ca/" rel="noopener">Virtually(Creative)</a>. Please do not include private conversation content, credentials, or secrets in a general website inquiry.</p><p><a class="button button-secondary" href="index.html">← Back to Allegretto</a></p></section>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-inner"><div><div class="footer-brand"><img src="assets/allegretto-mark.png" width="28" height="28" alt=""><span>Allegretto</span></div><div class="footer-meta"><p>The agent orchestrator by Virtually(Creative).</p><p>Built local-first. Designed for visible agency.</p></div></div><nav class="footer-links" aria-label="Footer navigation"><a href="index.html">Home</a><a href="index.html#status">Internal testing status</a><a href="https://virtuallycreative.ca/" rel="noopener">Virtually(Creative) ↗</a></nav></div>
+    </footer>
+  </body>
+</html>

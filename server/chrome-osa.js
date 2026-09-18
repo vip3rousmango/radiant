@@ -25,6 +25,8 @@
  */
 import { execFile } from 'child_process'
 import { promisify } from 'util'
+import { BRAND } from './brand.js'
+
 const execFileP = promisify(execFile)
 
 const CHROME = 'Google Chrome'
@@ -58,7 +60,7 @@ function jsError (e) {
     return err
   }
   if (/not authori[sz]ed|1743/.test(m)) {
-    const err = new Error('macOS has not granted Radiant permission to control Chrome. System Settings › Privacy & Security › Automation › Radiant › Google Chrome.')
+    const err = new Error(`macOS has not granted ${BRAND.productName} permission to control Chrome. System Settings › Privacy & Security › Automation › ${BRAND.productName} › Google Chrome.`)
     err.code = 'automation-denied'
     return err
   }

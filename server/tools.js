@@ -4,6 +4,7 @@ import crypto from 'crypto'
 import { execFile, spawn } from 'child_process'
 import { SPAWN_ENV } from './ollama.js'
 import { searchSessions, usableCwd } from './config.js'
+import { BRAND } from './brand.js'
 
 
 // background jobs (run_command with run_in_background:true). id -> job
@@ -122,7 +123,7 @@ export const TOOL_DEFS = [
   },
   {
     name: 'search_sessions',
-    description: 'Search the user\'s past Radiant sessions (their previous conversations with you) by keyword. Use it to recall earlier decisions or work — e.g. "what did we decide about auth". Returns matching session titles and snippets.',
+    description: `Search the user's past ${BRAND.productName} sessions (their previous conversations with you) by keyword. Use it to recall earlier decisions or work — e.g. "what did we decide about auth". Returns matching session titles and snippets.`,
     input_schema: { type: 'object', properties: { query: { type: 'string', description: 'Keywords to search for' } }, required: ['query'] }
   },
   {

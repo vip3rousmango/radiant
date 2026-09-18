@@ -1,5 +1,5 @@
 /**
- * Radiant's bridge into the browser you are actually signed into.
+ * Allegretto's bridge into the browser you are actually signed into.
  *
  * ⚠️ THIS EXISTS BECAUSE CHROME CLOSED THE OTHER DOOR ON PURPOSE. Chrome 136
  * removed --remote-debugging-port for the default profile, because one flag let any
@@ -9,17 +9,17 @@
  * session, and the authorisation is the user installing it rather than a hole
  * punched in the browser.
  *
- * ⚠️ THE EXTENSION DIALS OUT; RADIANT NEVER DIALS IN. A service worker cannot
- * listen for connections, and Radiant must not be able to reach into a browser that
- * did not ask for it. So this connects to Radiant on loopback and Radiant answers
- * requests on that socket. Unplugging is uninstalling — or just quitting Radiant.
+ * ⚠️ THE EXTENSION DIALS OUT; ALLEGRETTO NEVER DIALS IN. A service worker cannot
+ * listen for connections, and Allegretto must not be able to reach into a browser that
+ * did not ask for it. So this connects to Allegretto on loopback and Allegretto answers
+ * requests on that socket. Unplugging is uninstalling — or just quitting Allegretto.
  *
  * ⚠️ AND IT MUST SURVIVE THE SERVICE WORKER BEING KILLED. MV3 shuts an idle worker
  * down after ~30 seconds, which closes the socket with it. A chrome.alarms tick
  * wakes it and reconnects; that is why the alarm exists and why it must not be
  * removed as "unused".
  */
-// ⚠️ RADIANT MOVES IF ITS PORT IS TAKEN. server/index.js falls back to a random
+// ⚠️ ALLEGRETTO MOVES IF ITS PORT IS TAKEN. server/index.js falls back to a random
 // free port when 5834 is busy, and a service worker cannot read a file to find out
 // where it went — so a handful of likely ports are tried and Settings says plainly
 // when nothing answered. 5934 is the documented alternate.
@@ -27,7 +27,7 @@ const DEFAULT_PORTS = [5834, 5934, 5835, 5836, 5837]
 let sock = null
 let connectedPort = null
 
-function log (...a) { console.log('[radiant]', ...a) }
+function log (...a) { console.log('[allegretto]', ...a) }
 
 function connect () {
   if (sock && (sock.readyState === WebSocket.OPEN || sock.readyState === WebSocket.CONNECTING)) return
@@ -41,11 +41,11 @@ function connect () {
     ws.onopen = () => {
       sock = ws; connectedPort = port
       // ⚠️ NO BADGE. This used to stamp a blue "on" across the toolbar icon the
-      // whole time Radiant was running, which is most of the day — a permanent
+      // whole time Allegretto was running, which is most of the day — a permanent
       // sticker on a 16px icon, and the one thing about the extension a person
       // sees constantly. Tony: "Looks horrible. we dont need that." The state is
-      // already said in two better places: the popup ("Connected to Radiant on
-      // port N") and Radiant's own Settings ("✓ Connected"). Clear it on the way
+      // already said in two better places: the popup ("Connected to Allegretto on
+      // port N") and Allegretto's own Settings ("✓ Connected"). Clear it on the way
       // through in case an older build left one behind.
       chrome.action.setBadgeText({ text: '' })
       log('connected on', port)
@@ -192,6 +192,6 @@ chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
 
 chrome.runtime.onInstalled.addListener(connect)
 chrome.runtime.onStartup.addListener(connect)
-chrome.alarms.create('radiant-keepalive', { periodInMinutes: 0.5 })
+chrome.alarms.create('allegretto-keepalive', { periodInMinutes: 0.5 })
 chrome.alarms.onAlarm.addListener(connect)
 connect()

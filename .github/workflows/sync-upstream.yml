@@ -1,0 +1,154 @@
+# Fetch Templeton's source branch and open a review-only agency PR.
+#
+# This workflow never checks out or mutates agency master, never pushes to
+# upstream, and never builds or publishes a release. The resulting PR is the
+# only path for an upstream change to reach the agency repository.
+name: Sync upstream (review only)
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: Agency branch to use as the PR base
+        required: false
+        default: master
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+env:
+  BASE_BRANCH: ${{ github.event.inputs.base_branch || 'master' }}
+  SYNC_BRANCH: automation/sync-upstream-master
+
+jobs:
+  open-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the agency base
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.base_branch || 'master' }}
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Configure fetch-only upstream
+        run: |
+          set -euo pipefail
+          if git remote get-url upstream >/dev/null 2>&1; then
+            git remote set-url upstream https://github.com/templetongroup/radiant.git
+          else
+            git remote add upstream https://github.com/templetongroup/radiant.git
+          fi
+          # A pushurl is required: without it git silently falls back to url and
+          # a typo in a future command could publish to the source repository.
+          git config --local --unset-all remote.upstream.pushurl || true
+          git config --local remote.upstream.pushurl DISABLED
+
+      - name: Verify remotes and release targets
+        run: node scripts/test-upstream-sync.mjs
+
+      - name: Reject conflicting open review PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          open_prs=$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --head "$SYNC_BRANCH" \
+            --state open \
+            --json number,url,baseRefName)
+          conflicting=$(printf '%s' "$open_prs" | jq -r \
+            --arg expected_base "$BASE_BRANCH" \
+            '[.[] | select(.baseRefName != $expected_base) | .url] | join(", ")')
+          if [ -n "$conflicting" ]; then
+            echo "refusing to reset $SYNC_BRANCH while it has an open PR to another base: $conflicting" >&2
+            exit 1
+          fi
+
+      - name: Fetch upstream/master and recreate review branch from agency base
+        id: prepare
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --prune origin "$BASE_BRANCH"
+          git fetch --no-tags --prune upstream master
+
+          sync_remote_ref="refs/remotes/origin/$SYNC_BRANCH"
+          if git fetch --no-tags --prune origin \
+            "refs/heads/$SYNC_BRANCH:$sync_remote_ref"; then
+            sync_branch_expected_sha=$(git rev-parse "$sync_remote_ref")
+          else
+            # Treat a failed fetch as an error unless the remote confirms that
+            # this branch is absent. Never fall back to an unverified lease.
+            set +e
+            git ls-remote --exit-code origin "refs/heads/$SYNC_BRANCH" >/dev/null 2>&1
+            ls_remote_status=$?
+            set -e
+            if [ "$ls_remote_status" -eq 0 ]; then
+              echo "failed to fetch existing remote sync branch $SYNC_BRANCH" >&2
+              exit 1
+            elif [ "$ls_remote_status" -ne 2 ]; then
+              echo "could not determine whether remote sync branch $SYNC_BRANCH exists" >&2
+              exit 1
+            fi
+            # An absent remote branch is the only safe lease for its first push.
+            sync_branch_expected_sha=0000000000000000000000000000000000000000
+            git update-ref -d "$sync_remote_ref" || true
+          fi
+          echo "SYNC_BRANCH_EXPECTED_SHA=$sync_branch_expected_sha" >> "$GITHUB_ENV"
+
+          # -B recreates the local branch at the current agency base on every run.
+          # Do not use an existing origin/$SYNC_BRANCH tip: it may predate agency commits.
+          git checkout -B "$SYNC_BRANCH" "origin/$BASE_BRANCH"
+          git reset --hard "origin/$BASE_BRANCH"
+
+          # Conflicts stop the run and leave the agency base untouched. A human
+          # resolves them in the branch/PR; this job never merges automatically.
+          git merge --no-ff --no-edit upstream/master
+          if [ "$(git rev-parse HEAD)" = "$(git rev-parse "origin/$BASE_BRANCH")" ]; then
+            echo "has_delta=false" >> "$GITHUB_OUTPUT"
+            echo "upstream/master is already at $BASE_BRANCH; no sync PR needed"
+            echo "Any existing review PR is left untouched and will be refreshed on a future upstream change."
+          else
+            echo "has_delta=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push only the recreated review branch to origin
+        if: steps.prepare.outputs.has_delta == 'true'
+        run: |
+          set -euo pipefail
+          # The explicit lease prevents overwriting a branch changed after fetch.
+          git push \
+            --force-with-lease="refs/heads/$SYNC_BRANCH:$SYNC_BRANCH_EXPECTED_SHA" \
+            --set-upstream origin "HEAD:refs/heads/$SYNC_BRANCH"
+
+      - name: Open or report the review PR
+        if: steps.prepare.outputs.has_delta == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          existing=$(gh pr list \
+            --repo "$GITHUB_REPOSITORY" \
+            --base "$BASE_BRANCH" \
+            --head "$SYNC_BRANCH" \
+            --state open \
+            --json number,url \
+            --jq '.[0] | select(.number != null) | .url')
+          if [ -n "$existing" ]; then
+            echo "review PR already open: $existing"
+          else
+            gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
+              --base "$BASE_BRANCH" \
+              --head "$SYNC_BRANCH" \
+              --title "Sync upstream/master into $BASE_BRANCH" \
+              --body "Automated upstream fetch for review. This PR was created by the fetch-only sync workflow; it is not approved or merged automatically."
+          fi

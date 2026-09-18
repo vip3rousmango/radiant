@@ -14,7 +14,10 @@
  * who never turned it on cannot be billed by a stray button, and it says what
  * is missing (the setting, the key) in a sentence rather than a 4xx.
  */
+import { BRAND } from './brand.js'
 import { liveInstructions, seedFrom } from './voice-text.js'
+
+const brandedLiveInstructions = options => liveInstructions(options).replace(/\bRadiant\b/g, BRAND.productName)
 
 export const LIVE_MODEL = 'gpt-live-1'
 export const LIVE_VOICES = ['marin', 'quartz', 'ripple', 'vesper', 'willow', 'stone', 'gleam', 'meridian', 'beacon', 'delta', 'cinder']
@@ -54,7 +57,7 @@ export function liveSessionBody ({ session, settings, host, sdp }) {
   return {
     session: {
       model: LIVE_MODEL,
-      instructions: liveInstructions({ title: session?.title, model: session?.model, host }),
+      instructions: brandedLiveInstructions({ title: session?.title, model: session?.model, host }),
       delegation: { type: 'client' },
       audio: { output: { voice } },
       input

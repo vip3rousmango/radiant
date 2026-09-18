@@ -1,3 +1,4 @@
+import { BRAND } from './brand.js'
 /**
  * The text that crosses between a spoken conversation and a Radiant turn.
  *
@@ -91,11 +92,11 @@ function basename (p) { return String(p).split('/').filter(Boolean).pop() || Str
 /**
  * What GPT-Live is told at session start. Short: the doc says conversation
  * style and when to delegate go here, and everything about the task stays with
- * the backend — which is Radiant's own system prompt.
+ * the backend — which is Allegretto's own system prompt.
  */
 export function liveInstructions ({ title, model, host } = {}) {
   return [
-    'You are the voice of Radiant, a coding and research assistant that runs on the user\'s own computer.',
+    `You are the voice of ${BRAND.productName}, a coding and research assistant that runs on the user's own computer.`,
     'You handle the conversation: listen, speak briefly and naturally, ask a short question when a request is unclear.',
     'Delegate to the backend anything that needs the workspace, files, code, commands, the web, memory of earlier chats, or real knowledge — which is almost everything. Do not answer those yourself or guess.',
     'While the backend works, keep replies short. When a result arrives, paraphrase it in one to three sentences; say that details are in the chat when there are any.',
@@ -140,7 +141,7 @@ export function addFragment (rows, who, f) {
 /** The saved transcript as prose a model can read. */
 export function transcriptText (rows, seconds) {
   const mins = seconds ? `${Math.max(1, Math.round(seconds / 60))} min` : ''
-  const lines = (rows || []).map(r => `${r.who === 'you' ? 'You' : 'Radiant'}: ${String(r.text || '').trim()}`).filter(l => !/:\s*$/.test(l))
+  const lines = (rows || []).map(r => `${r.who === 'you' ? 'You' : BRAND.productName}: ${String(r.text || '').trim()}`).filter(l => !/:\s*$/.test(l))
   return `[Voice conversation${mins ? `, ${mins}` : ''} — what was said aloud:]\n${lines.join('\n')}`
 }
 

@@ -1,10 +1,11 @@
+import { BRAND } from './brand.js'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 
 // Connect to configured MCP servers and bridge their tools into the agent loop.
 // Tool names are namespaced mcp__<serverId>__<tool> so they never collide with
-// Radiant's own tools and can be routed back to the right server.
+// Allegretto's own tools and can be routed back to the right server.
 
 const clients = new Map() // serverId -> { client, tools, error }
 
@@ -12,14 +13,11 @@ async function connect (server) {
   const existing = clients.get(server.id)
   if (existing && !existing.error) return existing
   try {
-    const client = new Client({ name: 'radiant', version: '1.0.0' }, { capabilities: {} })
+    const client = new Client({ name: BRAND.productName, version: '1.0.0' }, { capabilities: {} })
     let transport
     if (server.transport === 'http' || server.url) {
-      // ⚠️ HOSTED MCP SERVERS USUALLY WANT CREDENTIALS. This connected with no
-      // auth at all, so any protected server answered 401 and Radiant reported
-      // it as a bare failure. A pasted bearer token covers servers that issue
-      // one; servers demanding a full OAuth flow still cannot be reached, and
-      // connect() below says so in words rather than leaving the user guessing.
+      // Hosted MCP servers usually need credentials. A pasted bearer token
+      // covers servers that issue one; full OAuth flows are not supported.
       transport = new StreamableHTTPClientTransport(new URL(server.url), {
         requestInit: server.token
           ? { headers: { authorization: `Bearer ${server.token}` } }
@@ -44,14 +42,12 @@ async function connect (server) {
     clients.set(server.id, entry)
     return entry
   } catch (e) {
-    // ⚠️ SAY WHAT A 401 MEANS. "HTTP 401" tells the user nothing they can act
-    // on; the server is asking them to sign in, and Radiant cannot do that flow
-    // yet, so the honest message names both facts.
+    // Say what a 401 means so the user knows whether to update a token or sign in.
     const msg = String(e?.message || e)
     if (/401|unauthor/i.test(msg)) {
       const entry = { client: null, tools: [], error: server.token
         ? 'That server rejected the token — check it is current and has the right scope.'
-        : 'That server needs you to sign in. Paste an access token if it issues one; Radiant cannot yet do a full OAuth sign-in for MCP servers.' }
+        : `That server needs you to sign in. Paste an access token if it issues one; ${BRAND.productName} cannot yet do a full OAuth sign-in for MCP servers.` }
       clients.set(server.id, entry)
       return entry
     }

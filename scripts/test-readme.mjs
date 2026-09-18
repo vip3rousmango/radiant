@@ -89,13 +89,11 @@ is('the Read me and the code agree on whether a red model can be downloaded',
   readme.includes('cannot be downloaded'), blocksOnMemory)
 
 // ⚠️ THE PRIVACY URL MUST KEEP ITS .html, AND MUST EXIST AT ALL. Apple requires
-// it reachable from the binary, and templetongroup.dev answers 200 for unknown
-// paths while serving the HOMEPAGE — so dropping ".html" for tidiness would
-// leave a link that looks fine, returns 200, and shows a reviewer the wrong
-// page. Verified live once: /showcase/radiant/privacy is 327 KB of homepage,
-// /showcase/radiant/privacy.html is the real 7 KB policy.
+// it reachable from the binary. Keep the shared product URL in BRAND so the
+// desktop and phone surfaces cannot drift to different policies.
 const settingsSrc = readFileSync('src/mobile/SettingsScreen.jsx', 'utf8')
-const purl = settingsSrc.match(/PRIVACY_URL = '([^']+)'/)?.[1]
+const brandSrc = readFileSync('server/brand.js', 'utf8')
+const purl = brandSrc.match(/privacyUrl:\s*'([^']+)'/)?.[1]
 is('the app carries a privacy policy URL', !!purl, true)
 is('and it keeps the .html that makes it real', /\.html$/.test(purl || ''), true)
 is('and the app links to it', settingsSrc.includes('Privacy policy'), true)
