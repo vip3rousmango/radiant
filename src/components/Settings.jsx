@@ -3423,7 +3423,7 @@ const GUIDE = [
   {
     title: 'Look & feel',
     items: [
-      ['Themes', 'Fourteen palettes plus colors you pick yourself, in light / medium / dark (bottom-left toggle). Agents can follow the accent or carry their own color.'],
+      ['Themes', 'Fourteen palettes plus colors you pick yourself, in light / medium / dark (bottom-left toggle). The Allegretto theme carries the warm paper, ink, agency blue, and soft pink from the product identity into the workspace. Agents can follow the accent or carry their own color.'],
       ['Motion', 'Ten animated backgrounds in Settings → Appearance, an accent glow that pulses around the composer while an agent is working, and subtle entrance animations throughout (all respect Reduce Motion).'],
       ['Usage meters', 'Every subscription you are signed in to shows at the bottom of the sidebar, along with your OpenRouter balance. Claude and ChatGPT report how much of each window you have left and when it resets; Grok, Nous, Qwen and Copilot do not publish usage, so those read simply “signed in”.'],
       ['Command palette', 'Press ⌘K for quick actions, model switching, and jumping between sessions.'],

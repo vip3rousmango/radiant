@@ -8,7 +8,38 @@ import { BRAND } from '../server/brand.js'
 // picker (hex → OKLCH). Everything else is derived, so themes stay tiny.
 
 export const THEMES = [
-  { id: 'radiant', name: BRAND.productName, hue: 258, chroma: 0.11, tint: 1 },
+  // Allegretto's default theme carries the landing page's quiet paper, ink,
+  // agency blue, and soft pink into the workspace without changing the legacy
+  // id persisted by existing installations.
+  {
+    id: 'radiant',
+    name: BRAND.productName,
+    // The pinned agency blue is #0d72ca; these OKLCH coordinates keep derived
+    // glyphs and fallback surfaces in the same family.
+    hue: 247.4,
+    chroma: 0.118,
+    tint: 1,
+    vars: {
+      dark: {
+        '--bg-input': '#1d2328', '--bg': '#252b2f', '--bg-panel': '#2e3539', '--bg-raised': '#394145', '--bg-hover': '#454d51',
+        '--border': '#596267', '--border-strong': '#737d82',
+        '--text': '#f5f1e8', '--text-muted': '#c4c3bc', '--text-faint': '#92948f',
+        '--accent': '#65acec', '--accent-hot': '#eda1cf', '--accent-dim': '#315f89', '--accent-wash': '#293d4d', '--on-accent': '#101820'
+      },
+      medium: {
+        '--bg-input': '#30383c', '--bg': '#3b4448', '--bg-panel': '#465054', '--bg-raised': '#515b5f', '--bg-hover': '#5d686c',
+        '--border': '#707b80', '--border-strong': '#8a969a',
+        '--text': '#fffaf0', '--text-muted': '#d1d0c8', '--text-faint': '#a6a7a1',
+        '--accent': '#7bb9f0', '--accent-hot': '#f0acd4', '--accent-dim': '#4e789e', '--accent-wash': '#465968', '--on-accent': '#15202a'
+      },
+      light: {
+        '--bg-input': '#fbfaf6', '--bg': '#f5f2ea', '--bg-panel': '#fcfbf8', '--bg-raised': '#ffffff', '--bg-hover': '#e9e5db',
+        '--border': '#d7d1c5', '--border-strong': '#b9b0a2',
+        '--text': '#252525', '--text-muted': '#5c5a54', '--text-faint': '#85837b',
+        '--accent': '#0d72ca', '--accent-hot': '#dc68b1', '--accent-dim': '#9bc8ed', '--accent-wash': '#e4f0fa', '--on-accent': '#ffffff'
+      }
+    }
+  },
   { id: 'ember', name: 'Ember', hue: 55, chroma: 0.17, tint: 1.4 },
   { id: 'tokyonight', name: 'Tokyo Night', hue: 265, chroma: 0.14, tint: 2.4 },
   { id: 'catppuccin', name: 'Catppuccin', hue: 310, chroma: 0.11, tint: 2.6 },

@@ -12,7 +12,8 @@ import { BRAND } from '../../server/brand.js'
  * from src/theme.js so the two apps cannot drift.
  */
 export const THEMES = [
-  { id: 'radiant', name: BRAND.productName, hue: 258, chroma: 0.11 },
+  // Allegretto's pinned agency blue is shared with the desktop theme.
+  { id: 'radiant', name: BRAND.productName, hue: 247.4, chroma: 0.118 },
   { id: 'ember', name: 'Ember', hue: 55, chroma: 0.17 },
   { id: 'tokyonight', name: 'Tokyo Night', hue: 265, chroma: 0.14 },
   { id: 'catppuccin', name: 'Catppuccin', hue: 310, chroma: 0.11 },
