@@ -3,7 +3,7 @@ const { autoUpdater } = require('electron-updater')
 const fs = require('fs')
 const path = require('path')
 const os = require('os')
-const { updaterEnabledForPackage, registerDisabledUpdater } = require('./updater-config.cjs')
+const { updaterEnabledForPackage, disableAutoUpdater, registerDisabledUpdater } = require('./updater-config.cjs')
 const { menuTemplate } = require('./menu.cjs')
 
 // ⚠️ A STAGED PACKAGE IS NOT NECESSARILY THE LATEST ONE.
@@ -103,6 +103,8 @@ function buildMenu (checkNow, updatesEnabled) {
 function installUpdater ({ getWindow }) {
   if (!updaterEnabledForPackage(packageMetadata())) {
     console.log('[radiant] updater disabled for this build')
+    disableAutoUpdater(autoUpdater)
+    clearStaged('updates disabled for this build')
     const updater = registerDisabledUpdater({ ipcMain, app })
     buildMenu(updater.checkNow, false)
     return updater

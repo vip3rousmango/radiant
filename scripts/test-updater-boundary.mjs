@@ -3,13 +3,16 @@ import assert from 'node:assert/strict'
 import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
-const { updaterEnabledForPackage, registerDisabledUpdater } = require('../electron/updater-config.cjs')
+const { updaterEnabledForPackage, disableAutoUpdater, registerDisabledUpdater } = require('../electron/updater-config.cjs')
 const { menuTemplate } = require('../electron/menu.cjs')
 
 assert.equal(updaterEnabledForPackage({ radiantUpdaterEnabled: true }), true)
 assert.equal(updaterEnabledForPackage({ radiantUpdaterEnabled: false }), false)
 assert.equal(updaterEnabledForPackage({}), true)
 assert.equal(updaterEnabledForPackage(null), true)
+const autoUpdater = { autoDownload: true, autoInstallOnAppQuit: true }
+disableAutoUpdater(autoUpdater)
+assert.deepEqual(autoUpdater, { autoDownload: false, autoInstallOnAppQuit: false })
 
 const handlers = new Map()
 const events = new Set()
@@ -50,4 +53,4 @@ assert.equal(labels(disabledMenu).includes('Check for Updates'), false)
 assert.equal(labels(enabledMenu).split('Check for Updates').length - 1, process.platform === 'darwin' ? 2 : 1)
 assert.deepEqual(disabledMenu.filter(item => item.role), [{ role: 'editMenu' }, { role: 'viewMenu' }, { role: 'windowMenu' }])
 
-console.log('13 updater boundary assertions passed')
+console.log('14 updater boundary assertions passed')

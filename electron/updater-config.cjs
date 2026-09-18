@@ -2,6 +2,11 @@ function updaterEnabledForPackage (pkg) {
   return pkg?.radiantUpdaterEnabled !== false
 }
 
+function disableAutoUpdater (autoUpdater) {
+  autoUpdater.autoDownload = false
+  autoUpdater.autoInstallOnAppQuit = false
+}
+
 function registerDisabledUpdater ({ ipcMain, app }) {
   const disabled = () => ({
     version: null,
@@ -15,5 +20,4 @@ function registerDisabledUpdater ({ ipcMain, app }) {
   ipcMain.handle('rad:install-location', () => ({ bundle: null, translocated: false, inApplications: false, updatable: false, disabled: true }))
   return { checkNow: async () => disabled(), startAutoCheck: () => {} }
 }
-
-module.exports = { updaterEnabledForPackage, registerDisabledUpdater }
+module.exports = { updaterEnabledForPackage, disableAutoUpdater, registerDisabledUpdater }
