@@ -11,6 +11,7 @@ import { shouldDrainQueue } from '../queue.js'
 import { emptyDictation, applyDictationEvent, dictationText } from '../dictation.js'
 import { turnStatus, clock } from '../turnstatus.js'
 import { BRAND } from '../../server/brand.js'
+const MAX_APPROVAL_HIGHLIGHT_CHARS = 64 * 1024
 
 // An agent brought in from another app on this Mac (Hermes, OpenClaw). They sit
 // apart from your own agents and keep their icon's own color rather than taking
@@ -1501,7 +1502,7 @@ export default function Chat ({ session, live, todos = [], stats, approval, ques
               <div className={'approval-card approval-' + request.tool}>
                 <div className='approval-label'>Permission request · {request.tool.replace(/_/g, ' ')}</div>
                 <div className='q'>{request.question}</div>
-                <pre className='approval-code'><code className={'hljs language-' + request.language} dangerouslySetInnerHTML={{ __html: highlightCode(request.detail, request.language) }} /></pre>
+                <pre className='approval-code'><code className={'hljs language-' + request.language} {...(request.detail.length <= MAX_APPROVAL_HIGHLIGHT_CHARS ? { dangerouslySetInnerHTML: { __html: highlightCode(request.detail, request.language) } } : {})}>{request.detail.length > MAX_APPROVAL_HIGHLIGHT_CHARS ? request.detail : null}</code></pre>
                 <div className='row'>
                   <button className='small-btn primary' onClick={() => onApproval(approval.id, true)}>{request.action}</button>
                   <button className='small-btn danger' onClick={() => onApproval(approval.id, false)}>Deny</button>

@@ -17,6 +17,8 @@ const read = approvalPresentation({ name: 'read_file', args: { path: '/Users/ton
 ok('read_file approval shows every argument', read.detail === '{\n  "path": "/Users/tony/project/src/App.jsx",\n  "offset": 3,\n  "limit": 8\n}')
 ok('read_file approval uses a read action', read.action === 'Read it')
 ok('read_file approval names the read operation', read.question === 'Read this file?')
+const relative = approvalPresentation({ name: 'read_file', args: { path: 'config.json' } }, '/Users/tony/project')
+ok('relative file approval names its workspace context', relative.question === 'Read this file relative to ~/project?')
 
 const shell = approvalPresentation({ name: 'run_command', args: { command: 'npm run build', cwd: '/tmp' } }, '/Users/tony/project')
 ok('run_command approval keeps the shell command', shell.detail === 'npm run build')

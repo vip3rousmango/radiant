@@ -11,6 +11,12 @@ function compactPath (cwd) {
   return cwd ? String(cwd).replace(/^\/Users\/[^/]+/, '~') : ''
 }
 
+function relativePathNeedsContext (name, args) {
+  return ['read_file', 'write_file', 'edit_file', 'list_dir'].includes(name) &&
+    typeof args.path === 'string' &&
+    !args.path.startsWith('/')
+}
+
 function stringifyArgs (args) {
   try { return JSON.stringify(args, null, 2) || '{}' } catch { return String(args) }
 }
@@ -24,9 +30,11 @@ export function approvalPresentation (approval, cwd) {
   const location = compactPath(cwd)
   const verb = definition?.verb || 'Allow'
   const noun = definition?.noun || name.replace(/_/g, ' ')
-  const includeLocation = name === 'run_command' || name === 'list_dir' || name === 'job'
+  const needsPathContext = relativePathNeedsContext(name, args)
+  const includeLocation = name === 'run_command' || needsPathContext
+  const preposition = needsPathContext ? 'relative to' : definition?.preposition
   const question = definition
-    ? `${verb} this ${noun}${includeLocation && location ? ` ${definition.preposition} ${location}` : ''}?`
+    ? `${verb} this ${noun}${includeLocation && location ? ` ${preposition} ${location}` : ''}?`
     : `${verb} ${noun}?`
   return {
     tool: name,
