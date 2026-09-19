@@ -23,14 +23,19 @@ git('commit', '-qm', 'test ship check')
 git('init', '--bare', '-q', remote)
 git('remote', 'add', 'origin', remote)
 
-let stdout
+let stdout = ''
+let stderr = ''
 try {
   stdout = execFileSync(process.execPath, ['scripts/ship-check.mjs', '--json'], {
     cwd: root,
     encoding: 'utf8'
   })
 } catch (error) {
-  stdout = error.stdout
+  stdout = String(error.stdout || '')
+  stderr = String(error.stderr || '')
+}
+if (stderr.trim()) {
+  throw new Error(`ship-check --json wrote unexpected stderr: ${stderr}`)
 }
 const report = JSON.parse(stdout)
 const pushed = report.checks.find(check => check.id === 'pushed')

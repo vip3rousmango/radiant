@@ -13,6 +13,7 @@ run "model catalog"  node scripts/test-catalog.mjs
 run "catalog vs HF"  node scripts/test-catalog-live.mjs
 run "HF search"      node scripts/test-hf-search.mjs
 run "read me"        node scripts/test-readme.mjs
+run "ship check"      node scripts/test-ship-check.mjs
 run "window drag"    node scripts/test-drag.mjs
 run "cross-origin"   node scripts/test-origin.mjs
 run "command risk"   node scripts/test-command-risk.mjs
