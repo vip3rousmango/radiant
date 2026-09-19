@@ -72,6 +72,7 @@ node scripts/test-install-location.mjs
 node scripts/test-upstream-sync.mjs
 node scripts/ship-check.mjs
 ```
+- There is no lint script or lint configuration in the root package; use the targeted tests and existing build checks rather than inventing a lint command.
 
 For the browser UI harness:
 
@@ -90,11 +91,11 @@ bash scripts/test-all.sh
 For iOS:
 
 ```bash
-cd apps/ios && npm install
-cd apps/ios && xcodebuild -project ios/App/App.xcodeproj -scheme App \
+npm --prefix apps/ios install
+(cd apps/ios && xcodebuild -project ios/App/App.xcodeproj -scheme App \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   -configuration Debug CODE_SIGNING_ALLOWED=NO \
-  -skipPackagePluginValidation -skipMacroValidation build
+  -skipPackagePluginValidation -skipMacroValidation build)
 scripts/ios-install-all.sh
 ```
 
@@ -103,6 +104,8 @@ Do not pass `-sdk iphonesimulator`. The Simulator is for layout, navigation, fir
 ## Code Conventions & Common Patterns
 
 - Match nearby JavaScript style: ESM in `src/` and `server/`, CommonJS only for Electron entry files (`.cjs`), semicolon-free code, and small named helpers.
+- Use descriptive `camelCase` names for JavaScript variables/functions and `PascalCase` for React components; preserve the repository's existing names for public events, routes, and IPC channels.
+- Prefer explicit dependency objects at orchestration seams (for example `graphDeps` in `server/index.js`) and small pure helpers for transformations. Keep long-lived state in the owning layer: per-session renderer maps in `src/App.jsx`, server controllers/maps in `server/index.js`, and durable records in `server/config.js`.
 - All model/provider calls go through `server/net.js:modelFetch`. Do not use bare `fetch` for a model round; slow local models need disabled Undici headers/body timeouts plus the turn `AbortSignal`.
 - Keep provider-specific request conversion inside `server/providers.js`. Preserve the neutral session format (`user.text`/`attachments`; `assistant.parts` containing text/tool parts).
 - Use `src/api.js` helpers (`apiUrl`, `authHeaders`, `json`, `streamChat`, and related stream helpers) from React. Do not put provider calls or credentials in renderer code, React state, or localStorage.
@@ -115,6 +118,15 @@ Do not pass `-sdk iphonesimulator`. The Simulator is for layout, navigation, fir
 - `apps/ios/ios/App/App/plugins/LocalModels.swift` is the catalogue source of truth. Generate `apps/ios/catalog.json` with `npm run catalog:export`, then run `npm run catalog:check`; do not hand-edit the generated JSON.
 - `npx cap sync ios` rewrites `apps/ios/ios/App/CapApp-SPM/Package.swift` and can remove MLX/HuggingFace dependencies. Restore that file from Git after manual sync; `scripts/ios-install-all.sh` does this automatically.
 - Keep Mac icons (`build/icon.*`) separate from web/iOS icons. Generated symbol and catalogue files should be changed through their scripts, not hand-edited.
+
+### Repository Workflow & Guardrails
+
+- Develop every change on a feature branch. Agency `master` is merge-only through a reviewed pull request.
+- Push Allegretto work only to writable agency `origin`. Keep `upstream` pointed at `https://github.com/templetongroup/radiant.git` with a disabled push URL.
+- The scheduled upstream workflow fetches upstream into `automation/sync-upstream-master`, never mutates agency `master`, never pushes upstream, and never publishes. Conflicts require semantic human resolution; do not resolve by blanket ours/theirs.
+- Before calling a user-facing change shipped, update the in-app Read me, run `node scripts/ship-check.mjs`, invoke the `ship-sync` agent, and record the work as Done in Linear for team “The Templeton Group” (TG), project “Radiant”. If Linear or the agent is unavailable, report the exact blocker.
+- Agency website work deploys only to `https://allegretto.netlify.app` (planned custom domain: `allegretto.virtuallycreative.ca`). Do not create a Radiant GitHub release, upload Radiant assets, or update the Radiant download page for Allegretto work.
+- Some docs and legacy scripts still say Radiant. Use current package identity, build configuration, and the actual target path as the source of truth; avoid broad branding rewrites unrelated to the change.
 
 ## Important Files
 
@@ -147,6 +159,7 @@ Do not pass `-sdk iphonesimulator`. The Simulator is for layout, navigation, fir
 ## Testing & QA
 
 There is no Jest/Vitest/Mocha/pytest suite and no root `npm test`. Tests are mostly Node ESM scripts using built-in assertions, with Playwright Core browser harnesses, Python catalogue checks, and pure Swift checks.
+- There is no numeric coverage gate. For changed behavior, run the narrowest real-path regression that exercises it and add a focused regression script/case when a plausible future bug is not already covered.
 
 - **Server/API:** `node scripts/test-api.mjs` starts the real server with throwaway data and exercises persistence and API behavior.
 - **Packaged Electron:** `node scripts/test-smoke.mjs <path-to-app>` launches the actual app with isolated HOME/CDP. Pass the generated Allegretto app path explicitly; the default still names the legacy Radiant path.
@@ -156,12 +169,3 @@ There is no Jest/Vitest/Mocha/pytest suite and no root `npm test`. Tests are mos
 - **Live catalogue:** `npm run catalog:check` requires network access to Hugging Face and checks reachability, size drift, and undeclared quantization.
 - **Website:** Netlify serves `website/` with no build step (`netlify.toml` sets `command = "true"`). Verify changed pages, dialogs, forms, and accessibility manually on the correct Allegretto deploy/preview URL; a local static server cannot prove Netlify Forms behavior.
 - **Release:** run the validation-only release command before any publish attempt. A signed release additionally needs Developer ID, notary profile, agency target, and token. Verify download assets with GET/ranged GET rather than HEAD.
-
-## Repository Workflow & Guardrails
-
-- Develop every change on a feature branch. Agency `master` is merge-only through a reviewed pull request.
-- Push Allegretto work only to writable agency `origin`. Keep `upstream` pointed at `https://github.com/templetongroup/radiant.git` with a disabled push URL.
-- The scheduled upstream workflow fetches upstream into `automation/sync-upstream-master`, never mutates agency `master`, never pushes upstream, and never publishes. Conflicts require semantic human resolution; do not resolve by blanket ours/theirs.
-- Before calling a user-facing change shipped, update the in-app Read me, run `node scripts/ship-check.mjs`, invoke the `ship-sync` agent, and record the work as Done in Linear for team “The Templeton Group” (TG), project “Radiant”. If Linear or the agent is unavailable, report the exact blocker.
-- Agency website work deploys only to `https://allegretto.netlify.app` (planned custom domain: `allegretto.virtuallycreative.ca`). Do not create a Radiant GitHub release, upload Radiant assets, or update the Radiant download page for Allegretto work.
-- Some docs and legacy scripts still say Radiant. Use current package identity, build configuration, and the actual target path as the source of truth; avoid broad branding rewrites unrelated to the change.
