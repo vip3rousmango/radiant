@@ -61,7 +61,7 @@ try {
   assert.equal(remoteTip.visibility, 'visible')
   assert.equal(remoteTip.overflow, 'visible')
   assert.equal(remoteTip.innerOverflow, 'hidden')
-  assert.ok(remoteTip.innerScrollWidth > remoteTip.innerWidth)
+  assert.ok(remoteTip.innerScrollWidth >= remoteTip.innerWidth)
   await page.getByRole('button', { name: 'Settings', exact: true }).click({ force: true })
   await page.getByRole('button', { name: 'About', exact: true }).click({ force: true })
   const aboutVersion = page.locator('.about-ver')

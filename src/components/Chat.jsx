@@ -6,7 +6,6 @@ import { SKILL_CATEGORIES } from '../../server/skill-categories.js'
 import { glyphColor } from '../theme.js'
 import { AgentGlyph } from './AgentIcons.jsx'
 import { api, getServer, apiUrl, authHeaders, deviceNoun } from '../api.js'
-import { approvalPresentation } from '../approval.js'
 import { shouldDrainQueue } from '../queue.js'
 import { emptyDictation, applyDictationEvent, dictationText } from '../dictation.js'
 import { turnStatus, clock } from '../turnstatus.js'
@@ -1495,20 +1494,16 @@ export default function Chat ({ session, live, todos = [], stats, approval, ques
               onChoose={onWidgetChoice}
             />
           )}
-          {approval && (() => {
-            const request = approvalPresentation(approval, session.cwd)
-            return (
-              <div className={'approval-card approval-' + request.tool}>
-                <div className='approval-label'>Permission request · {request.tool.replace(/_/g, ' ')}</div>
-                <div className='q'>{request.question}</div>
-                <pre className='approval-code'><code>{request.detail}</code></pre>
-                <div className='row'>
-                  <button className='small-btn primary' onClick={() => onApproval(approval.id, true)}>{request.action}</button>
-                  <button className='small-btn danger' onClick={() => onApproval(approval.id, false)}>Deny</button>
-                </div>
+          {approval && (
+            <div className='approval-card'>
+              <div className='q'>Run this command in <span className='mono'>{session.cwd?.replace(/^\/Users\/[^/]+/, '~')}</span>?</div>
+              <code>{approval.args?.command}</code>
+              <div className='row'>
+                <button className='small-btn primary' onClick={() => onApproval(approval.id, true)}>Run it</button>
+                <button className='small-btn danger' onClick={() => onApproval(approval.id, false)}>Deny</button>
               </div>
-            )
-          })()}
+            </div>
+          )}
           {question && <QuestionCard question={question} onAnswer={onAnswer} />}
           {error && <div className='error-note'>⚠ {error}</div>}
         </div>
