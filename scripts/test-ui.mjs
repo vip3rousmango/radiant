@@ -66,8 +66,11 @@ const sendBtn = page.locator('button[aria-label*="Send" i], button:has-text("Sen
 if (await sendBtn.count()) { await sendBtn.click({ force: true }); await page.waitForTimeout(500) }
 ok('the reply appears in the transcript', /Local reply to/i.test(await body()))
 
-// ⚠️ THE PRIVACY CLAIM. It must name where the answer came from, and with a
-// local model that is the device.
+// ── the privacy claim is agency-owned ────────────────────────────────────
+// The consent sheet must name the agency product owner, not the upstream
+// publisher.
+const AGENCY_PUBLISHER = 'Virtually(Creative)'
+const AGENCY_WEBSITE = 'https://virtuallycreative.ca/'
 const sub = await page.locator('.rx-chat-title-2').first().innerText().catch(() => '')
 ok('the chat states where the answer comes from', sub.trim().length > 0)
 
@@ -206,7 +209,7 @@ ok('and the app does not drag you back down', held && held.after < 80)
   ok('the sheet names the provider', /OpenRouter/.test(dt))
   ok('says what is sent', /messages you type/i.test(dt) && /images you attach/i.test(dt))
   ok('says where it goes, by host', /openrouter\.ai/.test(dt))
-  ok('says what is not sent, and who does not get it', /not sent/i.test(dt) && /Templeton/.test(dt))
+  ok('says what is not sent, and who does not get it', /not sent/i.test(dt) && dt.includes(AGENCY_PUBLISHER))
   ok('offers Allow and Not now', /Allow/.test(dt) && /Not now/.test(dt))
   is('nothing was sent while the sheet was up', await page.evaluate(() => window.__cloudSends), 0)
   await page.locator('[role=dialog] button', { hasText: 'Not now' }).click({ force: true }); await page.waitForTimeout(500)
@@ -227,7 +230,10 @@ ok('and the app does not drag you back down', held && held.after < 80)
 {
   await page.route('https://huggingface.co/**', route => {
     const u = route.request().url()
-    if (/api\/models\?search=/.test(u)) return route.fulfill({ contentType: 'application/json', body: JSON.stringify([{ id: 'mlx-community/Tiny-Test-4bit', downloads: 12000, tags: ['mlx'] }, { id: 'someone/Weird-Arch-4bit', downloads: 300, tags: ['mlx'] }]) })
+    // the third result is a repo the built-in catalogue already carries
+    if (/api\/models\?search=/.test(u)) return route.fulfill({ contentType: 'application/json', body: JSON.stringify([{ id: 'mlx-community/Tiny-Test-4bit', downloads: 12000, tags: ['mlx'] }, { id: 'someone/Weird-Arch-4bit', downloads: 300, tags: ['mlx'] }, { id: 'mlx-community/Qwen3-4B-Instruct-2507-4bit', downloads: 9000, tags: ['mlx'] }]) })
+    if (/api\/models\/mlx-community\/Qwen3-1\.7B-4bit/.test(u)) return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ siblings: [{ rfilename: 'model.safetensors', size: 1.0e9 }], safetensors: { total: 1.7e9 } }) })
+    if (/mlx-community\/Qwen3-1\.7B-4bit\/raw\/main\/config\.json/.test(u)) return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ model_type: 'qwen3', quantization: { bits: 4 } }) })
     if (/api\/models\/mlx-community\/Tiny-Test-4bit/.test(u)) return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ siblings: [{ rfilename: 'model.safetensors', size: 1.2e9 }], safetensors: { total: 2.1e9 } }) })
     if (/mlx-community\/Tiny-Test-4bit\/raw\/main\/config\.json/.test(u)) return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ model_type: 'qwen3', quantization: { bits: 4 } }) })
     if (/api\/models\/someone\/Weird-Arch-4bit/.test(u)) return route.fulfill({ contentType: 'application/json', body: JSON.stringify({ siblings: [{ rfilename: 'model.safetensors', size: 1.0e9 }], safetensors: { total: 1.8e9 } }) })
@@ -296,7 +302,14 @@ ok('and the app does not drag you back down', held && held.after < 80)
   const focusedAfter = await page.evaluate(() => document.activeElement?.getAttribute('aria-label'))
   ok(`searching gives up focus so the keyboard goes away (was ${focusedAfter})`, focusedAfter !== 'Search Hugging Face for models')
   const rows = page.locator('.rx-hf-row')
-  is('two results', await rows.count(), 2)
+  is('three results', await rows.count(), 3)
+  // ⚠️ REMOVE ONLY WHAT THIS SEARCH ADDED. A result that is already a
+  // catalogue model showed a Remove button under its Download button — one
+  // that called removeCustom on an id that was never custom and did nothing.
+  // Tony: "I get a Download button and Remove button right under it."
+  const hfRows = await page.evaluate(() => [...document.querySelectorAll('.rx-hf-row')].map(r => ({ name: r.querySelector('.rx-headline')?.textContent, buttons: [...r.querySelectorAll('.rx-hf-btn')].map(b => b.textContent.trim()) })))
+  const catalogueRow = hfRows.find(r => /Qwen3-4B-Instruct-2507-4bit/.test(r.name || ''))
+  ok('a result the catalogue already carries has no Remove button', catalogueRow && !catalogueRow.buttons.includes('Remove'), JSON.stringify(catalogueRow))
   const t = await page.locator('.rx-section:has(.rx-hf-search)').innerText()
   ok('the runnable one says Runs well with its size and type', /Runs well/.test(t) && /1\.2 GB/.test(t) && /qwen3/.test(t))
   ok('the unknown architecture says it won’t run, and names the type', /Won’t run/.test(t) && /brand_new_arch/.test(t))
@@ -978,9 +991,8 @@ for (const [query, label, expect] of [['', 'available', /nothing to download/], 
 }
 
 // ── ⚠️ THE BYLINE IS A LINK, ON EVERY SCREEN THAT CARRIES IT ────────────
-// "Radiant is a Templeton Technologies product." names the company on four
-// screens and, until now, gave nobody a way to find it. Tony, 2026-09-17: it
-// "should be clickable and take people to the templetontech.com website."
+// "{AGENCY_PUBLISHER} is an Allegretto product." names the agency owner on four
+// screens and gives people a direct path to the agency website.
 // Four copies of one sentence is four chances for one of them to stay dead, so
 // this walks to each and taps it.
 {
@@ -1015,7 +1027,7 @@ for (const [query, label, expect] of [['', 'available', /nothing to download/], 
     ok(`${where}: the byline is there`, await line.count() >= 1)
     ok(`${where}: and it is a link`, await line.getAttribute('role') === 'link')
     const name = await line.getAttribute('aria-label') || ''
-    ok(`${where}: and says where it goes`, /templetontech\.com/i.test(name))
+    ok(`${where}: and says where it goes`, name.includes(new URL(AGENCY_WEBSITE).host))
     // ⚠️ MEASURE THE TARGET, NOT THE TEXT. A caption line is ~16pt tall and the
     // floor is 44; the hit strip is a pseudo-element, so read what the browser
     // actually hit-tests rather than the box.
@@ -1028,8 +1040,8 @@ for (const [query, label, expect] of [['', 'available', /nothing to download/], 
     await armed()
     await line.click({ force: true })
     await pB.waitForTimeout(250)
-    is(`${where}: tapping it opens templetontech.com`,
-      await pB.evaluate(() => window.__opened), ['https://templetontech.com'])
+    is(`${where}: tapping it opens ${AGENCY_WEBSITE}`,
+      await pB.evaluate(() => window.__opened), [AGENCY_WEBSITE])
   }
 
   // the welcome screen, which is the first thing anyone ever sees
@@ -1061,7 +1073,7 @@ for (const [query, label, expect] of [['', 'available', /nothing to download/], 
   // ⚠️ AND NOWHERE STILL SHOWS IT AS DEAD TEXT. The point of one component is
   // that a fifth screen cannot quietly carry a fifth, unlinked copy.
   const stray = await pB.evaluate(() => [...document.querySelectorAll('p, span, div')]
-    .filter(el => el.children.length === 0 && /Templeton\s*\u00a0?\s*Technologies product/.test(el.textContent || ''))
+    .filter(el => el.children.length === 0 && /Virtually\s*\(Creative\)\s+product/.test(el.textContent || ''))
     .filter(el => !el.closest('[role="link"]')).length)
   is('no screen still carries the byline as plain text', stray, 0)
   await pB.close()

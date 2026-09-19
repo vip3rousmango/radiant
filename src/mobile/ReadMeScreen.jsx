@@ -32,6 +32,12 @@ const sections = () => [
     ]
   },
   {
+    title: 'The icons are the ones iOS uses',
+    body: [
+      'The gear, the back arrow, the ⋯ menu, the download circle, the tick, the send arrow and the rest are now the same symbols iOS itself draws, at the same weights, so they sit next to the system\u2019s own icons without looking a little off. They follow the text color, so they read correctly in light and dark.'
+    ]
+  },
+  {
     title: 'Home',
     body: [
       'Home is where the app opens: the logo, a greeting, and one button to start talking. Under it, Recent lists the conversations you have had, newest first — tap one to pick it up where you left off, or Delete to remove it.',
@@ -58,7 +64,7 @@ const sections = () => [
     title: 'Finding more on Hugging Face',
     body: [
       `The Models page ends with a search box. Type a name — “llama 3.2”, “qwen 4bit”, “gemma” — and ${BRAND.productName} searches Hugging Face for models in the format it runs. Each result is checked before you download it: whether the engine can load that kind of model, whether its weights are what its description says, and whether it fits the memory of this ${deviceWord()}. Then it gets the same green, amber or red label as the built-in list, or a plain reason it cannot run. The keyboard scrolls the search box up clear of itself, so you can see what you are typing and the Search button.`,
-      `Download puts it beside the built-in models with the same turning swirl, byte count, stop, chat and remove. The search is not filtered: anything published in a format ${BRAND.productName} can run will show up, including uncensored and abliterated builds. These are models other people have made, and a model with its safety training removed will say anything — read its page on Hugging Face if you want to know what it is.`
+      `Download puts it beside the built-in models with the same turning swirl, byte count, stop, chat and remove. Remove only appears on a model the search added; a result that is already in the built-in list is managed from its own shelf. The search is not filtered: anything published in a format ${BRAND.productName} can run will show up, including uncensored and abliterated builds. These are models other people have made, and a model with its safety training removed will say anything — read its page on Hugging Face if you want to know what it is.`
     ]
   },
   {

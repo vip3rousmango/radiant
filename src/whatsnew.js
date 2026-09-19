@@ -18,6 +18,15 @@
  */
 export const WHATS_NEW = [
   {
+    version: '0.9.27',
+    items: [
+      ['Slow local replies stay visible after the answer is done', 'Optional memory housekeeping now continues separately, so a slow Ollama or LM Studio server does not make a completed reply look stuck.'],
+      ['Connected services join only when a message needs them', 'MCP tools stay out of unrelated messages, which keeps requests smaller and makes connected services easier to reason about.'],
+      ['Long Claude subscription work uses prompt caching', 'Repeated context can be served from the provider cache instead of being sent at full price every time.'],
+      ['Your answer to an agent question stays in the conversation', 'When an agent pauses for a decision, your answer now appears where the question happened instead of disappearing into a collapsed tool row.']
+    ]
+  },
+  {
     version: '0.6.234',
     items: [
       ['A Templeton theme', 'Sage green and warm tan, saved as a theme with light, medium and dark versions.'],

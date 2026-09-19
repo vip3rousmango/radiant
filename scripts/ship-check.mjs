@@ -88,15 +88,41 @@ if (!range) {
   )
 }
 
-// ── 4. Does the released version match what's committed? ─────────────────────
+// The version tag must identify THIS release commit. A tag with the right name
+// pointing at an older commit is not evidence that these files shipped.
 const pkgVersion = JSON.parse(readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version
-const tagForPkg = tryGit('tag', '-l', `v${pkgVersion}`)
+const tagName = `v${pkgVersion}`
+const tagSha = tryGit('rev-parse', `${tagName}^{commit}`)
+const headSha = tryGit('rev-parse', 'HEAD')
+const tagForPkg = tryGit('tag', '-l', tagName)
+const tagMatchesHead = Boolean(tagForPkg && tagSha && headSha && tagSha === headSha)
 add(
   'tagged',
-  Boolean(tagForPkg),
-  tagForPkg ? `v${pkgVersion} is tagged` : `package.json is ${pkgVersion} but there is no v${pkgVersion} tag`,
-  `npm version <next> --no-git-tag-version && npm run build && git commit && git tag v${pkgVersion}`
+  tagMatchesHead,
+  tagMatchesHead
+    ? `${tagName} points at HEAD`
+    : tagForPkg
+      ? `${tagName} points at ${tagSha || 'an unreadable commit'}, not HEAD ${headSha || 'an unreadable commit'}`
+      : `package.json is ${pkgVersion} but there is no ${tagName} tag`,
+  `git tag ${tagName} at the release commit`
 )
+
+// ── judged ───────────────────────────────────────────────────────────────────
+// The four checks above are facts. This one is a judgment — is the commit
+// message a why, is the Read me written for a person using the app — made by
+// Jev in a third of a second (scripts/ship-judge.mjs). It caught two entries
+// on its first run that talked about prompt caches and tool schemas to users.
+// Unreachable, it reports so and passes: a judge that is down must not block.
+{
+  const { spawnSync } = await import('node:child_process')
+  const r = spawnSync(process.execPath, [new URL('./ship-judge.mjs', import.meta.url).pathname, 'HEAD'], { encoding: 'utf8' })
+  const out = (r.stdout || '').trim()
+  const advisory = /cannot judge|nothing to judge/.test(out)
+  const bad = out.split('\n').filter(l => l.trim().startsWith('✗')).map(l => l.trim().slice(2).trim())
+  add('judged', advisory || r.status === 0,
+    advisory ? out.split('\n')[0] : (r.status === 0 ? 'commit message and Read me judged fit for a user' : `${bad.length} judgment(s) below the bar: ${bad.join(' · ')}`),
+    'rewrite the flagged text in plain words, for the person using the app, and commit again')
+}
 
 // ── report ───────────────────────────────────────────────────────────────────
 const failed = checks.filter(c => !c.ok)
