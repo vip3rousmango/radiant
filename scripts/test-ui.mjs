@@ -504,6 +504,9 @@ await page.waitForTimeout(600)
 // reached, and it passed against the BUG as happily as against the fix.
 {
   const p2 = await browser.newPage({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 })
+  const p2Errors = []
+  p2.on('pageerror', e => p2Errors.push(String(e?.message || e)))
+  p2.on('console', m => { if (m.type() === 'error') p2Errors.push(m.text()) })
   await p2.addInitScript(() => localStorage.setItem('rx.activeModel', 'qwen3-1.7b'))
   await p2.goto(BASE, { waitUntil: 'networkidle' })
   await p2.waitForTimeout(900)
@@ -550,6 +553,7 @@ await page.waitForTimeout(600)
   // where Apple's model is unavailable.
   is('new chat still works, on Apple\u2019s model', await newChatState(), 'enabled')
   is('and Home names it', /Current model: Apple Intelligence/.test(await homeText()), true)
+  is('model removal page has no uncaught errors', p2Errors, [])
   await p2.close()
 }
 

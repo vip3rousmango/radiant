@@ -55,9 +55,11 @@ await page.waitForSelector('.sidebar', { timeout: 15000 })
 // open it the way a person does: imported chats land in a collapsed
 // "Imported <day>" project shelf, so open the shelf, then the row
 const shelf = page.getByText(/^Imported /).first()
-if (await shelf.count()) { await shelf.click({ force: true }).catch(() => {}); await page.waitForTimeout(600) }
+if (await shelf.count()) { await shelf.click({ force: true }).catch(() => {}); await page.waitForSelector('.session-item', { timeout: 5000 }) }
 const row = page.getByText('Asked and answered').first()
-if (await row.count()) { await row.click({ force: true }).catch(() => {}); await page.waitForTimeout(1000) }
+if (await row.count()) { await row.click({ force: true }).catch(() => {}) }
+await page.waitForSelector('.asked', { timeout: 15000 })
+await page.waitForSelector('.tool-chip, .tool-run', { timeout: 15000 })
 const text = await page.locator('body').innerText()
 ok('the question is on the page', /Where should I set it up\?/.test(text))
 ok('and the answer is on the page, as the user\'s', /You\s*Python at ~\/Projects\/x/i.test(text), text.slice(0, 400))

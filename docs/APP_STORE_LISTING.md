@@ -328,7 +328,9 @@ rewritten privacy policy, and the subtitle **"Open models, on your phone"**.
 carries the Hugging Face search (unfiltered), Archive, the keyboard fix, the
 unsent-message fix, the byline link, and the **17+ age rating** answered for
 an open model list — that answer is on record now and does not need
-re-answering unless the app changes again. `CURRENT_PROJECT_VERSION` is 21.
+re-answering unless the app changes again. The current Xcode project version
+is 23; builds 22 and 23 are not evidence of an App Store submission. The
+approved App Store build remains 21 unless App Store Connect says otherwise.
 Screenshots are still 1.0's (4 iPhone 6.7", 1 iPad 12.9"); replace with the
 next submission.
 
