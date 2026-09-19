@@ -18,6 +18,12 @@
  */
 export const WHATS_NEW = [
   {
+    version: '0.9.35',
+    items: [
+      ['Approval cards show what will run or be read', 'Permission requests now show shell commands and file paths in a readable code-style block, so a file read is never mistaken for an empty command.']
+    ]
+  },
+  {
     version: '0.9.34',
     items: [
       ['Version details work with a keyboard too', 'Focus the sidebar version to read the same Radiant engine and connected-server details without a mouse. Remote labels now say which Mac is connected instead of assigning its build to this window.'],
