@@ -5,7 +5,7 @@ import { glyphColor } from '../theme.js'
 import { AgentGlyph } from './AgentIcons.jsx'
 import { BRAND } from '../../server/brand.js'
 import { isImported } from './Chat.jsx'
-import { api, saveToFile, getServer, deviceNoun } from '../api.js'
+import { api, saveToFile, getServer } from '../api.js'
 
 function UsageChip () {
   const [items, setItems] = useState(null)
@@ -239,7 +239,7 @@ function SessionRow ({ s, showAgent = true, ctx }) {
 // index in this list, so reordering it moves the pill; it is not decoration.
 const WORK = ['tasks', 'loops', 'graph']
 
-export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, sessions, activeId, working, onOpen, onNew, onNewGroup, onDelete, onArchive, onRename, onPin, agents = [], projects = [], projectsError = null, onNewProject, onRenameProject, onDeleteProject, onSetProjectCwd, onMoveSession, onSettings, mode, onToggleMode, updateInfo, onUpdate, onCloseNav, platform }) {
+export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, sessions, activeId, working, onOpen, onNew, onNewGroup, onDelete, onArchive, onRename, onPin, agents = [], projects = [], projectsError = null, onNewProject, onRenameProject, onDeleteProject, onSetProjectCwd, onMoveSession, onSettings, mode, onToggleMode, updateInfo, onUpdate, onCloseNav }) {
   const agentOf = id => agents.find(a => a.id === id)
   const [width, setWidth] = useState(() => {
     const saved = Number(localStorage.getItem('radiant.sidebarWidth'))

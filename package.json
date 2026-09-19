@@ -1,6 +1,6 @@
 {
   "name": "allegretto",
-  "version": "0.9.34",
+  "version": "0.9.36",
   "radiantEngineName": "Radiant",
   "radiantEngineVersion": "0.9.28",
   "private": true,
@@ -27,6 +27,7 @@
     "test:notify": "node scripts/test-notify.mjs",
     "test:cwd": "node scripts/test-cwd.mjs",
     "test:api": "node scripts/test-api.mjs",
+    "test:approval": "node scripts/test-approval-card.mjs",
     "test:version-footer": "node scripts/test-version-footer.mjs",
     "test:contrast": "node scripts/test-contrast.mjs",
     "test:supply": "node scripts/test-supply-chain.mjs",
