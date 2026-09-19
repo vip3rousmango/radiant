@@ -39,10 +39,11 @@
             <h1 id="hero-title">A calmer way to<br><em>work with intelligence.</em></h1>
             <p class="hero-lead">Allegretto is the agent orchestrator for thoughtful work: a local-first place to shape an intention, review the path, and stay present as it unfolds.</p>
             <div class="hero-actions">
-              <a class="button button-primary" href="#use-cases">See what it can do</a>
-              <a class="button button-secondary" href="docs.html">Read the guide</a>
+              <button class="button button-primary" type="button" data-modal-open="invite-dialog" aria-haspopup="dialog">Request a desktop alpha invite</button>
+              <button class="button button-secondary" type="button" data-modal-open="invite-dialog" aria-haspopup="dialog">App Store — invite request</button>
+              <a class="button button-secondary" href="#use-cases">See what it can do</a>
             </div>
-            <p class="hero-note"><strong>Internal testing:</strong> this is currently an unsigned build. There is no public binary download or production update feed yet.</p>
+            <p class="hero-note"><strong>Invite-only alpha:</strong> Allegretto Desktop is being tested with a small group. There is no public binary download yet. Request an invite and we’ll follow up within 24 hours.</p>
             <div class="hero-signature" aria-label="Allegretto principles">
               <span>Local-first orchestration</span>
               <span>Visible agency</span>
@@ -207,9 +208,9 @@
       <section class="section section-tint" id="status" aria-labelledby="status-title">
         <div class="container">
           <div class="status">
-            <div class="status-copy"><h3 id="status-title">Current release posture</h3><p>Allegretto is in internal testing as an unsigned build. Future agency releases will use a separate signed update channel after review; they will not silently pull binaries from an upstream project.</p></div>
-            <span class="status-badge">UNSIGNED · INTERNAL</span>
-          </div>
+            <div class="status-copy"><h3 id="status-title">Current release posture</h3><p>Allegretto Desktop is in invite-only alpha testing. The App Store button opens the invite request; it does not download a public app. Future agency releases will use a separate signed update channel after review; they will not silently pull binaries from an upstream project.</p></div>
+            <span class="status-badge">INVITE-ONLY · ALPHA</span>
+        </div>
         </div>
       </section>
 
@@ -227,8 +228,86 @@
           <div class="footer-brand"><img src="assets/allegretto-mark.png" width="28" height="28" alt=""> <span>Allegretto</span></div>
           <div class="footer-meta"><p>The agent orchestrator by Virtually(Creative).</p><p>Built local-first. Designed for visible agency.</p></div>
         </div>
-        <nav class="footer-links" aria-label="Footer navigation"><a href="use-cases.html">Use cases</a><a href="privacy.html">Privacy and data boundary</a><a href="#status">Internal testing status</a><a href="https://virtuallycreative.ca/" rel="noopener">Virtually(Creative) ↗</a></nav>
+        <nav class="footer-links" aria-label="Footer navigation"><a href="use-cases.html">Use cases</a><a href="privacy.html">Privacy and data boundary</a><a href="#status">Invite-only alpha status</a><a href="https://virtuallycreative.ca/" rel="noopener">Virtually(Creative) ↗</a></nav>
       </div>
     </footer>
+    <div class="modal-backdrop" id="invite-dialog" hidden>
+      <section class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="invite-dialog-title" aria-describedby="invite-dialog-description">
+        <button class="modal-close" type="button" data-modal-close aria-label="Close invite request">×</button>
+        <p class="eyebrow">Allegretto Desktop · Invite-only alpha</p>
+        <h2 id="invite-dialog-title">Request an alpha invite</h2>
+        <p id="invite-dialog-description" class="modal-description">Allegretto Desktop is not publicly available yet. The App Store button opens this invite request instead of downloading an app. Tell us a little about your work and we’ll follow up within 24 hours from <a href="mailto:alexander@virtuallycreative.ca">alexander@virtuallycreative.ca</a>.</p>
+        <form class="invite-form" name="allegretto-alpha-invite" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/">
+          <input type="hidden" name="form-name" value="allegretto-alpha-invite">
+          <div class="form-honeypot" aria-hidden="true">
+            <label>Don’t fill this out if you’re human: <input name="bot-field" tabindex="-1" autocomplete="off"></label>
+          </div>
+          <div class="form-field">
+            <label for="invite-name">Name <span aria-hidden="true">*</span></label>
+            <input id="invite-name" name="name" type="text" autocomplete="name" required>
+          </div>
+          <div class="form-field">
+            <label for="invite-business">Business <span aria-hidden="true">*</span></label>
+            <input id="invite-business" name="business" type="text" autocomplete="organization" required>
+          </div>
+          <div class="form-field">
+            <label for="invite-email">Email <span aria-hidden="true">*</span></label>
+            <input id="invite-email" name="email" type="email" autocomplete="email" required>
+          </div>
+          <p class="form-note" id="invite-form-note">This static form is prepared for Netlify Forms and does not promise automatic email delivery. We will follow up within 24 hours from <a href="mailto:alexander@virtuallycreative.ca">alexander@virtuallycreative.ca</a>. If the form is unavailable, email us directly.</p>
+          <button class="button button-primary" type="submit">Request invite</button>
+        </form>
+      </section>
+    </div>
+    <script>
+      (() => {
+        const modal = document.getElementById('invite-dialog');
+        if (!modal) return;
+        const panel = modal.querySelector('[role="dialog"]');
+        const closeButton = modal.querySelector('[data-modal-close]');
+        const openers = document.querySelectorAll('[data-modal-open="invite-dialog"]');
+        let returnFocus = null;
+        const focusableSelector = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])';
+        const getFocusable = () => [...panel.querySelectorAll(focusableSelector)].filter((element) => !element.hidden && element.offsetParent !== null);
+        const closeModal = () => {
+          modal.hidden = true;
+          document.body.classList.remove('modal-open');
+          document.removeEventListener('keydown', handleKeydown);
+          if (returnFocus && returnFocus.isConnected) returnFocus.focus({ preventScroll: true });
+        };
+        const handleKeydown = (event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            closeModal();
+            return;
+          }
+          if (event.key !== 'Tab') return;
+          const focusable = getFocusable();
+          if (!focusable.length) return;
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        };
+        const openModal = (event) => {
+          event.preventDefault();
+          returnFocus = document.activeElement;
+          modal.hidden = false;
+          document.body.classList.add('modal-open');
+          document.addEventListener('keydown', handleKeydown);
+          closeButton.focus();
+        };
+        openers.forEach((opener) => opener.addEventListener('click', openModal));
+        closeButton.addEventListener('click', closeModal);
+        modal.addEventListener('click', (event) => {
+          if (event.target === modal) closeModal();
+        });
+      })();
+    </script>
   </body>
 </html>
