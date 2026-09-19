@@ -24,10 +24,10 @@ export function approvalPresentation (approval, cwd) {
   const location = compactPath(cwd)
   const verb = definition?.verb || 'Allow'
   const noun = definition?.noun || name.replace(/_/g, ' ')
+  const includeLocation = name === 'run_command' || name === 'list_dir' || name === 'job'
   const question = definition
-    ? `${verb} this ${noun}${location ? ` ${definition.preposition} ${location}` : ''}?`
+    ? `${verb} this ${noun}${includeLocation && location ? ` ${definition.preposition} ${location}` : ''}?`
     : `${verb} ${noun}?`
-
   return {
     tool: name,
     question,

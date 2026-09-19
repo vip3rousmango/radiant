@@ -16,7 +16,7 @@ const ok = (name, condition, detail = '') => {
 const read = approvalPresentation({ name: 'read_file', args: { path: '/Users/tony/project/src/App.jsx', offset: 3, limit: 8 } }, '/Users/tony/project')
 ok('read_file approval shows every argument', read.detail === '{\n  "path": "/Users/tony/project/src/App.jsx",\n  "offset": 3,\n  "limit": 8\n}')
 ok('read_file approval uses a read action', read.action === 'Read it')
-ok('read_file approval names the read operation', read.question === 'Read this file from ~/project?')
+ok('read_file approval names the read operation', read.question === 'Read this file?')
 
 const shell = approvalPresentation({ name: 'run_command', args: { command: 'npm run build', cwd: '/tmp' } }, '/Users/tony/project')
 ok('run_command approval keeps the shell command', shell.detail === 'npm run build')
