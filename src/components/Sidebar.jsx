@@ -302,7 +302,9 @@ export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, se
   // connected server version is diagnostic only and may be stale.
   const remoteBase = getServer().base || ''
   const remoteHost = remoteBase ? (() => { try { return new URL(remoteBase).host } catch { return remoteBase } })() : ''
-  const serverNote = serverVersion && serverVersion !== version ? ` · connected server ${serverVersion}` : ''
+  const serverNote = serverVersion ? ` · server ${serverVersion}` : ''
+  const localVersionTip = `${BRAND.productName} ${version} · Radiant engine ${engineVersion}${serverVersion && serverVersion !== version ? serverNote : ''}`
+  const remoteVersionTip = `${BRAND.productName} ${version} · connected to ${remoteHost}${serverNote} · Radiant engine ${engineVersion}`
   useEffect(() => {
     let alive = true
     api.getVersion().then(v => {
@@ -624,20 +626,20 @@ export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, se
         {version && (
           remoteBase
             ? <span className='sidebar-version is-remote'
-                data-tip={`Showing ${BRAND.productName} ${version} on ${remoteHost} · Radiant engine ${engineVersion}${serverNote}. Settings → Devices to use this ${deviceNoun(platform)} instead.`}
+                data-tip={remoteVersionTip}
                 data-tip-end
-                title={`Showing ${BRAND.productName} ${version} on ${remoteHost} · Radiant engine ${engineVersion}${serverNote}. Settings → Devices to use this ${deviceNoun(platform)} instead.`}
+                title={remoteVersionTip}
                 tabIndex={0}
-                aria-label={`Showing ${BRAND.productName} ${version} on ${remoteHost}.`}
+                aria-label={remoteVersionTip}
               >
-                <span className='sidebar-version-text'>{remoteHost} · {BRAND.productName} {version}</span>
+                <span className='sidebar-version-text'>{BRAND.productName} {version} · connected to {remoteHost}</span>
               </span>
             : <span className='sidebar-version'
-                data-tip={`${BRAND.productName} ${version} · Radiant engine ${engineVersion}${serverNote}`}
+                data-tip={localVersionTip}
                 data-tip-end
-                title={`${BRAND.productName} ${version} · Radiant engine ${engineVersion}${serverNote}`}
+                title={localVersionTip}
                 tabIndex={0}
-                aria-label={`${BRAND.productName} ${version}`}
+                aria-label={localVersionTip}
               >
                 <span className='sidebar-version-text'>{BRAND.productName} {version}</span>
               </span>

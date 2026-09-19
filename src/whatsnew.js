@@ -18,6 +18,12 @@
  */
 export const WHATS_NEW = [
   {
+    version: '0.9.34',
+    items: [
+      ['Version details work with a keyboard too', 'Focus the sidebar version to read the same Radiant engine and connected-server details without a mouse. Remote labels now say which Mac is connected instead of assigning its build to this window.'],
+    ]
+  },
+  {
     version: '0.9.33',
     items: [
       ['Remote version details stay visible', 'The engine-version tooltip remains readable even when the sidebar is connected to another Mac or narrowed to its smallest width.'],
