@@ -142,6 +142,7 @@ Do not pass `-sdk iphonesimulator`. The Simulator is for layout, navigation, fir
 - Electron packaging intentionally sets `npmRebuild: false` and unpacks native/runtime modules such as `node-pty` and `playwright-core`; preserve those packaging boundaries.
 - Mac helper, signing, notarization, and iOS work require macOS native tooling. The package's `afterSign` hook handles notarization only when a valid profile is configured.
 - The updater is agency-only and fail-closed: it rejects the upstream `templetongroup/radiant` target. Unsigned builds disable the packaged updater; a DMG can test manual installation, not an in-app update.
+- For any App Store Connect or iOS submission work, read `.claude/skills/app-store-review/` first and query live state with `node scripts/asc.mjs get 6804891721`; do not trust the written approval/build status in this file.
 
 ## Testing & QA
 
