@@ -18,6 +18,13 @@
  */
 export const WHATS_NEW = [
   {
+    version: '0.9.28',
+    items: [
+      ['Removing a phone model leaves the Models screen usable', 'Removing the current model now closes its detail sheet cleanly and Home stops offering weights that are no longer installed. Your conversations stay on the phone.'],
+      ['Agency syncs now stop safely for review', 'Upstream changes are fetched into a review branch with an explicit agency identity, so the agency master branch is never changed behind the review process.']
+    ]
+  },
+  {
     version: '0.9.27',
     items: [
       ['Slow local replies stay visible after the answer is done', 'Optional memory housekeeping now continues separately, so a slow Ollama or LM Studio server does not make a completed reply look stuck.'],

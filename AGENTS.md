@@ -28,8 +28,10 @@ and approved the next morning with no questions.
 **1.1 carries:** Hugging Face search with a run/won't-run verdict (unfiltered
 — TG-454, do not reinstate a word filter), Archive on chats, the keyboard fix,
 the unsent-message fix (TG-467), the byline link to templetontech.com, and an
-age rating of 17+ — answered honestly for an open model list. `CURRENT_PROJECT_VERSION`
-is 21; the next upload must be higher.
+age rating of 17+ — answered honestly for an open model list. The current Xcode
+project version is 23; builds 22 and 23 are not evidence of an App Store
+submission. The approved App Store build remains 21 unless App Store Connect
+says otherwise.
 
 **The next build is an update:** a new version number in App Store Connect
 (`asc.mjs new-version`), its own what's new, its own review. Screenshots are
@@ -157,11 +159,10 @@ treat pruning as creating or uploading a Radiant release.
 - **Remote devices** authenticate with a token (Settings → Devices & sharing),
   held in an httpOnly cookie so a phone stays signed in. Loopback is always
   allowed, so test the gate over the Tailscale address, never `127.0.0.1`.
-- **`~/.radiant/config.json` has one writer, the server.** Window geometry lives
-  in `~/.radiant/window-state.json` precisely to avoid racing it.
-- The updater stages a download in `~/Library/Caches/radiant-updater/pending`
-  and installs it on quit. It must always hold the newest release or the user
-  gets walked up one version at a time.
+- **`~/.allegretto/config.json` has one writer, the server.** Window geometry
+  lives in `~/.allegretto/window-state.json` precisely to avoid racing it.
+  The updater stages downloads under Electron's cache path in
+  `allegretto-updater/pending` and installs the newest staged build on quit.
 
 ## The iPhone app
 

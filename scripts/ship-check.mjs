@@ -43,11 +43,17 @@ add(
 
 // ── 2. Is it pushed? ─────────────────────────────────────────────────────────
 const branch = tryGit('rev-parse', '--abbrev-ref', 'HEAD')
-const ahead = tryGit('rev-list', '--count', `origin/${branch}..HEAD`)
+const remoteRef = branch && tryGit('rev-parse', '--verify', `refs/remotes/origin/${branch}`)
+const ahead = remoteRef ? tryGit('rev-list', '--count', `origin/${branch}..HEAD`) : ''
+const pushed = Boolean(remoteRef && ahead === '0')
 add(
   'pushed',
-  ahead === '' || ahead === '0',
-  ahead && ahead !== '0' ? `${ahead} commit(s) not on origin/${branch}` : `origin/${branch} up to date`,
+  pushed,
+  pushed
+    ? `origin/${branch} up to date`
+    : remoteRef
+      ? `${ahead || 'unknown'} commit(s) not on origin/${branch}`
+      : `origin/${branch} does not exist`,
   `git push origin ${branch}`
 )
 
