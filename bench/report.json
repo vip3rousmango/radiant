@@ -1,0 +1,105 @@
+{
+ "plan": {
+  "n": 30,
+  "seed": 2026,
+  "tasks": [
+   "django__django-11964",
+   "django__django-16527",
+   "django__django-15851",
+   "sympy__sympy-12419",
+   "django__django-11620",
+   "sphinx-doc__sphinx-8435",
+   "sympy__sympy-21171",
+   "django__django-15388",
+   "django__django-12286",
+   "django__django-13401",
+   "django__django-11815",
+   "sympy__sympy-18621",
+   "django__django-11133",
+   "django__django-13964",
+   "psf__requests-2317",
+   "sympy__sympy-24213",
+   "sympy__sympy-17022",
+   "django__django-13033",
+   "sympy__sympy-14308",
+   "django__django-11797",
+   "sympy__sympy-23262",
+   "sphinx-doc__sphinx-8506",
+   "django__django-16400",
+   "sympy__sympy-18698",
+   "django__django-14997",
+   "pytest-dev__pytest-5692",
+   "pytest-dev__pytest-5495",
+   "django__django-12983",
+   "django__django-11019",
+   "pytest-dev__pytest-7168"
+  ],
+  "droppedByGoldCheck": [
+   "pytest-dev__pytest-11148"
+  ],
+  "made": "2026-09-17T20:48:22.717Z"
+ },
+ "rows": [
+  {
+   "tag": "claude__claude-sonnet-5",
+   "tasks": 30,
+   "attempts": 90,
+   "graded": 90,
+   "gradedTasks": 30,
+   "success": 85.55555555555556,
+   "cost": 0.48269451999999996,
+   "turns": 16.333333333333332,
+   "secs": 116.69666666666666,
+   "cachePct": 93.09887690114383
+  },
+  {
+   "tag": "codex__gpt-5.6-sol",
+   "tasks": 30,
+   "attempts": 90,
+   "graded": 90,
+   "gradedTasks": 30,
+   "success": 95.55555555555556,
+   "cost": 0.45254442666666667,
+   "turns": 22.222222222222218,
+   "secs": 125.4125111111111,
+   "cachePct": 92.25840818202103
+  },
+  {
+   "tag": "radiant+mcp__gpt-5.6-sol",
+   "tasks": 1,
+   "attempts": 1,
+   "graded": 1,
+   "gradedTasks": 1,
+   "success": 100,
+   "cost": 0.1581088,
+   "turns": 7,
+   "secs": 53.435,
+   "cachePct": 82.00538488503047
+  },
+  {
+   "tag": "radiant__claude-sonnet-5",
+   "tasks": 30,
+   "attempts": 90,
+   "graded": 90,
+   "gradedTasks": 30,
+   "success": 85.55555555555556,
+   "cost": 1.8373757599999998,
+   "turns": 23.25555555555555,
+   "secs": 176.29044444444443,
+   "cachePct": 6.597811667826224
+  },
+  {
+   "tag": "radiant__gpt-5.6-sol",
+   "tasks": 30,
+   "attempts": 90,
+   "graded": 90,
+   "gradedTasks": 30,
+   "success": 95.55555555555554,
+   "cost": 0.36982017777777776,
+   "turns": 21.96666666666666,
+   "secs": 124.3952111111111,
+   "cachePct": 70.10450483533378
+  }
+ ],
+ "at": "2026-09-18T16:58:26.825Z"
+}

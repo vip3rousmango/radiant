@@ -40,8 +40,18 @@ const NEEDS = {
 }
 
 export default function GetModelSheet ({ local = {}, models = [], modelId, onDismiss, onStartChat }) {
+  // Keep the sheet in its original detail mode while a removal is closing it.
+  // The parent model list updates immediately; switching to ModelPicker for one
+  // render mounted a large hook tree during the dismiss animation and crashed
+  // the phone UI. A removed model should simply remain visible until the sheet
+  // leaves.
+  const [detailModel] = useState(() => {
+    const initial = models.find(m => m.id === modelId)
+    return initial?.downloaded ? initial : null
+  })
   const model = useMemo(() => models.find(m => m.id === modelId) || null, [models, modelId])
-  const detail = !!model?.downloaded
+  const shownModel = model || detailModel
+  const detail = Boolean(detailModel)
 
   const [p, setP] = useState(1)        // 1 = fully off-screen, 0 = presented
   const [dragging, setDragging] = useState(false)
@@ -113,8 +123,8 @@ export default function GetModelSheet ({ local = {}, models = [], modelId, onDis
     if (projected > g.h * 0.4 || g.v > 300) { haptics.impact('RIGID'); close() } else setP(0)
   }
 
-  const start = usePress(() => { onStartChat?.(model.id) })
-  const remove = usePress(() => { local.remove?.(model.id); close() })
+  const start = usePress(() => { shownModel && onStartChat?.(shownModel.id) })
+  const remove = usePress(() => { if (shownModel) local.remove?.(shownModel.id); close() })
 
   return (
     <>
@@ -149,21 +159,21 @@ export default function GetModelSheet ({ local = {}, models = [], modelId, onDis
           <div style={{ padding: '24px 20px 0', display: 'flex', flexDirection: 'column', minHeight: 0, flex: '1 1 auto' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
               <BrandMark size={120} />
-              <div className="rx-title-2">{model.name}</div>
+              <div className="rx-title-2">{shownModel?.name}</div>
             </div>
 
             <div className="rx-stat-strip">
               <div className="rx-stat">
                 <div className="rx-stat-key">Size</div>
-                <div className="rx-stat-value">{Number(model.sizeGB).toFixed(1)} GB</div>
+                <div className="rx-stat-value">{Number(shownModel?.sizeGB || 0).toFixed(1)} GB</div>
               </div>
               <div className="rx-stat">
                 <div className="rx-stat-key">Speed</div>
-                <div className="rx-stat-value">{SPEED[model.id] || 'Fast'}</div>
+                <div className="rx-stat-value">{SPEED[shownModel?.id] || 'Fast'}</div>
               </div>
               <div className="rx-stat">
                 <div className="rx-stat-key">Needs</div>
-                <div className="rx-stat-value">{NEEDS[model.id] || 'Recent'}</div>
+                <div className="rx-stat-value">{NEEDS[shownModel?.id] || 'Recent'}</div>
               </div>
             </div>
 

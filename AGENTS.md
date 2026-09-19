@@ -17,44 +17,24 @@ only to `allegretto.netlify.app`; the future public domain is
 and Zen color assets; do not substitute Radiant branding.
 
 
-## THE iPHONE APP — 1.0 (build 7) APPROVED by Apple, 2026-09-16
+## THE iPHONE APP — 1.1 (build 21) READY FOR SALE, approved 2026-09-18
 
-⚠️ **STILL READ APP STORE CONNECT BEFORE YOU TRUST THIS.** The heading above has
-been wrong twice, once for nine days: it said "with Apple, build 2" while the
-app had been REJECTED since 2026-08-25, and later said build 4 while the project
-file had moved to 6. Approval does not make a written status reliable — whether
-1.0 is *Pending Developer Release*, *Ready for Sale*, or has been superseded is
-not recorded here and cannot be.
+⚠️ **STILL READ APP STORE CONNECT BEFORE YOU TRUST THIS.** `node
+scripts/asc.mjs get 6804891721` prints the live state in one line; this
+heading has gone stale three times. 1.0 (build 7) was approved 2026-09-16; 1.1
+(build 21) was submitted 2026-09-17 from the command line (`asc.mjs submit`)
+and approved the next morning with no questions.
 
-    https://appstoreconnect.apple.com/apps/6804891721/distribution/reviewsubmissions
+**1.1 carries:** Hugging Face search with a run/won't-run verdict (unfiltered
+— TG-454, do not reinstate a word filter), Archive on chats, the keyboard fix,
+the unsent-message fix (TG-467), the byline link to templetontech.com, and an
+age rating of 17+ — answered honestly for an open model list. `CURRENT_PROJECT_VERSION`
+is 21; the next upload must be higher.
 
-**What got approved is build 7, and build 7 only.** It carries the consent sheet
-(5.1.1(i)/5.1.2(i)), the rewritten privacy policy, and the subtitle "Open
-models, on your phone". It does NOT carry anything after it.
-
-### ⚠️ BEFORE ANYTHING AFTER BUILD 7 IS SUBMITTED: RE-ANSWER THE AGE RATING
-
-`CURRENT_PROJECT_VERSION` is **11**. Builds 8–11 are on TestFlight and contain
-the Hugging Face search — an unrestricted search over Hugging Face's public MLX
-models, with download. The 13+ rating on record was answered on the explicit
-premise that "there is no field anywhere in the phone UI for pasting an
-arbitrary Hugging Face repo, so the list is closed". **That premise is gone**,
-and the word filter that briefly softened it was removed on Tony's instruction
-(TG-454) and must not come back to make a rating easier.
-
-So the questionnaire has to be answered again, honestly, for an open list before
-build 8 or later goes to review. `docs/APP_STORE_LISTING.md` carries the
-reference points (Locally AI ships an open list at 12+; expect to raise the
-sexual-content and violence rows; 17+ is a fine outcome, an inaccurate
-declaration is guideline 2.3 and costs a review cycle). Tony decides the
-answers; only Tony can drive App Store Connect.
-
-**A shipped 1.0 changes the rules for the next build.** While a version was
-*Waiting for Review* you could remove it from review and swap the binary. Once
-1.0 is out, build 8+ is an **update** — a new version number in App Store
-Connect, its own review, and its own "what's new". The subtitle, screenshots and
-description are tied to a version and change with that submission; promotional
-text and review notes do not need a build.
+**The next build is an update:** a new version number in App Store Connect
+(`asc.mjs new-version`), its own what's new, its own review. Screenshots are
+still 1.0's — replace them with the next submission (`asc.mjs shots` counts
+them). `scripts/asc.mjs` can do everything short of signing in.
 
 **Anything to do with the submission: use the `app-store-review` skill**
 (`.claude/skills/app-store-review/`, also installed at `~/.claude/skills`;
@@ -78,11 +58,6 @@ under ~1.2 bytes per parameter that declares no quantization — the Gemma 4
 defect, which shipped because the old check only asked whether MLX implemented
 the architecture.
 
-Allegretto is the agency fork of Tony's Radiant coding harness: an Electron app
-wrapping a local node server (`server/index.js`, port 5834) and a React UI
-(`src/`). Pull upstream changes one way into this fork. Develop on a feature
-branch and merge to the agency fork's `master` only through a pull request.
-
 
 ## Written is not shipped
 
@@ -99,6 +74,36 @@ Every Allegretto change closes these in the same turn:
    access is available. If access is unavailable, report the exact blocker; do
    not substitute a Radiant issue or pull request.
 
+Before calling an Allegretto change shipped, run the objective ship check:
+
+```bash
+node scripts/ship-check.mjs
+```
+
+It verifies the committed and pushed feature-branch state, the in-app Read me,
+the release marker when one is required, and the fifth gate, **judged**:
+`scripts/ship-judge.mjs` has Jev (the decision model in `server/decide.js`) read the
+commit message and any new Read me entries and judge whether they explain why
+the change matters and are written for someone using the app. Below 50% fails;
+if the judge is unreachable, the check passes and reports that.
+Rewrite entries in plain words and commit again when it flags them. The check
+does not override the agency rules above: push only to
+the agency fork, and merge into agency `master` only through review.
+
+New agency GitHub issues are triaged by `scripts/triage.mjs`, run by
+`.github/workflows/triage.yml`. It proposes app, kind, severity, and possible
+duplicate labels with probabilities; nothing below 60% confidence (or 90% for
+duplicates) is applied. Inspect closed-issue recommendations without changing
+them with:
+
+```bash
+node scripts/triage.mjs --closed --dry-run
+```
+
+Use the resulting labels as triage input, not as a substitute for recording
+shipped work in the agency's Linear project.
+
+
 ## Agency publication
 
 The public destination for Allegretto is the agency website only:
@@ -112,6 +117,11 @@ an agency artifact for testing or release only when the agency signing and
 publishing prerequisites are present; never claim a release from an unsigned
 or incomplete build.
 
+After an agency artifact has actually shipped, prune local build output with
+`scripts/prune-releases.sh`. It keeps the version just shipped and the two
+newest iOS archives; this is local cleanup only. Run it only after confirming
+the signed agency artifact and the agency publication are complete, and never
+treat pruning as creating or uploading a Radiant release.
 
 
 ## Sharp edges
