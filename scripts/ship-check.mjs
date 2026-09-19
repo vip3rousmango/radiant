@@ -10,9 +10,8 @@
 //
 //   node scripts/ship-check.mjs [--json]
 //
-// Exit code 0 = everything it can verify is clean, 1 = something is outstanding.
-// Linear is deliberately NOT checked here (no API key in the repo); the
-// ship-sync agent covers that half.
+// ClickUp is deliberately NOT checked here (no API key in the repo); the
+// agency tracking step covers that half.
 
 import { execFileSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'

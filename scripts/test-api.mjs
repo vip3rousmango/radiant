@@ -64,6 +64,14 @@ await check('API responses are not cacheable', async () => {
   return r.headers.get('cache-control')
 })
 
+await check('version identifies the agency build and engine', async () => {
+  const r = await api('GET', '/api/version')
+  ok(r.json?.product === 'Allegretto', 'missing Allegretto product identity')
+  ok(r.json?.engine?.name === 'Radiant', 'missing Radiant engine identity')
+  ok(/^\d+\.\d+\.\d+$/.test(r.json?.engine?.version || ''), 'missing Radiant engine version')
+  return `${r.json.product} ${r.json.version} / ${r.json.engine.name} ${r.json.engine.version}`
+})
+
 await check('projects live in their own files', async () => {
   const a = await api('POST', '/api/projects', { name: 'Alpha' })
   const b = await api('POST', '/api/projects', { name: 'Beta' })
