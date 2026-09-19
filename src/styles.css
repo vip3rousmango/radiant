@@ -587,7 +587,7 @@ code, pre, .mono { font-family: var(--font-mono); }
 .sidebar-version.is-remote {
   color: var(--accent); border: 1px solid var(--accent);
   border-radius: 6px; padding: 1px 5px; max-width: 190px;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  white-space: nowrap;
 }
 .artifact-btn {
   position: absolute; top: 6px; right: 62px;
