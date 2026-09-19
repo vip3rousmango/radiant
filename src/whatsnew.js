@@ -18,6 +18,12 @@
  */
 export const WHATS_NEW = [
   {
+    version: '0.9.31',
+    items: [
+      ['See what the model saw', 'Every completed reply now has a small expandable record of the model, tools, context size, cache use and what was sent. It makes a long or surprising answer easier to understand without rerunning it.'],
+    ]
+  },
+  {
     version: '0.9.30',
     items: [
       ['A maintenance update', 'This update adds no new controls; it keeps agency update checks clear and reliable before a build is published.']
