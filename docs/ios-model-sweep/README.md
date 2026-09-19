@@ -15,8 +15,8 @@ Two scheduled tasks in the Claude app carry it out:
 - **Monday 8 am — `radiant-ios-model-apply`.** Merges that branch, publishes
   the catalogue to the website (which is what installed apps read at launch),
   rebuilds the app and installs it on every paired device via
-  `scripts/ios-install-all.sh`, updates the in-app Read me, files the Linear
-  issue.
+  `scripts/ios-install-all.sh`, updates the in-app Read me, records the ClickUp
+  task.
 
 Both run only while the Claude desktop app is open on Tony's Mac; a missed
 slot runs at the next launch. Nothing here touches App Store Connect — a new

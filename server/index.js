@@ -59,10 +59,12 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '10mb' }))
 
 const __dirname0 = path.dirname(fileURLToPath(import.meta.url))
-const APP_VERSION = (() => {
-  try { return JSON.parse(fs.readFileSync(path.join(__dirname0, '..', 'package.json'), 'utf8')).version } catch { return '0.0.0' }
+const APP_PACKAGE = (() => {
+  try { return JSON.parse(fs.readFileSync(path.join(__dirname0, '..', 'package.json'), 'utf8')) } catch { return {} }
 })()
-
+const APP_VERSION = APP_PACKAGE.version || '0.0.0'
+const ENGINE_NAME = APP_PACKAGE.radiantEngineName || 'upstream engine'
+const ENGINE_VERSION = APP_PACKAGE.radiantEngineVersion || 'unknown'
 let config = loadConfig()
 
 // ⚠️ FIVE MACS, ONE FOLDER, AND EVERY SERVER HELD ITS OWN COPY. Each Radiant
@@ -1588,7 +1590,11 @@ app.post('/api/design/pick', async (req, res) => {
 })
 
 // ---------- version & updates ----------
-app.get('/api/version', (req, res) => res.json({ version: APP_VERSION }))
+app.get('/api/version', (req, res) => res.json({
+  version: APP_VERSION,
+  product: BRAND.productName,
+  engine: { name: ENGINE_NAME, version: ENGINE_VERSION }
+}))
 
 app.get('/api/update-check', async (req, res) => {
   try {

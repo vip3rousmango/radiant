@@ -293,6 +293,7 @@ export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, se
   const collapsed = new Proxy({}, { get: (_t, id) => !open.has(String(id)) })
 
   const [version, setVersion] = useState('')
+  const [engineVersion, setEngineVersion] = useState('')
   // ⚠️ THIS WINDOW MAY NOT BE SHOWING THIS MAC. A stored server address in
   // localStorage points every API call at another Mac — its models, chats,
   // projects and version — and nothing in the main window ever said so. The
@@ -302,7 +303,15 @@ export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, se
   // that across four releases: "nav bar says .128 about screen says 133."
   const remoteBase = getServer().base || ''
   const remoteHost = remoteBase ? (() => { try { return new URL(remoteBase).host } catch { return remoteBase } })() : ''
-  useEffect(() => { let alive = true; api.getVersion().then(v => { if (alive) setVersion(v.version || '') }).catch(() => {}); return () => { alive = false } }, [])
+  useEffect(() => {
+    let alive = true
+    api.getVersion().then(v => {
+      if (!alive) return
+      setVersion(v.version || '')
+      setEngineVersion(v.engine?.version || '')
+    }).catch(() => {})
+    return () => { alive = false }
+  }, [])
 
   const [search, setSearch] = useState('')
   const [results, setResults] = useState(null)
@@ -616,10 +625,10 @@ export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, se
             answering it meant opening another screen. */}
         {version && (
           remoteBase
-            ? <span className='sidebar-version is-remote' title={`Showing ${BRAND.productName} ${version} on ${remoteHost}. Settings → Devices to use this ${deviceNoun(platform)} instead.`}>
-                {remoteHost} · {version}
+            ? <span className='sidebar-version is-remote' title={`Showing ${BRAND.productName} ${version} on ${remoteHost}${engineVersion ? ` · Radiant engine ${engineVersion}` : ''}. Settings → Devices to use this ${deviceNoun(platform)} instead.`}>
+                {remoteHost} · {BRAND.productName} {version}
               </span>
-            : <span className='sidebar-version' title={`${BRAND.productName} ${version}`}>{version}</span>
+            : <span className='sidebar-version' title={`${BRAND.productName} ${version}${engineVersion ? ` · Radiant engine ${engineVersion}` : ''}`}>{BRAND.productName} {version}</span>
         )}
       </div>
       <div className='sidebar-resize' onMouseDown={startDrag} title='Drag to resize' />

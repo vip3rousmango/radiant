@@ -72,9 +72,9 @@ Every Allegretto change closes these in the same turn:
 2. **The in-app Read me** — update the `GUIDE` array in
    `src/components/Settings.jsx` whenever a user-facing feature changes. Write
    it for someone using Allegretto, in plain US English.
-3. **Agency tracking** — record shipped work in the agency's Linear project when
-   access is available. If access is unavailable, report the exact blocker; do
-   not substitute a Radiant issue or pull request.
+3. **Agency tracking** — record shipped work in the agency's ClickUp workspace
+   when access is available. If access is unavailable, report the exact blocker;
+   do not substitute a Radiant issue or pull request.
 
 Before calling an Allegretto change shipped, run the objective ship check:
 
@@ -103,7 +103,7 @@ node scripts/triage.mjs --closed --dry-run
 ```
 
 Use the resulting labels as triage input, not as a substitute for recording
-shipped work in the agency's Linear project.
+shipped work in the agency's ClickUp workspace.
 
 
 ## Agency publication
