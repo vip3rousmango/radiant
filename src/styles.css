@@ -778,9 +778,13 @@ code, pre, .mono { font-family: var(--font-mono); }
    fact you occasionally need, not something to read every time you look at the
    sidebar. Tabular figures so it does not jitter as versions change width. */
 .sidebar-version {
-  margin-left: auto; font-size: 10px; color: var(--text-faint);
-  font-family: var(--font-mono); font-variant-numeric: tabular-nums;
-  white-space: nowrap; user-select: text;
+  margin-left: auto; min-width: 0; max-width: 120px; font-size: 10px;
+  color: var(--text-faint); font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums; white-space: nowrap; user-select: text;
+}
+.sidebar-version-text {
+  display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: inherit;
 }
 
 /* About pane */

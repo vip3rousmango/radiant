@@ -9,7 +9,10 @@ const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 
 export default defineConfig({
   // the phone's Settings shows the version, and reading package.json at build
   // time is the only source that cannot drift from what actually shipped
-  define: { __APP_VERSION__: JSON.stringify(pkg.version) },
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __RADIANT_ENGINE_VERSION__: JSON.stringify(pkg.radiantEngineVersion || '')
+  },
   plugins: [react()],
   server: {
     // ⚠️ THE BACKEND PORT IS AN OVERRIDE, NOT A CONSTANT. Radiant.app owns 5834

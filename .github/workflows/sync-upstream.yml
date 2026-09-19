@@ -125,6 +125,17 @@ jobs:
             echo "has_delta=true" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Record upstream engine metadata
+        if: steps.prepare.outputs.has_delta == 'true'
+        run: |
+          set -euo pipefail
+          upstream_engine_version="$(git show upstream/master:package.json | node --input-type=module -e "let input=''; process.stdin.on('data', chunk => { input += chunk }); process.stdin.on('end', () => { const version = JSON.parse(input).version; if (!/^[0-9]+\.[0-9]+\.[0-9]+$/.test(version)) process.exit(1); process.stdout.write(version) })")"
+          node --input-type=module -e "import fs from 'node:fs'; const file = 'package.json'; const pkg = JSON.parse(fs.readFileSync(file, 'utf8')); pkg.radiantEngineName = 'Radiant'; pkg.radiantEngineVersion = process.argv[1]; fs.writeFileSync(file, JSON.stringify(pkg, null, 2) + '\n')" "$upstream_engine_version"
+          git add package.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Record upstream Radiant engine $upstream_engine_version"
+          fi
+
       - name: Push only the recreated review branch to origin
         if: steps.prepare.outputs.has_delta == 'true'
         run: |

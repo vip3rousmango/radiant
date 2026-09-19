@@ -134,7 +134,9 @@ if (!existsSync(syncWorkflowPath)) {
     ['record a no-delta preparation result', 'echo "has_delta=false" >> "$GITHUB_OUTPUT"'],
     ['record a delta preparation result', 'echo "has_delta=true" >> "$GITHUB_OUTPUT"'],
     ['force-push only with an explicit lease', '--force-with-lease="refs/heads/$SYNC_BRANCH:$SYNC_BRANCH_EXPECTED_SHA"'],
-    ['push the sync branch only to origin', '--set-upstream origin "HEAD:refs/heads/$SYNC_BRANCH"']
+    ['push the sync branch only to origin', '--set-upstream origin "HEAD:refs/heads/$SYNC_BRANCH"'],
+    ['derive the upstream engine version from upstream package metadata', 'git show upstream/master:package.json'],
+    ['persist the upstream engine version in the agency package', 'radiantEngineVersion = process.argv[1]'],
   ]
   for (const [description, requiredText] of syncContract) {
     if (!syncWorkflow.includes(requiredText)) {
@@ -143,8 +145,8 @@ if (!existsSync(syncWorkflowPath)) {
   }
   const deltaGuard = /^\s*if: steps\.prepare\.outputs\.has_delta == 'true'\s*$/gm
   const deltaGuardCount = syncWorkflow.match(deltaGuard)?.length ?? 0
-  if (deltaGuardCount !== 2) {
-    failures.push(`sync workflow must guard push and PR steps with has_delta (found ${deltaGuardCount})`)
+  if (deltaGuardCount !== 3) {
+    failures.push(`sync workflow must guard metadata, push, and PR steps with has_delta (found ${deltaGuardCount})`)
   }
   if (/^\s*git push\b[^\n]*\bupstream\b/m.test(syncWorkflow)) {
     failures.push('sync workflow must never push to upstream')
