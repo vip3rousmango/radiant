@@ -298,7 +298,7 @@ code, pre, .mono { font-family: var(--font-mono); }
 
 /* Instant, reliable tooltips (Electron's native title tooltips are slow/flaky). */
 [data-tip] { position: relative; }
-[data-tip]:hover::after {
+[data-tip]:is(:hover, :focus-visible)::after {
   content: attr(data-tip);
   position: absolute; z-index: 200;
   bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%);
@@ -315,17 +315,17 @@ code, pre, .mono { font-family: var(--font-mono); }
   box-shadow: 0 6px 20px oklch(0 0 0 / 0.35);
   pointer-events: none; animation: tip-in 0.12s ease both;
 }
-[data-tip]:hover::before {
+[data-tip]:is(:hover, :focus-visible)::before {
   content: ''; position: absolute; z-index: 200;
   bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%);
   border: 5px solid transparent; border-top-color: var(--border);
   pointer-events: none;
 }
-[data-tip-below]:hover::after { bottom: auto; top: calc(100% + 7px); }
-[data-tip-below]:hover::before { bottom: auto; top: calc(100% + 2px); border-top-color: transparent; border-bottom-color: var(--border); }
+[data-tip-below]:is(:hover, :focus-visible)::after { bottom: auto; top: calc(100% + 7px); }
+[data-tip-below]:is(:hover, :focus-visible)::before { bottom: auto; top: calc(100% + 2px); border-top-color: transparent; border-bottom-color: var(--border); }
 /* right-anchored — for buttons near the right edge so the bubble doesn't clip */
-[data-tip-end]:hover::after { left: auto; right: 0; transform: none; animation-name: tip-in-end; }
-[data-tip-end]:hover::before { left: auto; right: 8px; transform: none; }
+[data-tip-end]:is(:hover, :focus-visible)::after { left: auto; right: 0; transform: none; animation-name: tip-in-end; }
+[data-tip-end]:is(:hover, :focus-visible)::before { left: auto; right: 8px; transform: none; }
 @keyframes tip-in-end { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
 @keyframes tip-in { from { opacity: 0; transform: translateX(-50%) translateY(3px); } to { opacity: 1; } }
 
