@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import Markdown from './Markdown.jsx'
+import Markdown, { highlightCode } from './Markdown.jsx'
 import { Icon } from './Icons.jsx'
 import { contextWindow } from '../../server/context-windows.js'
 import { SKILL_CATEGORIES } from '../../server/skill-categories.js'
@@ -1501,7 +1501,7 @@ export default function Chat ({ session, live, todos = [], stats, approval, ques
               <div className={'approval-card approval-' + request.tool}>
                 <div className='approval-label'>Permission request · {request.tool.replace(/_/g, ' ')}</div>
                 <div className='q'>{request.question}</div>
-                <pre className='approval-code'><code>{request.detail}</code></pre>
+                <pre className='approval-code'><code className={'hljs language-' + request.language} dangerouslySetInnerHTML={{ __html: highlightCode(request.detail, request.language) }} /></pre>
                 <div className='row'>
                   <button className='small-btn primary' onClick={() => onApproval(approval.id, true)}>{request.action}</button>
                   <button className='small-btn danger' onClick={() => onApproval(approval.id, false)}>Deny</button>
