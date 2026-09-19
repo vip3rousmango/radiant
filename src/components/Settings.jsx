@@ -2212,7 +2212,8 @@ function ChromePane () {
 
 function AboutPane ({ config, onSettings }) {
   const s = config.settings
-  const [version, setVersion] = useState(null)
+  const buildVersion = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : ''
+  const [version, setVersion] = useState(buildVersion || null)
   const [status, setStatus] = useState(null) // { hasUpdate, latest, current } | { error }
   const [checking, setChecking] = useState(false)
   const [phase, setPhase] = useState('idle') // idle | downloading | ready
@@ -2222,25 +2223,18 @@ function AboutPane ({ config, onSettings }) {
   const remote = getServer()
   const remoteLabel = remote.base ? (() => { try { return new URL(remote.base).host } catch { return remote.base } })() : ''
 
-  // ⚠️ ONE SOURCE, NOT TWO. This pane used to show the version from the server
-  // and the version from Electron side by side and reconcile them in the UI.
-  // They come from the same package.json in the same bundle, so any difference
-  // is a bug somewhere else — and rendering it here produced a screen telling
-  // Tony to restart, which never helped: "i hit resstart now and get same
-  // prompt to update. you fucking failed again."
-  //
-  // In the installed app, Electron's own version is the answer to "what is
-  // installed" and cannot go stale. The server is only asked in a browser tab,
-  // where there is no Electron to ask. A genuinely damaged bundle is still
-  // caught at startup in updater.cjs, which repairs it instead of reporting it.
+  // The version shown here identifies the Allegretto bundle that rendered the
+  // page. Never read it from the connected server: a stale backend can answer
+  // successfully while the current frontend is already newer.
   useEffect(() => {
     if (native) {
       native.check().then(r => {
         if (r?.disabled) setUpdatesDisabled(true)
-        if (r?.current) setVersion(r.current)
       }).catch(() => {})
-    } else api.getVersion().then(v => setVersion(v.version)).catch(() => {})
-  }, [native])
+    } else if (!buildVersion) {
+      api.getVersion().then(v => setVersion(v.version)).catch(() => {})
+    }
+  }, [native, buildVersion])
 
   // ⚠️ ASK WHAT WAS MISSED, THEN LISTEN. Events only reach a window that is open
   // when they fire, and this pane lives in the Settings window, which is opened and

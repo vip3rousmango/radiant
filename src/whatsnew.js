@@ -18,6 +18,12 @@
  */
 export const WHATS_NEW = [
   {
+    version: '0.9.32',
+    items: [
+      ['Version labels stay truthful', 'The sidebar and About page now identify the Allegretto build that rendered them, even when a stale connected server answers API requests. Hover the sidebar version to see the separately recorded Radiant engine version.'],
+    ]
+  },
+  {
     version: '0.9.31',
     items: [
       ['See what the model saw', 'Every completed reply now has a small expandable record of the model, tools, context size, cache use and what was sent. It makes a long or surprising answer easier to understand without rerunning it.'],

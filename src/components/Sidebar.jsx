@@ -292,23 +292,21 @@ export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, se
   })
   const collapsed = new Proxy({}, { get: (_t, id) => !open.has(String(id)) })
 
-  const [version, setVersion] = useState('')
-  const [engineVersion, setEngineVersion] = useState('')
+  const version = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : ''
+  const engineVersion = typeof __RADIANT_ENGINE_VERSION__ === 'string' ? __RADIANT_ENGINE_VERSION__ : ''
+  const [serverVersion, setServerVersion] = useState('')
   // ⚠️ THIS WINDOW MAY NOT BE SHOWING THIS MAC. A stored server address in
   // localStorage points every API call at another Mac — its models, chats,
-  // projects and version — and nothing in the main window ever said so. The
-  // footer showed that remote version as if it were this app's, while Settings
-  // → About showed the local one, so the two disagreed permanently and the
-  // update pill offered to "update" based on someone else's build. Tony chased
-  // that across four releases: "nav bar says .128 about screen says 133."
+  // projects and server version — and nothing in the main window ever said so.
+  // The footer must identify the Allegretto bundle that rendered it; the
+  // connected server version is diagnostic only and may be stale.
   const remoteBase = getServer().base || ''
   const remoteHost = remoteBase ? (() => { try { return new URL(remoteBase).host } catch { return remoteBase } })() : ''
+  const serverNote = serverVersion && serverVersion !== version ? ` · connected server ${serverVersion}` : ''
   useEffect(() => {
     let alive = true
     api.getVersion().then(v => {
-      if (!alive) return
-      setVersion(v.version || '')
-      setEngineVersion(v.engine?.version || '')
+      if (alive) setServerVersion(v.version || '')
     }).catch(() => {})
     return () => { alive = false }
   }, [])
@@ -625,10 +623,24 @@ export default function Sidebar ({ section = 'chat', onSection, onOpenAgents, se
             answering it meant opening another screen. */}
         {version && (
           remoteBase
-            ? <span className='sidebar-version is-remote' title={`Showing ${BRAND.productName} ${version} on ${remoteHost}${engineVersion ? ` · Radiant engine ${engineVersion}` : ''}. Settings → Devices to use this ${deviceNoun(platform)} instead.`}>
-                {remoteHost} · {BRAND.productName} {version}
+            ? <span className='sidebar-version is-remote'
+                data-tip={`Showing ${BRAND.productName} ${version} on ${remoteHost} · Radiant engine ${engineVersion}${serverNote}. Settings → Devices to use this ${deviceNoun(platform)} instead.`}
+                data-tip-end
+                title={`Showing ${BRAND.productName} ${version} on ${remoteHost} · Radiant engine ${engineVersion}${serverNote}. Settings → Devices to use this ${deviceNoun(platform)} instead.`}
+                tabIndex={0}
+                aria-label={`Showing ${BRAND.productName} ${version} on ${remoteHost}.`}
+              >
+                <span className='sidebar-version-text'>{remoteHost} · {BRAND.productName} {version}</span>
               </span>
-            : <span className='sidebar-version' title={`${BRAND.productName} ${version}${engineVersion ? ` · Radiant engine ${engineVersion}` : ''}`}>{BRAND.productName} {version}</span>
+            : <span className='sidebar-version'
+                data-tip={`${BRAND.productName} ${version} · Radiant engine ${engineVersion}${serverNote}`}
+                data-tip-end
+                title={`${BRAND.productName} ${version} · Radiant engine ${engineVersion}${serverNote}`}
+                tabIndex={0}
+                aria-label={`${BRAND.productName} ${version}`}
+              >
+                <span className='sidebar-version-text'>{BRAND.productName} {version}</span>
+              </span>
         )}
       </div>
       <div className='sidebar-resize' onMouseDown={startDrag} title='Drag to resize' />
