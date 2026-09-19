@@ -42,17 +42,21 @@ add(
 )
 
 // ── 2. Is it pushed? ─────────────────────────────────────────────────────────
+// Cached remote-tracking refs can outlive a deleted or force-moved server
+// branch. Ask the remote every time and require its advertised commit to match
+// HEAD exactly.
 const branch = tryGit('rev-parse', '--abbrev-ref', 'HEAD')
-const remoteRef = branch && tryGit('rev-parse', '--verify', `refs/remotes/origin/${branch}`)
-const ahead = remoteRef ? tryGit('rev-list', '--count', `origin/${branch}..HEAD`) : ''
-const pushed = Boolean(remoteRef && ahead === '0')
+const remoteLine = branch ? tryGit('ls-remote', '--exit-code', 'origin', `refs/heads/${branch}`) : ''
+const remoteSha = remoteLine.split(/\s+/)[0] || ''
+const currentSha = tryGit('rev-parse', 'HEAD')
+const pushed = Boolean(remoteSha && currentSha && remoteSha === currentSha)
 add(
   'pushed',
   pushed,
   pushed
-    ? `origin/${branch} up to date`
-    : remoteRef
-      ? `${ahead || 'unknown'} commit(s) not on origin/${branch}`
+    ? `origin/${branch} points at HEAD`
+    : remoteSha
+      ? `origin/${branch} points at ${remoteSha}, not HEAD ${currentSha || 'an unreadable commit'}`
       : `origin/${branch} does not exist`,
   `git push origin ${branch}`
 )

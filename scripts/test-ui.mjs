@@ -511,13 +511,13 @@ await page.waitForTimeout(600)
   await p2.goto(BASE, { waitUntil: 'networkidle' })
   await p2.waitForTimeout(900)
   // Real pointer presses: these controls listen for pointer events, not clicks.
-  const press = async (sel) => {
+  const press = async (sel, settle = 550) => {
     const el = p2.locator(sel).first()
     if (!(await el.count())) return false
     const b = await el.boundingBox(); if (!b) return false
     await p2.mouse.move(b.x + b.width / 2, b.y + b.height / 2)
     await p2.mouse.down(); await p2.waitForTimeout(60); await p2.mouse.up()
-    await p2.waitForTimeout(550); return true
+    await p2.waitForTimeout(settle); return true
   }
   const homeText = () => p2.evaluate(() => {
     const h = [...document.querySelectorAll('*')].find(e =>
@@ -535,10 +535,26 @@ await page.waitForTimeout(600)
     /Current model: Qwen 3 1\.7B/.test(await homeText()))
 
   await press('text="Models"')
+  let checkedDismissal = false
   for (let i = 0; i < 6; i++) {
     if (!(await p2.locator('text="Manage"').count())) break
     await press('text="Manage"')
-    if (!(await press('text="Remove model"'))) break
+    if (checkedDismissal) {
+      if (!(await press('text="Remove model"'))) break
+      continue
+    }
+    if (!(await press('text="Remove model"', 100))) break
+    const dismissal = await p2.evaluate(() => {
+      const sheet = document.querySelector('.rx-sheet')
+      return {
+        height: sheet?.style.getPropertyValue('--rx-sheet-h'),
+        detail: Boolean(sheet?.querySelector('.rx-title-2'))
+      }
+    })
+    is('removal keeps the detail sheet height during dismissal', dismissal.height, '55dvh')
+    is('removal keeps detail content during dismissal', dismissal.detail, true)
+    checkedDismissal = true
+    await p2.waitForTimeout(450)
   }
   is('every model really was removed',
     await p2.evaluate(() => window.__harness.state.models.filter(m => m.downloaded).length), 0)

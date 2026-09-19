@@ -40,8 +40,16 @@ const NEEDS = {
 }
 
 export default function GetModelSheet ({ local = {}, models = [], modelId, onDismiss, onStartChat }) {
+  // Keep the detail face and its height stable while removal animates out.
+  // The parent model list updates immediately; switching to ModelPicker during
+  // the 300 ms dismissal changes the sheet's contents and detent mid-animation.
+  const [detailModel] = useState(() => {
+    const initial = models.find(m => m.id === modelId)
+    return initial?.downloaded ? initial : null
+  })
   const model = useMemo(() => models.find(m => m.id === modelId) || null, [models, modelId])
-  const detail = Boolean(model?.downloaded)
+  const shownModel = model || detailModel
+  const detail = Boolean(detailModel)
 
   const [p, setP] = useState(1)        // 1 = fully off-screen, 0 = presented
   const [dragging, setDragging] = useState(false)
@@ -113,8 +121,8 @@ export default function GetModelSheet ({ local = {}, models = [], modelId, onDis
     if (projected > g.h * 0.4 || g.v > 300) { haptics.impact('RIGID'); close() } else setP(0)
   }
 
-  const start = usePress(() => { model && onStartChat?.(model.id) })
-  const remove = usePress(() => { if (model) local.remove?.(model.id); close() })
+  const start = usePress(() => { shownModel && onStartChat?.(shownModel.id) })
+  const remove = usePress(() => { if (shownModel) local.remove?.(shownModel.id); close() })
 
   return (
     <>
@@ -132,8 +140,7 @@ export default function GetModelSheet ({ local = {}, models = [], modelId, onDis
         // Control user unable to close the app's central screen.
         role="dialog"
         aria-modal="true"
-        aria-label={detail ? model?.name : 'Choose a model'}
-        data-dragging={dragging ? 'true' : undefined}
+        aria-label={detail ? shownModel?.name : 'Choose a model'}
         style={{ '--rx-sheet-p': p, '--rx-sheet-h': detail ? '55dvh' : '92dvh' }}
       >
         <div
@@ -149,21 +156,21 @@ export default function GetModelSheet ({ local = {}, models = [], modelId, onDis
           <div style={{ padding: '24px 20px 0', display: 'flex', flexDirection: 'column', minHeight: 0, flex: '1 1 auto' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
               <BrandMark size={120} />
-              <div className="rx-title-2">{model?.name}</div>
+              <div className="rx-title-2">{shownModel?.name}</div>
             </div>
 
             <div className="rx-stat-strip">
               <div className="rx-stat">
                 <div className="rx-stat-key">Size</div>
-                <div className="rx-stat-value">{Number(model?.sizeGB || 0).toFixed(1)} GB</div>
+                <div className="rx-stat-value">{Number(shownModel?.sizeGB || 0).toFixed(1)} GB</div>
               </div>
               <div className="rx-stat">
                 <div className="rx-stat-key">Speed</div>
-                <div className="rx-stat-value">{SPEED[model?.id] || 'Fast'}</div>
+                <div className="rx-stat-value">{SPEED[shownModel?.id] || 'Fast'}</div>
               </div>
               <div className="rx-stat">
                 <div className="rx-stat-key">Needs</div>
-                <div className="rx-stat-value">{NEEDS[model?.id] || 'Recent'}</div>
+                <div className="rx-stat-value">{NEEDS[shownModel?.id] || 'Recent'}</div>
               </div>
             </div>
 
