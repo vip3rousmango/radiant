@@ -1063,20 +1063,13 @@ code, pre, .mono { font-family: var(--font-mono); }
 .question-other { display: flex; gap: 8px; }
 .question-other input { flex: 1; padding: 6px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-input); outline: none; font-size: 12.5px; }
 .question-other input:focus { border-color: var(--accent); }
-.approval-card .q { font-weight: 500; margin-bottom: 9px; font-size: 13px; }
-.approval-label {
-  color: var(--text-faint); font-size: 10px; font-weight: 600;
-  letter-spacing: .07em; text-transform: uppercase; margin-bottom: 7px;
+.approval-card .q { font-weight: 500; margin-bottom: 8px; font-size: 13px; }
+.approval-card code {
+  display: block; background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px; margin-bottom: 10px; font-size: 12px;
+  white-space: pre-wrap; word-break: break-word;
 }
-.approval-code {
-  position: relative; display: block; margin: 0 0 10px; padding: 12px 14px;
-  background: var(--bg-input); border: 1px solid var(--border);
-  border-left: 3px solid var(--accent); border-radius: 9px;
-  overflow-x: auto; white-space: pre-wrap; word-break: break-word;
-  color: var(--text); font-family: var(--font-mono); font-size: 12px; line-height: 1.55;
-  box-shadow: inset 0 1px 0 var(--accent-wash);
-}
-.approval-code code { display: block; padding: 0; border: 0; background: none; }
 .approval-card .row { display: flex; gap: 8px; }
 
 .notice { color: var(--text-faint); font-size: 12px; font-style: italic; margin: 8px 0; }

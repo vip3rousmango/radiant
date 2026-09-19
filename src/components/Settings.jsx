@@ -3444,7 +3444,6 @@ const GUIDE = [
     title: 'Tools the agent can use',
     items: [
       ['Files & commands', 'Read, write, and edit files and run shell commands in the workspace folder. Toggle with the “tools” pill; command runs ask for approval.'],
-      ['Approval requests show the exact operation', 'When the agent needs permission, the card names the tool and shows its command or file path in a theme-aware code block. Read-file approvals now say which file will be read instead of showing an empty command row.'],
       ['Set the workspace folder', 'Click the folder chip at the top of a chat to choose which folder the agent works in — it opens a native folder picker.'],
       ['Permissions', 'The composer’s permissions pill sets how much the agent can do without asking — Ask each (confirm every command), Auto approve (low-risk runs silently, risky ones still ask), or Allow all (never ask). In Auto approve, MCP tools and computer control still ask unless Full automation is enabled; Allow all bypasses those prompts even when Full automation is off. Flip it to Allow all for an unattended long build.'],
       ['Background jobs', 'Long builds, test watchers, and dev servers run in the background so the agent keeps working and checks on them.'],
