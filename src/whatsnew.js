@@ -18,6 +18,12 @@
  */
 export const WHATS_NEW = [
   {
+    version: '0.9.37',
+    items: [
+      ['Approval details stay reviewable', 'Approval cards keep structured arguments visible, stay readable in light and dark themes, and keep the action buttons reachable for long payloads.']
+    ]
+  },
+  {
     version: '0.9.36',
     items: [
       ['Approval cards show complete tool details', 'Permission requests now show shell commands and every structured argument in a readable, highlighted code block. File reads are no longer blank or mislabeled as running inside the workspace.']
