@@ -55,7 +55,7 @@ export default function GetModelSheet ({ local = {}, models = [], modelId, onDis
   const [dragging, setDragging] = useState(false)
   const sheetRef = useRef(null)
   const drag = useRef(null)
-
+  const closing = useRef(false)
   // present on the next frame so the transform has something to animate from
   useEffect(() => {
     const r = requestAnimationFrame(() => setP(0))
@@ -64,8 +64,22 @@ export default function GetModelSheet ({ local = {}, models = [], modelId, onDis
 
 
   const close = useCallback(() => {
+    if (closing.current) return
+    closing.current = true
     setP(1)
-    setTimeout(() => onDismiss?.(), 300)
+    const sheet = sheetRef.current
+    let fallback
+    const finish = () => {
+      clearTimeout(fallback)
+      sheet?.removeEventListener('transitionend', onTransitionEnd)
+      onDismiss?.()
+    }
+    const onTransitionEnd = e => {
+      if (e.target === sheet && e.propertyName === 'transform') finish()
+    }
+    if (!sheet) return finish()
+    sheet.addEventListener('transitionend', onTransitionEnd)
+    fallback = setTimeout(finish, 450)
   }, [onDismiss])
 
   // Modal behaviour: move focus in, keep it in, put it back, and answer Escape.

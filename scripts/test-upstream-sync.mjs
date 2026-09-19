@@ -124,6 +124,8 @@ if (!existsSync(syncWorkflowPath)) {
   // be overwritten.
   const syncContract = [
     ['identify the preparation step for output guards', 'id: prepare'],
+    ['configure the merge identity name', 'git config user.name "github-actions[bot]"'],
+    ['configure the merge identity email', 'git config user.email "41898282+github-actions[bot]@users.noreply.github.com"'],
     ['fetch the selected agency base', 'git fetch --no-tags --prune origin "$BASE_BRANCH"'],
     ['recreate the sync branch from the agency base', 'git checkout -B "$SYNC_BRANCH" "origin/$BASE_BRANCH"'],
     ['reset the sync branch to the agency base', 'git reset --hard "origin/$BASE_BRANCH"'],

@@ -24,18 +24,21 @@ const is = (name, got, want) => {
 }
 const ok = (name, cond) => is(name, !!cond, true)
 
+const collectErrors = (target, output) => {
+  target.on('pageerror', e => output.push(String(e?.message || e)))
+  target.on('console', m => {
+    if (m.type() !== 'error') return
+    const t = m.text()
+    // The harness page ships no favicon; the app does. Anything else is real.
+    if (/favicon/i.test(t)) return
+    if (/Failed to load resource.*404/i.test(t) && !/\.(js|css|png|woff2?)\b/i.test(t)) return
+    output.push(t)
+  })
+}
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const page = await browser.newPage({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 })
 const errors = []
-page.on('pageerror', e => errors.push(String(e.message)))
-page.on('console', m => {
-  if (m.type() !== 'error') return
-  const t = m.text()
-  // The harness page ships no favicon; the app does. Anything else is real.
-  if (/favicon/i.test(t)) return
-  if (/Failed to load resource.*404/i.test(t) && !/\.(js|css|png|woff2?)\b/i.test(t)) return
-  errors.push(t)
-})
+collectErrors(page, errors)
 
 await page.goto(BASE, { waitUntil: 'networkidle' })
 await page.waitForTimeout(600)
@@ -505,8 +508,7 @@ await page.waitForTimeout(600)
 {
   const p2 = await browser.newPage({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 3 })
   const p2Errors = []
-  p2.on('pageerror', e => p2Errors.push(String(e?.message || e)))
-  p2.on('console', m => { if (m.type() === 'error') p2Errors.push(m.text()) })
+  collectErrors(p2, p2Errors)
   await p2.addInitScript(() => localStorage.setItem('rx.activeModel', 'qwen3-1.7b'))
   await p2.goto(BASE, { waitUntil: 'networkidle' })
   await p2.waitForTimeout(900)

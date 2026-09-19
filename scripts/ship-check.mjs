@@ -20,7 +20,11 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const git = (...a) => execFileSync('git', a, { cwd: ROOT, encoding: 'utf8' }).trim()
+const git = (...a) => execFileSync('git', a, {
+  cwd: ROOT,
+  encoding: 'utf8',
+  stdio: ['ignore', 'pipe', 'ignore']
+}).trim()
 const tryGit = (...a) => { try { return git(...a) } catch { return '' } }
 
 // Code whose behavior a user could notice. Docs and this script don't count.
