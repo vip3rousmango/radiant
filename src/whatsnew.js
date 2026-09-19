@@ -18,6 +18,12 @@
  */
 export const WHATS_NEW = [
   {
+    version: '0.9.30',
+    items: [
+      ['A maintenance update', 'This update adds no new controls; it keeps agency update checks clear and reliable before a build is published.']
+    ]
+  },
+  {
     version: '0.9.29',
     items: [
       ['Sheets finish their closing motion', 'Phone sheets now wait for their visible closing motion to finish before leaving the screen.']
