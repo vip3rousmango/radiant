@@ -1,306 +1,166 @@
-# Radiant — read this first, every turn
+# Repository Guidelines
 
-## Allegretto agency fork
+## Project Overview
 
-Allegretto is the agency fork of Radiant. The source relationship is one-way:
-pull updates from the main Radiant package, adapt and test them here, then ship
-Allegretto changes from the agency fork. The main Radiant repository is never a
-destination for Allegretto work, and Allegretto is never published as a Radiant
-release.
+Allegretto is Virtually(Creative)'s agency fork of Radiant, a local-first coding harness. It combines an Electron desktop shell, a Vite/React renderer, an in-process Express/WebSocket server, native desktop helpers, a Capacitor iOS shell, and a static Netlify website.
 
-The agency fork is the only Git remote that receives Allegretto commits. Keep
-the main package remote fetch-only. Develop every change on a feature branch.
-The agency `master` branch is merge-only: land completed work through a reviewed
-pull request after verification. When the agency website is requested, deploy
-only to `allegretto.netlify.app`; the future public domain is
-`allegretto.virtuallycreative.ca`. Use the existing Allegretto logo baseline
-and Zen color assets; do not substitute Radiant branding.
+The package identity is Allegretto (`com.virtuallycreative.allegretto`), while `radiantEngineVersion` records the upstream Radiant engine version. Upstream synchronization is one-way: fetch `templetongroup/radiant`, adapt it in this repository, and publish only agency-owned Allegretto artifacts. Never publish Allegretto as a Radiant release.
 
+## Architecture & Data Flow
 
-## THE iPHONE APP — 1.1 (build 21) READY FOR SALE, approved 2026-09-18
+- **Desktop startup:** `electron/main.cjs` starts `server/index.js`, waits for its `ready` port promise, and opens the local HTTP app. Electron exposes only narrow native APIs through `electron/preload.cjs`; renderer Node integration is disabled.
+- **Renderer:** `src/main.jsx` selects the main app, Settings window, or HUD from the URL hash. `src/App.jsx` owns desktop session/config/task state and lazy-loads `src/mobile/Phone.jsx` only on Capacitor-native platforms.
+- **Transport:** `src/api.js` is the renderer/server boundary. REST handles durable resources and settings; `/api/chat` and dictation use SSE; `/term` and the browser extension use WebSockets. Vite proxies `/api` and `/term` to the backend during development.
+- **Chat flow:** `/api/chat` in `server/index.js` loads config/session state, resolves provider credentials and skills, then calls `server/providers.js:runTurn`. Provider-specific wire formats become the neutral stored transcript format; normalized events stream back to `src/components/Chat.jsx`.
+- **Agent execution:** tools are defined and dispatched in `server/tools.js` and `server/computer-tools.js`. Shell, file, MCP, and unsafe computer actions are approval-gated on the server. Tasks reuse the chat run path. Loops are client-pumped through `/advance`; graphs are detached server-side runs managed by `server/graph-run.js`.
+- **Persistence:** `server/config.js` owns config, sessions, projects, agents, tasks, loops, and graphs. JSON writes use temporary files followed by rename. Config has one server writer; window geometry is stored separately.
+- **Cancellation and failures:** turns carry an `AbortSignal`; dropped SSE connections and explicit aborts must persist a meaningful stopped/halt result, not only show a transient banner. SSE heartbeats keep quiet remote turns alive.
+- **Native boundary:** `server/computer.js` selects `native/radiant-control` on macOS or `gnome/radiant-control.cjs` on Linux. macOS source is `native/RadiantControl.swift`; compile it with `npm run compile:helper`.
+- **iOS:** `apps/ios` is a separate Capacitor shell around the root `dist/` bundle. Its native model UI is separate from the desktop entry chunk. The iOS model catalogue is authored in Swift and exported to JSON.
+- **Website:** `website/` is independent static HTML/CSS/assets, published directly by Netlify. It is not part of the Electron or iOS build.
 
-⚠️ **STILL READ APP STORE CONNECT BEFORE YOU TRUST THIS.** `node
-scripts/asc.mjs get 6804891721` prints the live state in one line; this
-heading has gone stale three times. 1.0 (build 7) was approved 2026-09-16; 1.1
-(build 21) was submitted 2026-09-17 from the command line (`asc.mjs submit`)
-and approved the next morning with no questions.
+## Key Directories
 
-**1.1 carries:** Hugging Face search with a run/won't-run verdict (unfiltered
-— TG-454, do not reinstate a word filter), Archive on chats, the keyboard fix,
-the unsent-message fix (TG-467), the byline link to templetontech.com, and an
-age rating of 17+ — answered honestly for an open model list. The current Xcode
-project version is 23; builds 22 and 23 are not evidence of an App Store
-submission. The approved App Store build remains 21 unless App Store Connect
-says otherwise.
+- `src/` — React/Vite renderer, API client, desktop UI, mobile UI, themes, and native-aware entry routing.
+- `server/` — Express routes, SSE/WebSocket transport, provider loops, persistence, auth, tools, updater logic, and platform adapters.
+- `electron/` — Electron main process, preload bridge, updater, window state, and native window lifecycle.
+- `native/` — macOS Swift helper and embedded helper metadata.
+- `apps/ios/` — nested Capacitor/npm project, Xcode project, Swift plugins, and generated runtime catalogue.
+- `website/` — Allegretto landing page, documentation, privacy policy, use cases, and assets.
+- `scripts/` — focused regression tests, release gates, catalogue tooling, screenshots, packaging checks, and operational utilities.
+- `build/` — Electron signing/notarization hook and macOS entitlements.
+- `extension/` — internal Radiant Browser Bridge extension source and packaging metadata.
+- `public/` — renderer static assets and web manifest.
 
-**The next build is an update:** a new version number in App Store Connect
-(`asc.mjs new-version`), its own what's new, its own review. Screenshots are
-still 1.0's — replace them with the next submission (`asc.mjs shots` counts
-them). `scripts/asc.mjs` can do everything short of signing in.
+## Development Commands
 
-**Anything to do with the submission: use the `app-store-review` skill**
-(`.claude/skills/app-store-review/`, also installed at `~/.claude/skills`;
-published at https://github.com/templetongroup/app-store-review — the repo is
-the copy people install, so a change here goes there too). It is the whole
-adventure — both rejections, the TestFlight false alarm, the privacy Publish
-button, the two-button resubmit — turned into a protocol.
-
-**The catalogue is published, not only compiled in.** `apps/ios/catalog.json` is
-fetched at launch and applied over the built-in Swift array, so a broken row can
-be corrected in minutes instead of a review cycle. It is GENERATED from that
-array (`npm run catalog:export`), so the two cannot drift, and every failure
-falls back to what shipped.
-
-⚠️ **That also means a bad publish reaches every phone at once.** `npm run
-catalog:publish` runs the export, then `scripts/catalog-check.py`, which probes
-every repo and refuses on undeclared quantization, a size more than 10% off the
-real blob total, or a 404. Do not copy catalog.json to the website by hand.
-**Before any future submission, run `npm run catalog:check`.** It fails any repo
-under ~1.2 bytes per parameter that declares no quantization — the Gemma 4
-defect, which shipped because the old check only asked whether MLX implemented
-the architecture.
-
-
-## Written is not shipped
-
-Every Allegretto change closes these in the same turn:
-
-1. **Agency Git** — commit and push feature branches only to the agency fork;
-   merge into its `master` through a pull request. Pull from the main Radiant
-   package when updating the base; never send Allegretto commits back to the
-   main package.
-2. **The in-app Read me** — update the `GUIDE` array in
-   `src/components/Settings.jsx` whenever a user-facing feature changes. Write
-   it for someone using Allegretto, in plain US English.
-3. **Agency tracking** — record shipped work in the agency's ClickUp workspace
-   when access is available. If access is unavailable, report the exact blocker;
-   do not substitute a Radiant issue or pull request.
-
-Before calling an Allegretto change shipped, run the objective ship check:
+Install and run the desktop app:
 
 ```bash
+npm install                 # local development
+npm ci                      # reproducible CI/fresh checkout install
+npm run dev                 # server :5834, Vite UI http://localhost:5833
+npm run build               # production renderer in dist/
+npm run app                 # build and launch Electron without packaging
+NODE_ENV=production npm start
+```
+
+Build and package:
+
+```bash
+npm run compile:helper
+npm run dist:allegretto:unsigned   # local arm64 DMG/ZIP; updater disabled; never publishes
+npm run dist:agency                # alias for the unsigned agency build
+npm run dist                      # macOS electron-builder path
+npm run dist:linux                # local Linux AppImage, never publishes
+node scripts/release-allegretto.mjs       # validation only
+node scripts/release-allegretto.mjs --release
+```
+
+A real agency release requires an agency GitHub owner/repository, GitHub token, valid Developer ID identity, and saved `notarytool` profile. Do not treat an unsigned DMG or ignored `release/` output as a published release.
+
+Focused checks:
+
+```bash
+node scripts/test-api.mjs
+node scripts/test-contrast.mjs
+node scripts/test-supply-chain.mjs
+node scripts/test-packaged-imports.mjs
+node scripts/test-updater-boundary.mjs
+node scripts/test-allegretto-updater-feed.mjs
+node scripts/test-install-location.mjs
+node scripts/test-upstream-sync.mjs
 node scripts/ship-check.mjs
 ```
 
-It verifies the committed and pushed feature-branch state, the in-app Read me,
-the release marker when one is required, and the fifth gate, **judged**:
-`scripts/ship-judge.mjs` has Jev (the decision model in `server/decide.js`) read the
-commit message and any new Read me entries and judge whether they explain why
-the change matters and are written for someone using the app. Below 50% fails;
-if the judge is unreachable, the check passes and reports that.
-Rewrite entries in plain words and commit again when it flags them. The check
-does not override the agency rules above: push only to
-the agency fork, and merge into agency `master` only through review.
-
-New agency GitHub issues are triaged by `scripts/triage.mjs`, run by
-`.github/workflows/triage.yml`. It proposes app, kind, severity, and possible
-duplicate labels with probabilities; nothing below 60% confidence (or 90% for
-duplicates) is applied. Inspect closed-issue recommendations without changing
-them with:
+For the browser UI harness:
 
 ```bash
-node scripts/triage.mjs --closed --dry-run
+bash scripts/test-ui.sh
 ```
 
-Use the resulting labels as triage input, not as a substitute for recording
-shipped work in the agency's ClickUp workspace.
-
-
-## Agency publication
-
-The public destination for Allegretto is the agency website only:
-`allegretto.netlify.app`, with `allegretto.virtuallycreative.ca` as the planned
-custom domain. Do not create a Radiant GitHub release, upload Radiant release
-assets, or update the Radiant download page for Allegretto work.
-
-Before a website deployment, verify the agency logo baseline, Zen colors,
-version text, download links, and the live Netlify URL. A packaged Mac build is
-an agency artifact for testing or release only when the agency signing and
-publishing prerequisites are present; never claim a release from an unsigned
-or incomplete build.
-
-After an agency artifact has actually shipped, prune local build output with
-`scripts/prune-releases.sh`. It keeps the version just shipped and the two
-newest iOS archives; this is local cleanup only. Run it only after confirming
-the signed agency artifact and the agency publication are complete, and never
-treat pruning as creating or uploading a Radiant release.
-
-
-## Sharp edges
-
-- **Model calls go through `server/net.js` (`modelFetch`), never bare `fetch`.**
-  Node's fetch is undici with 300 s headers/body timeouts; a local 27B can be
-  silent longer than that while it loads and reads a prompt, and the round
-  died with `TypeError: terminated`. `scripts/test-slow-model.mjs` refuses a
-  bare fetch on a provider round. Cancellation is the turn's AbortSignal.
-- **An empty round is nudged once, then halted with a reason** (providers.js,
-  `emptyRounds`); `finish_reason: length` is announced; `<tool_call>` written
-  as text is parsed. `scripts/test-empty-turn-live.mjs` drives all four shapes
-  through the real server against a scripted provider.
-
-- **Voice conversations are opt-in and the key is server-side.** `src/voice.js`
-  (WebRTC to GPT-Live from the renderer) and `server/voice.js` (creates the
-  session with an OpenAI *API key* — a ChatGPT sign-in cannot; `voiceKey()`
-  takes any key on the OpenAI roster). Client delegation only: the thinking is
-  always Radiant's own turn. Nothing runs unless `settings.voice.enabled`.
-  `scripts/test-voice.mjs` covers everything short of a microphone; the
-  in-app Browser pane blocks the mic, so an end-to-end check needs the
-  packaged app.
-
-- **Two icons, not one.** `build/icon.png` + `build/icon.icns` is the Mac Dock
-  icon and copies AiOS's geometry (body 0.896 of canvas, swirl 0.678, measured
-  off `~/Projects/aios-claude/mac/icon-1024.png`). The web/iOS set —
-  `public/favicon.png`, `public/apple-touch-icon.png`, `public/icon-{192,512}.png`,
-  `src/assets/logo-mark.png` — is **full-bleed and signed off; do not change it.**
-  `scripts/make-icon.py` writes only the Mac icon unless you pass `--web`.
-- **Colors live under `:root[data-mode=…]`**, applied from the config. A device
-  that has not signed in never gets a config, so anything that renders before
-  auth must work with the mode restored from localStorage in `index.html`.
-- **Remote devices** authenticate with a token (Settings → Devices & sharing),
-  held in an httpOnly cookie so a phone stays signed in. Loopback is always
-  allowed, so test the gate over the Tailscale address, never `127.0.0.1`.
-- **`~/.allegretto/config.json` has one writer, the server.** Window geometry
-  lives in `~/.allegretto/window-state.json` precisely to avoid racing it.
-  The updater stages downloads under Electron's cache path in
-  `allegretto-updater/pending` and installs the newest staged build on quit.
-
-## The iPhone app
-
-`apps/ios` is a real Capacitor shell around a **separate** UI in `src/mobile`.
-It shares no styling with the desktop build: `App.jsx` lazy-imports
-`mobile/Phone.jsx` only when `window.Capacitor.isNativePlatform()` is true, so
-`mobile.css` and the whole tree stay out of the Mac bundle's entry chunk. Keep
-it that way — check `vite build` still emits a separate `Phone-*.js` chunk.
-
-**Every iOS build goes to every device.** Standing instruction from Tony
-(2026-09-10): *"when you create new builds to the ios version, i want you to
-update it on all devices."* A dev install only changes when someone pushes a
-new one to that device, so a build that lands on one phone leaves the others
-on last week's code with no way to tell. One command does the whole job —
-web bundle, sync, build once, install on every paired device that answers:
+For the broad pre-iOS gate:
 
 ```bash
-scripts/ios-install-all.sh
+bash scripts/test-all.sh
 ```
 
-It lists the devices that did not answer (off, asleep, not on this network)
-at the end; run it again when they are. Devices today: iPhone 17 Pro Max,
-iPad Pro 11, iPad mini (A17 Pro). All are on the paid team's profile, which
-lasts a year — not the seven days a free Apple ID gets.
+`test-all.sh` is a sequence of focused scripts and is mobile/iOS-oriented; it is not a complete test runner for every desktop, updater, or website path.
 
-⚠️ `npx cap sync ios` REWRITES `CapApp-SPM/Package.swift` and drops the MLX and
-HuggingFace packages (TG-221); the next build fails with "unable to resolve
-module dependency: 'Cmlx'". The script restores the file from git after every
-sync. If you sync by hand, `git checkout -- apps/ios/ios/App/CapApp-SPM/Package.swift`.
-
-⚠️ **iOS 27 SDK refuses the old app lifecycle.** Build 23 (2026-09-18) was the
-first compiled after Xcode moved to the iOS 27 SDK, and it died at launch on
-Tony's iPhone with SIGTRAP in
-`__UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption`. Capacitor's
-template has no scene; `App/SceneDelegate.swift` plus the
-`UIApplicationSceneManifest` in `Info.plist` are what keep it launching. Do not
-let a `cap sync` or a template refresh remove either. Crash reports come off
-the phone with `xcrun devicectl device copy from --domain-type systemCrashLogs`.
-
-**Building it takes two non-obvious flags.** Plain `xcodebuild` fails twice:
+For iOS:
 
 ```bash
+cd apps/ios && npm install
 cd apps/ios && xcodebuild -project ios/App/App.xcodeproj -scheme App \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   -configuration Debug CODE_SIGNING_ALLOWED=NO \
   -skipPackagePluginValidation -skipMacroValidation build
+scripts/ios-install-all.sh
 ```
 
-- Without `-skipPackagePluginValidation`, it dies on "Validate plug-in CudaBuild
-  in package mlx-swift" — an unapproved build-tool plugin, normally a GUI trust
-  prompt.
-- Do **not** pass `-sdk iphonesimulator`. It forces the host toolchain to that
-  SDK and MLX's macro target then cannot resolve SwiftSyntax.
+Do not pass `-sdk iphonesimulator`. The Simulator is for layout, navigation, first run, and accessibility only; MLX model download/generation requires a physical device.
 
-**A Debug build's code is not in `App.app/App`.** That is a 40 KB launcher stub;
-the real binary is `App.app/App.debug.dylib` (~79 MB). Verify a Swift change
-landed by checking the dylib, not the stub:
+## Code Conventions & Common Patterns
 
-```bash
-strings -a "$APP/App.debug.dylib" | grep -c downloadProgress
-```
+- Match nearby JavaScript style: ESM in `src/` and `server/`, CommonJS only for Electron entry files (`.cjs`), semicolon-free code, and small named helpers.
+- All model/provider calls go through `server/net.js:modelFetch`. Do not use bare `fetch` for a model round; slow local models need disabled Undici headers/body timeouts plus the turn `AbortSignal`.
+- Keep provider-specific request conversion inside `server/providers.js`. Preserve the neutral session format (`user.text`/`attachments`; `assistant.parts` containing text/tool parts).
+- Use `src/api.js` helpers (`apiUrl`, `authHeaders`, `json`, `streamChat`, and related stream helpers) from React. Do not put provider calls or credentials in renderer code, React state, or localStorage.
+- Preserve server-side approval and safety checks. Plan mode blocks mutation tools both when schemas are built and when dispatch occurs; UI approval is not a security boundary.
+- Use temporary `RADIANT_DIR` and `HOME` values for tests and development fixtures. Never let a test point at the installed app's real data directory.
+- New REST resources belong in `server/index.js` with explicit auth/origin behavior and no-store responses. Remote clients authenticate with the token header/bearer/cookie paths already implemented there.
+- Keep `contextIsolation: true`, `nodeIntegration: false`, and the narrow named bridge in `electron/preload.cjs`. Renderer code must use `window.radiantNative` for native dialogs, notifications, microphone permission, and file saving.
+- Settings and HUD are separate renderer windows. Synchronize them with IPC events; do not assume they share React state.
+- User-facing desktop behavior needs a plain-language entry in the `GUIDE` array in `src/components/Settings.jsx`. Run `scripts/test-readme.mjs` or `scripts/ship-check.mjs` when changing user-facing behavior.
+- `apps/ios/ios/App/App/plugins/LocalModels.swift` is the catalogue source of truth. Generate `apps/ios/catalog.json` with `npm run catalog:export`, then run `npm run catalog:check`; do not hand-edit the generated JSON.
+- `npx cap sync ios` rewrites `apps/ios/ios/App/CapApp-SPM/Package.swift` and can remove MLX/HuggingFace dependencies. Restore that file from Git after manual sync; `scripts/ios-install-all.sh` does this automatically.
+- Keep Mac icons (`build/icon.*`) separate from web/iOS icons. Generated symbol and catalogue files should be changed through their scripts, not hand-edited.
 
-### Before you touch the download path
+## Important Files
 
-```bash
-./scripts/test-download-math.sh
-```
+- `package.json` — package identity, scripts, exact dependencies, Electron Builder targets/resources, and version metadata.
+- `package-lock.json`, `.npmrc` — npm lockfile and exact-save policy.
+- `vite.config.js` — backend proxy, `RADIANT_PORT`, and compile-time app/engine version injection.
+- `src/main.jsx`, `src/App.jsx`, `src/api.js`, `src/components/Chat.jsx` — renderer entry, state owner, transport boundary, and streaming chat UI.
+- `server/index.js` — backend composition root and API/SSE/WebSocket routes.
+- `server/config.js`, `server/providers.js`, `server/tools.js`, `server/net.js` — persistence, provider loop, tools, and model transport.
+- `electron/main.cjs`, `electron/preload.cjs`, `electron/updater.cjs`, `electron/updater-config.cjs` — shell, secure bridge, and update behavior.
+- `scripts/release-allegretto.mjs` — authoritative agency release validation/publisher.
+- `scripts/ship-check.mjs`, `scripts/ship-judge.mjs` — commit/push/readme/release-copy checks.
+- `.github/workflows/sync-upstream.yml` — scheduled/manual fetch-only upstream review workflow.
+- `.github/workflows/linux-release.yml` — Linux AppImage build and post-release smoke/download verification.
+- `apps/ios/ios/App/App/plugins/LocalModels.swift`, `apps/ios/catalog.json`, `apps/ios/ios/App/CapApp-SPM/Package.swift` — iOS catalogue and dependency boundaries.
+- `website/index.html`, `website/privacy.html`, `website/styles.css`, `netlify.toml` — static agency site and deployment configuration.
+- `README.md` and `RULES.md` — user-facing installation/architecture summary and repository verification rules. Package/config files are authoritative when they disagree with legacy Radiant wording.
 
-Download progress broke FOUR times in production — flatlining at 2%, starting at
-100%, showing no number at all, and reporting a stopped download as a finished
-model. Every one was pure arithmetic or a folder name. None of it needed MLX, a
-simulator, or a phone. But it lived inside a plugin that cannot even initialise
-in the Simulator, so the only way to run it was to install a build on Tony's
-phone and ask him to watch — which is how he ended up being the test harness for
-two lines of division.
+## Runtime/Tooling Preferences
 
-That logic now lives in `apps/ios/…/plugins/DownloadMath.swift`, which is pure:
-values in, values out, no filesystem, no network, no UIKit. `LocalModels.swift`
-calls it and holds no copy. Each shipped bug has a named case in
-`scripts/test-download-math.swift`.
+- Use npm. The root package is ESM; Electron entrypoints are CommonJS. CI standardizes on Node 22; the Capacitor CLI requires Node 20 or newer.
+- Keep dependency versions aligned with `package-lock.json`; do not introduce pnpm, Yarn, Bun, or a second lockfile.
+- Vite development uses port 5833 and proxies to backend port 5834 by default. Set `RADIANT_PORT` for an isolated backend and `RADIANT_DEV_ORIGIN` when the UI runs on another origin.
+- `RADIANT_DIR` selects the app data directory. Use a temporary directory for tests, smoke runs, and experiments.
+- Electron packaging intentionally sets `npmRebuild: false` and unpacks native/runtime modules such as `node-pty` and `playwright-core`; preserve those packaging boundaries.
+- Mac helper, signing, notarization, and iOS work require macOS native tooling. The package's `afterSign` hook handles notarization only when a valid profile is configured.
+- The updater is agency-only and fail-closed: it rejects the upstream `templetongroup/radiant` target. Unsigned builds disable the packaged updater; a DMG can test manual installation, not an in-app update.
 
-Run it before and after any change to downloading, and add a case the moment
-something breaks again — before fixing it. If a change to the download path
-cannot be expressed as a failing case there, that is a signal the logic is in the
-wrong place, not that the test is unnecessary.
+## Testing & QA
 
-**MLX cannot run in the iOS Simulator — the app aborts.** Anything that touches
-the model engine (download, generate) dies in `mlx::core::metal::Device::Device()`
-with SIGABRT the moment it initialises Metal; the simulator has no GPU MLX will
-accept. The app then vanishes and the simulator falls back to whatever was
-behind it, which looks like a UI bug and is not one. Read the real reason in
-`~/Library/Logs/DiagnosticReports/App-*.ips`.
+There is no Jest/Vitest/Mocha/pytest suite and no root `npm test`. Tests are mostly Node ESM scripts using built-in assertions, with Playwright Core browser harnesses, Python catalogue checks, and pure Swift checks.
 
-So the simulator is good for **layout, navigation, first run and accessibility
-only**. Any claim about downloading or generating has to be made on a physical
-iPhone — build with `-destination 'id=<udid>'`, `DEVELOPMENT_TEAM=5VY66S6G3M`,
-`-allowProvisioningUpdates`, then `xcrun devicectl device install app`. Do not
-write "verified in the Simulator" about a model actually running.
+- **Server/API:** `node scripts/test-api.mjs` starts the real server with throwaway data and exercises persistence and API behavior.
+- **Packaged Electron:** `node scripts/test-smoke.mjs <path-to-app>` launches the actual app with isolated HOME/CDP. Pass the generated Allegretto app path explicitly; the default still names the legacy Radiant path.
+- **Rendered UI:** `bash scripts/test-ui.sh` runs the Vite harness and `scripts/test-ui.mjs` in Chrome. Use the actual UI surface for interaction claims.
+- **Runtime/provider regressions:** `scripts/test-empty-turn-live.mjs`, `scripts/test-slow-model.mjs`, `scripts/test-fallback-live.mjs`, `scripts/test-caching.mjs`, and `scripts/test-origin.mjs` cover streaming, cancellation, slow models, cache layout, and origin security.
+- **iOS download math:** `./scripts/test-download-math.sh` is pure and must run before and after download-path changes. It needs no Simulator, model, or device.
+- **Live catalogue:** `npm run catalog:check` requires network access to Hugging Face and checks reachability, size drift, and undeclared quantization.
+- **Website:** Netlify serves `website/` with no build step (`netlify.toml` sets `command = "true"`). Verify changed pages, dialogs, forms, and accessibility manually on the correct Allegretto deploy/preview URL; a local static server cannot prove Netlify Forms behavior.
+- **Release:** run the validation-only release command before any publish attempt. A signed release additionally needs Developer ID, notary profile, agency target, and token. Verify download assets with GET/ranged GET rather than HEAD.
 
-**Previewing the phone UI without a device.** The native gate means a browser
-shows the desktop app. Serve `dist/` with a script that defines
-`window.Capacitor` — `isNativePlatform`, `getPlatform`, `nativePromise`,
-`addListener` — before the bundle loads, and the phone UI renders at 375×812.
-Match the real contracts or you will chase ghosts: sizes are **`sizeGB`** (not
-bytes), disk comes from `Device.getInfo().realDiskTotal/realDiskFree`, and the
-download events are **`downloadStarted` / `downloadProgress` / `downloadDone` /
-`downloadFailed`**. Note a hidden browser pane suspends rAF and clamps
-`setTimeout` to ~1s, so screen-push animations never settle and stubbed
-progress loops crawl — neither is an app bug.
+## Repository Workflow & Guardrails
 
-- **Type on the phone: two rules that have each cost a whole review cycle.**
-  1. `-apple-system` and `ui-monospace` are system-font **keywords**. Declare
-     them literally — the stack lives on `.is-native body` and everything else
-     inherits it. Never put one behind a custom property; `grep -r -- '--rx-font'
-     src/mobile` must come back with only the comment that says so.
-  2. **`-apple-system-body` is 17px in the app and 16px in mobile Safari** on the
-     same simulator — Safari steps web system text down one notch. So the
-     `--rx-dt` Dynamic Type probe divides by **17**, and any measurement taken in
-     the browser preview above will be one notch small and wrong for the build.
-     Body-scale roles use the `font: -apple-system-*` shorthands directly (they
-     resolve to UIKit's real 17/17/15/13/12/11 here, which is free Dynamic Type);
-     large title, title 2, title 3 and the mono readouts are typed out and scaled
-     by `--rx-dt`.
-
-- **Every control in `src/mobile` is a `div`**, so `usePress` carries the
-  semantics: `role`, `tabIndex`, `aria-label`, and Enter/Space. Use it for
-  anything tappable and pass `label` for an icon-only control. Do not
-  reintroduce `outline: none` on `:focus-visible` — it never matches a tap, and
-  a phone can have a keyboard, Full Keyboard Access or Switch Control.
-
-## Rating work — the star system
-
-`.claude/skills/star-system/` is vendored from
-https://github.com/templetongroup/star-system. Run it when Tony says "rate this"
-or "run the star system" after a deliverable, and follow it exactly: ask for the
-1–5 rating, never assign one yourself, never argue with it, ask fewer questions
-the higher it is, log the round in `ratings.md`, and loop until it reaches 4+.
-
-`ratings.md` at the repo root is the record. Read its **Gold Standards** section
-before building anything in an area that already has one — that is the bar for
-that area, set by Tony, and new work is measured against it.
+- Develop every change on a feature branch. Agency `master` is merge-only through a reviewed pull request.
+- Push Allegretto work only to writable agency `origin`. Keep `upstream` pointed at `https://github.com/templetongroup/radiant.git` with a disabled push URL.
+- The scheduled upstream workflow fetches upstream into `automation/sync-upstream-master`, never mutates agency `master`, never pushes upstream, and never publishes. Conflicts require semantic human resolution; do not resolve by blanket ours/theirs.
+- Before calling a user-facing change shipped, update the in-app Read me, run `node scripts/ship-check.mjs`, invoke the `ship-sync` agent, and record the work as Done in Linear for team “The Templeton Group” (TG), project “Radiant”. If Linear or the agent is unavailable, report the exact blocker.
+- Agency website work deploys only to `https://allegretto.netlify.app` (planned custom domain: `allegretto.virtuallycreative.ca`). Do not create a Radiant GitHub release, upload Radiant assets, or update the Radiant download page for Allegretto work.
+- Some docs and legacy scripts still say Radiant. Use current package identity, build configuration, and the actual target path as the source of truth; avoid broad branding rewrites unrelated to the change.
