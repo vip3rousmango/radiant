@@ -18,6 +18,12 @@
  */
 export const WHATS_NEW = [
   {
+    version: '0.9.33',
+    items: [
+      ['Remote version details stay visible', 'The engine-version tooltip remains readable even when the sidebar is connected to another Mac or narrowed to its smallest width.'],
+    ]
+  },
+  {
     version: '0.9.32',
     items: [
       ['Version labels stay truthful', 'The sidebar and About page now identify the Allegretto build that rendered them, even when a stale connected server answers API requests. Hover the sidebar version to see the separately recorded Radiant engine version.'],
