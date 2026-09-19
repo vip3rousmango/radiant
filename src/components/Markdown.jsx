@@ -5,22 +5,25 @@ import DOMPurify from 'dompurify'
 import { saveToFile } from '../api.js'
 
 marked.setOptions({
-  highlight: (code, lang) => {
-    try {
-      if (lang && hljs.getLanguage(lang)) return hljs.highlight(code, { language: lang }).value
-      return hljs.highlightAuto(code).value
-    } catch { return code }
-  }
+  highlight: (code, lang) => highlightCode(code, lang)
 })
 
 const renderer = new marked.Renderer()
-renderer.code = ({ text, lang }) => {
+export function highlightCode (code, lang) {
+  const text = String(code || '')
   let html
   try {
     html = lang && hljs.getLanguage(lang)
       ? hljs.highlight(text, { language: lang }).value
       : hljs.highlightAuto(text).value
-  } catch { html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;') }
+  } catch {
+    html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+  }
+  return DOMPurify.sanitize(html, { ALLOWED_TAGS: ['span'], ALLOWED_ATTR: ['class'] })
+}
+
+renderer.code = ({ text, lang }) => {
+  const html = highlightCode(text, lang)
   // ⚠️ THE LANGUAGE HAS TO SURVIVE THE RENDER. Artifacts are decided by it, and
   // it was being thrown away here — the <pre> that came out could not be told
   // apart from any other block.
